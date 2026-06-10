@@ -1,0 +1,11 @@
+name: Design Sync
+description: Capture an implementation design sync.
+title: "design: "
+labels: ["design"]
+body:
+  - type: textarea
+    id: notes
+    attributes:
+      label: Notes
+    validations:
+      required: true

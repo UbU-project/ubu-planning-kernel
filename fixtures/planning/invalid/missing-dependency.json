@@ -1,0 +1,10 @@
+{
+  "requestId": "missing-dependency",
+  "tasks": [
+    {
+      "id": "task-a",
+      "duration": 1,
+      "dependsOn": ["missing-task"]
+    }
+  ]
+}

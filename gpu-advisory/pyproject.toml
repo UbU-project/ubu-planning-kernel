@@ -1,0 +1,21 @@
+[build-system]
+requires = ["setuptools>=68"]
+build-backend = "setuptools.build_meta"
+
+[project]
+name = "ubu-gpu-advisory"
+version = "0.1.0"
+description = "No-op UbU GPU advisory process scaffold"
+requires-python = ">=3.10"
+dependencies = []
+
+[project.optional-dependencies]
+torch = [
+    # TODO: add a pinned torch dependency when a real GPU advisory implementation exists.
+]
+
+[tool.setuptools.packages.find]
+where = ["src"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]

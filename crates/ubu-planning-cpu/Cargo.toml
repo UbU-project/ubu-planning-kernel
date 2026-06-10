@@ -1,0 +1,11 @@
+[package]
+name = "ubu_planning_cpu"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+ubu_core.workspace = true
+ubu_planning_core.workspace = true

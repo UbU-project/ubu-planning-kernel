@@ -1,0 +1,12 @@
+name: Contract Change
+description: Propose a planning kernel contract change.
+title: "contract: "
+labels: ["contract"]
+body:
+  - type: textarea
+    id: change
+    attributes:
+      label: Change
+      description: Describe the public API or authority-layering change.
+    validations:
+      required: true

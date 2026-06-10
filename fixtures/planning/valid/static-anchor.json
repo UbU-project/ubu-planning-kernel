@@ -1,0 +1,16 @@
+{
+  "requestId": "static-anchor",
+  "tasks": [
+    {
+      "id": "task-a",
+      "duration": 2,
+      "window": {
+        "start": 5,
+        "end": 10
+      },
+      "staticAnchor": {
+        "start": 5
+      }
+    }
+  ]
+}

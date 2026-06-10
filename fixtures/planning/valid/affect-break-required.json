@@ -1,0 +1,11 @@
+{
+  "requestId": "affect-break-required",
+  "tasks": [
+    {
+      "id": "task-a",
+      "duration": 1,
+      "affectRequired": true,
+      "affectCurrent": true
+    }
+  ]
+}

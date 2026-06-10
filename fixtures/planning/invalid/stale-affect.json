@@ -1,0 +1,11 @@
+{
+  "requestId": "stale-affect",
+  "tasks": [
+    {
+      "id": "task-a",
+      "duration": 1,
+      "affectRequired": true,
+      "affectCurrent": false
+    }
+  ]
+}

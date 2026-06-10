@@ -1,0 +1,15 @@
+{
+  "requestId": "cyclic-dependency",
+  "tasks": [
+    {
+      "id": "task-a",
+      "duration": 1,
+      "dependsOn": ["task-b"]
+    },
+    {
+      "id": "task-b",
+      "duration": 1,
+      "dependsOn": ["task-a"]
+    }
+  ]
+}

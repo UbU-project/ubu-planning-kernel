@@ -1,0 +1,13 @@
+{
+  "requestId": "impossible-window",
+  "tasks": [
+    {
+      "id": "task-a",
+      "duration": 5,
+      "window": {
+        "start": 1,
+        "end": 3
+      }
+    }
+  ]
+}

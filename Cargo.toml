@@ -1,0 +1,24 @@
+[workspace]
+resolver = "2"
+members = [
+    "crates/ubu-planning-core",
+    "crates/ubu-planning-cpu",
+    "crates/ubu-planning-advisory-protocol",
+    "crates/ubu-planning-cli",
+]
+
+[workspace.package]
+version = "0.1.0"
+edition = "2021"
+license = "MIT"
+repository = "https://github.com/UbU-project/ubu-planning-kernel"
+publish = false
+
+[workspace.dependencies]
+anyhow = "1"
+serde = { version = "1", features = ["derive"] }
+serde_json = "1"
+thiserror = "1"
+ubu_core = { git = "https://github.com/UbU-project/ubu-core", rev = "1cc00650b25924ba705eab5ad1730d99304741f2" }
+ubu_planning_core = { path = "crates/ubu-planning-core" }
+ubu_planning_cpu = { path = "crates/ubu-planning-cpu" }

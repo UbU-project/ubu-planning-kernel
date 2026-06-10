@@ -1,0 +1,17 @@
+[package]
+name = "ubu_planning_core"
+version.workspace = true
+edition.workspace = true
+license.workspace = true
+repository.workspace = true
+publish.workspace = true
+
+[dependencies]
+serde.workspace = true
+serde_json.workspace = true
+thiserror.workspace = true
+ubu_core.workspace = true
+
+[dev-dependencies]
+ubu_planning_advisory_protocol = { path = "../ubu-planning-advisory-protocol" }
+ubu_planning_cpu.workspace = true

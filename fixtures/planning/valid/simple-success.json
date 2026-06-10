@@ -1,0 +1,9 @@
+{
+  "requestId": "simple-success",
+  "tasks": [
+    {
+      "id": "task-a",
+      "duration": 1
+    }
+  ]
+}
