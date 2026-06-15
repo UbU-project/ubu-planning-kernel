@@ -1,6 +1,6 @@
 {
-  "requestId": "advisory-fixture",
-  "respondedAt": "2026-01-01T00:00:00Z",
+  "request_id": "advisory-fixture",
+  "responded_at": "2026-01-01T00:00:00Z",
   "recommendation": "manual_review",
   "rationale": "no-op advisory scaffold; no GPU hardware or torch required"
 }

@@ -1,5 +1,6 @@
 {
-  "requestId": "impossible-window",
+  "schema_version": "planning-kernel-contract/0.1",
+  "request_id": "impossible-window",
   "tasks": [
     {
       "id": "task-a",

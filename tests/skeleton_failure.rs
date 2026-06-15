@@ -1,9 +1,12 @@
-use ubu_planning_core::{DiagnosticCode, PlanningRequest, TaskSpec, TimeWindow};
+use ubu_planning_core::{
+    DiagnosticCode, PlanningRequest, TaskSpec, TimeWindow, PLANNING_SCHEMA_VERSION,
+};
 use ubu_planning_cpu::CpuStrategy;
 
 #[test]
 fn impossible_after_dependency_window_returns_skeleton_failure() {
     let request = PlanningRequest {
+        schema_version: Some(PLANNING_SCHEMA_VERSION.to_string()),
         request_id: "skeleton-failure".to_string(),
         tasks: vec![
             TaskSpec {

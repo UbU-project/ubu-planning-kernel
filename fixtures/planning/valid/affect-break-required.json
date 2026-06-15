@@ -1,11 +1,12 @@
 {
-  "requestId": "affect-break-required",
+  "schema_version": "planning-kernel-contract/0.1",
+  "request_id": "affect-break-required",
   "tasks": [
     {
       "id": "task-a",
       "duration": 1,
-      "affectRequired": true,
-      "affectCurrent": true
+      "affect_required": true,
+      "affect_current": true
     }
   ]
 }

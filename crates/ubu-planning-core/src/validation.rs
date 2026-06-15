@@ -1,11 +1,29 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::diagnostics::{Diagnostic, DiagnosticCode};
-use crate::request::PlanningRequest;
+use crate::request::{PlanningRequest, PLANNING_SCHEMA_VERSION};
 use crate::response::{Plan, ValidationResult};
+
+pub fn validate_schema_version(schema_version: Option<&str>) -> Option<Diagnostic> {
+    match schema_version {
+        None => Some(Diagnostic::new(
+            DiagnosticCode::MissingSchemaVersion,
+            "planning request must include schema_version",
+        )),
+        Some(PLANNING_SCHEMA_VERSION) => None,
+        Some(schema_version) => Some(Diagnostic::new(
+            DiagnosticCode::UnknownSchemaVersion,
+            format!("unknown planning schema_version '{schema_version}'"),
+        )),
+    }
+}
 
 pub fn validate_planning_request(request: &PlanningRequest) -> ValidationResult {
     let mut diagnostics = Vec::new();
+    if let Some(diagnostic) = validate_schema_version(request.schema_version.as_deref()) {
+        diagnostics.push(diagnostic);
+    }
+
     if request.tasks.is_empty() {
         diagnostics.push(Diagnostic::new(
             DiagnosticCode::EmptyRequest,

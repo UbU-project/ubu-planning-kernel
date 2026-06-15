@@ -1,5 +1,5 @@
 {
-  "requestId": "advisory-fixture",
-  "requestedAt": "2026-01-01T00:00:00Z",
+  "request_id": "advisory-fixture",
+  "requested_at": "2026-01-01T00:00:00Z",
   "workload": "fixture"
 }

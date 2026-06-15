@@ -1,0 +1,10 @@
+{
+  "schema_version": "planning-kernel-contract/9.9",
+  "request_id": "unknown-schema-version",
+  "tasks": [
+    {
+      "id": "task-a",
+      "duration": 1
+    }
+  ]
+}

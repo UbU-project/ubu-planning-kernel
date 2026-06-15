@@ -1,5 +1,6 @@
 {
-  "requestId": "simple-success",
+  "schema_version": "planning-kernel-contract/0.1",
+  "request_id": "simple-success",
   "tasks": [
     {
       "id": "task-a",

@@ -1,10 +1,11 @@
 {
-  "requestId": "missing-dependency",
+  "schema_version": "planning-kernel-contract/0.1",
+  "request_id": "missing-dependency",
   "tasks": [
     {
       "id": "task-a",
       "duration": 1,
-      "dependsOn": ["missing-task"]
+      "depends_on": ["missing-task"]
     }
   ]
 }

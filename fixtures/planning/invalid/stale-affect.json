@@ -1,11 +1,12 @@
 {
-  "requestId": "stale-affect",
+  "schema_version": "planning-kernel-contract/0.1",
+  "request_id": "stale-affect",
   "tasks": [
     {
       "id": "task-a",
       "duration": 1,
-      "affectRequired": true,
-      "affectCurrent": false
+      "affect_required": true,
+      "affect_current": false
     }
   ]
 }

@@ -1,0 +1,9 @@
+{
+  "request_id": "missing-schema-version",
+  "tasks": [
+    {
+      "id": "task-a",
+      "duration": 1
+    }
+  ]
+}

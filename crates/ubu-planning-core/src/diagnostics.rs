@@ -15,6 +15,8 @@ pub enum DiagnosticCode {
     DependencyOrderViolation,
     StaticAnchorViolation,
     SkeletonFailure,
+    MissingSchemaVersion,
+    UnknownSchemaVersion,
     NotYetImplemented,
 }
 

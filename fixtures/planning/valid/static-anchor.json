@@ -1,5 +1,6 @@
 {
-  "requestId": "static-anchor",
+  "schema_version": "planning-kernel-contract/0.1",
+  "request_id": "static-anchor",
   "tasks": [
     {
       "id": "task-a",
@@ -8,7 +9,7 @@
         "start": 5,
         "end": 10
       },
-      "staticAnchor": {
+      "static_anchor": {
         "start": 5
       }
     }

@@ -1,5 +1,6 @@
 {
-  "requestId": "dependency-chain",
+  "schema_version": "planning-kernel-contract/0.1",
+  "request_id": "dependency-chain",
   "tasks": [
     {
       "id": "task-a",
@@ -8,12 +9,12 @@
     {
       "id": "task-b",
       "duration": 1,
-      "dependsOn": ["task-a"]
+      "depends_on": ["task-a"]
     },
     {
       "id": "task-c",
       "duration": 1,
-      "dependsOn": ["task-b"]
+      "depends_on": ["task-b"]
     }
   ]
 }

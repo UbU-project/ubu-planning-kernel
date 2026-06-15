@@ -3,8 +3,10 @@ use serde::{Deserialize, Serialize};
 use crate::graph::{DependencyEdge, TaskId};
 use crate::response::Plan;
 
+pub const PLANNING_SCHEMA_VERSION: &str = "planning-kernel-contract/0.1";
+
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "snake_case")]
 pub struct TimeWindow {
     pub start: u64,
     pub end: u64,
@@ -17,13 +19,13 @@ impl TimeWindow {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "snake_case")]
 pub struct StaticAnchor {
     pub start: u64,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "snake_case")]
 pub struct TaskSpec {
     pub id: TaskId,
     pub duration: u64,
@@ -40,8 +42,10 @@ pub struct TaskSpec {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "snake_case")]
 pub struct PlanningRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub schema_version: Option<String>,
     pub request_id: String,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub tasks: Vec<TaskSpec>,
@@ -62,8 +66,10 @@ impl PlanningRequest {
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
-#[serde(rename_all = "camelCase")]
+#[serde(rename_all = "snake_case")]
 pub struct RepairRequest {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub schema_version: Option<String>,
     pub request_id: String,
     pub candidate: Plan,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]

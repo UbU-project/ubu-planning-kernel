@@ -386,7 +386,7 @@ dependencies = [
 [[package]]
 name = "ubu_core"
 version = "0.1.0"
-source = "git+https://github.com/UbU-project/ubu-core?rev=1cc00650b25924ba705eab5ad1730d99304741f2#1cc00650b25924ba705eab5ad1730d99304741f2"
+source = "git+https://github.com/UbU-project/ubu-core?rev=139ce98a2dce40f8e73f472344d5cc4a8eb59db1#139ce98a2dce40f8e73f472344d5cc4a8eb59db1"
 dependencies = [
  "regex",
  "serde",
