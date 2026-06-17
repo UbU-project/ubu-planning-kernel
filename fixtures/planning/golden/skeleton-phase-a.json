@@ -1,0 +1,984 @@
+{
+  "schema_version": "planning-golden-corpus/phase-a.v1",
+  "human_reviewed_then_frozen": true,
+  "cases": [
+    {
+      "name": "linear-chain-success",
+      "covers": ["linear_chain"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-linear-chain",
+        "mode": "fresh_generation",
+        "rng_seed": 11,
+        "time_window": {
+          "start": 0,
+          "end": 20
+        },
+        "topological_order": ["task-a", "task-b", "task-c"],
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 2
+          },
+          {
+            "id": "task-b",
+            "duration": 3,
+            "depends_on": ["task-a"]
+          },
+          {
+            "id": "task-c",
+            "duration": 1,
+            "depends_on": ["task-b"]
+          }
+        ]
+      },
+      "expected_response": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-linear-chain",
+        "plan": {
+          "plan_id": "plan-golden-linear-chain-000000000000000b",
+          "status": "candidate",
+          "steps": [
+            {
+              "task_id": "task-a",
+              "start": 0,
+              "end": 2
+            },
+            {
+              "task_id": "task-b",
+              "start": 2,
+              "end": 5,
+              "depends_on": ["task-a"]
+            },
+            {
+              "task_id": "task-c",
+              "start": 5,
+              "end": 6,
+              "depends_on": ["task-b"]
+            }
+          ]
+        },
+        "diagnostics": [
+          {
+            "code": "not_yet_implemented",
+            "message": "semi-legitimization Legitimizer engine is not yet implemented"
+          },
+          {
+            "code": "not_yet_implemented",
+            "message": "full-legitimization Legitimizer engine is not yet implemented"
+          }
+        ]
+      }
+    },
+    {
+      "name": "diamond-success",
+      "covers": ["diamond"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-diamond",
+        "mode": "fresh_generation",
+        "rng_seed": 12,
+        "time_window": {
+          "start": 0,
+          "end": 20
+        },
+        "topological_order": ["task-a", "task-b", "task-c", "task-d"],
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 2
+          },
+          {
+            "id": "task-b",
+            "duration": 3,
+            "depends_on": ["task-a"]
+          },
+          {
+            "id": "task-c",
+            "duration": 4,
+            "depends_on": ["task-a"]
+          },
+          {
+            "id": "task-d",
+            "duration": 1,
+            "depends_on": ["task-b", "task-c"]
+          }
+        ]
+      },
+      "expected_response": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-diamond",
+        "plan": {
+          "plan_id": "plan-golden-diamond-000000000000000c",
+          "status": "candidate",
+          "steps": [
+            {
+              "task_id": "task-a",
+              "start": 0,
+              "end": 2
+            },
+            {
+              "task_id": "task-b",
+              "start": 2,
+              "end": 5,
+              "depends_on": ["task-a"]
+            },
+            {
+              "task_id": "task-c",
+              "start": 5,
+              "end": 9,
+              "depends_on": ["task-a"]
+            },
+            {
+              "task_id": "task-d",
+              "start": 9,
+              "end": 10,
+              "depends_on": ["task-b", "task-c"]
+            }
+          ]
+        },
+        "diagnostics": [
+          {
+            "code": "not_yet_implemented",
+            "message": "semi-legitimization Legitimizer engine is not yet implemented"
+          },
+          {
+            "code": "not_yet_implemented",
+            "message": "full-legitimization Legitimizer engine is not yet implemented"
+          }
+        ]
+      }
+    },
+    {
+      "name": "wide-fan-out-fan-in-success",
+      "covers": ["wide_fan_out", "wide_fan_in"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-wide-fan",
+        "mode": "fresh_generation",
+        "rng_seed": 13,
+        "time_window": {
+          "start": 0,
+          "end": 20
+        },
+        "topological_order": [
+          "task-root",
+          "task-branch-a",
+          "task-branch-b",
+          "task-branch-c",
+          "task-join"
+        ],
+        "tasks": [
+          {
+            "id": "task-root",
+            "duration": 1
+          },
+          {
+            "id": "task-branch-a",
+            "duration": 2,
+            "depends_on": ["task-root"]
+          },
+          {
+            "id": "task-branch-b",
+            "duration": 3,
+            "depends_on": ["task-root"]
+          },
+          {
+            "id": "task-branch-c",
+            "duration": 1,
+            "depends_on": ["task-root"]
+          },
+          {
+            "id": "task-join",
+            "duration": 2,
+            "depends_on": ["task-branch-a", "task-branch-b", "task-branch-c"]
+          }
+        ]
+      },
+      "expected_response": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-wide-fan",
+        "plan": {
+          "plan_id": "plan-golden-wide-fan-000000000000000d",
+          "status": "candidate",
+          "steps": [
+            {
+              "task_id": "task-root",
+              "start": 0,
+              "end": 1
+            },
+            {
+              "task_id": "task-branch-a",
+              "start": 1,
+              "end": 3,
+              "depends_on": ["task-root"]
+            },
+            {
+              "task_id": "task-branch-b",
+              "start": 3,
+              "end": 6,
+              "depends_on": ["task-root"]
+            },
+            {
+              "task_id": "task-branch-c",
+              "start": 6,
+              "end": 7,
+              "depends_on": ["task-root"]
+            },
+            {
+              "task_id": "task-join",
+              "start": 7,
+              "end": 9,
+              "depends_on": ["task-branch-a", "task-branch-b", "task-branch-c"]
+            }
+          ]
+        },
+        "diagnostics": [
+          {
+            "code": "not_yet_implemented",
+            "message": "semi-legitimization Legitimizer engine is not yet implemented"
+          },
+          {
+            "code": "not_yet_implemented",
+            "message": "full-legitimization Legitimizer engine is not yet implemented"
+          }
+        ]
+      }
+    },
+    {
+      "name": "disconnected-components-success",
+      "covers": ["disconnected_components"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-disconnected",
+        "mode": "fresh_generation",
+        "rng_seed": 14,
+        "time_window": {
+          "start": 0,
+          "end": 20
+        },
+        "topological_order": ["alpha-start", "beta-start", "alpha-end", "beta-end"],
+        "tasks": [
+          {
+            "id": "alpha-start",
+            "duration": 2
+          },
+          {
+            "id": "alpha-end",
+            "duration": 1,
+            "depends_on": ["alpha-start"]
+          },
+          {
+            "id": "beta-start",
+            "duration": 3
+          },
+          {
+            "id": "beta-end",
+            "duration": 1,
+            "depends_on": ["beta-start"]
+          }
+        ]
+      },
+      "expected_response": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-disconnected",
+        "plan": {
+          "plan_id": "plan-golden-disconnected-000000000000000e",
+          "status": "candidate",
+          "steps": [
+            {
+              "task_id": "alpha-start",
+              "start": 0,
+              "end": 2
+            },
+            {
+              "task_id": "beta-start",
+              "start": 2,
+              "end": 5
+            },
+            {
+              "task_id": "alpha-end",
+              "start": 5,
+              "end": 6,
+              "depends_on": ["alpha-start"]
+            },
+            {
+              "task_id": "beta-end",
+              "start": 6,
+              "end": 7,
+              "depends_on": ["beta-start"]
+            }
+          ]
+        },
+        "diagnostics": [
+          {
+            "code": "not_yet_implemented",
+            "message": "semi-legitimization Legitimizer engine is not yet implemented"
+          },
+          {
+            "code": "not_yet_implemented",
+            "message": "full-legitimization Legitimizer engine is not yet implemented"
+          }
+        ]
+      }
+    },
+    {
+      "name": "static-anchor-success",
+      "covers": ["static_anchor"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-static-anchor",
+        "mode": "fresh_generation",
+        "rng_seed": 15,
+        "time_window": {
+          "start": 0,
+          "end": 20
+        },
+        "topological_order": ["task-prep", "task-anchored", "task-follow"],
+        "tasks": [
+          {
+            "id": "task-prep",
+            "duration": 2
+          },
+          {
+            "id": "task-anchored",
+            "duration": 3,
+            "static_anchor": {
+              "start": 8
+            }
+          },
+          {
+            "id": "task-follow",
+            "duration": 2,
+            "depends_on": ["task-anchored"]
+          }
+        ]
+      },
+      "expected_response": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-static-anchor",
+        "plan": {
+          "plan_id": "plan-golden-static-anchor-000000000000000f",
+          "status": "candidate",
+          "steps": [
+            {
+              "task_id": "task-prep",
+              "start": 0,
+              "end": 2
+            },
+            {
+              "task_id": "task-anchored",
+              "start": 8,
+              "end": 11,
+              "static_anchor": true
+            },
+            {
+              "task_id": "task-follow",
+              "start": 11,
+              "end": 13,
+              "depends_on": ["task-anchored"]
+            }
+          ]
+        },
+        "diagnostics": [
+          {
+            "code": "not_yet_implemented",
+            "message": "semi-legitimization Legitimizer engine is not yet implemented"
+          },
+          {
+            "code": "not_yet_implemented",
+            "message": "full-legitimization Legitimizer engine is not yet implemented"
+          }
+        ]
+      }
+    },
+    {
+      "name": "time-window-overflow-failure",
+      "covers": ["time_window_overflow", "insufficient_window"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-window-overflow",
+        "mode": "fresh_generation",
+        "rng_seed": 16,
+        "time_window": {
+          "start": 0,
+          "end": 5
+        },
+        "topological_order": ["task-a", "task-b"],
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 3
+          },
+          {
+            "id": "task-b",
+            "duration": 3,
+            "depends_on": ["task-a"]
+          }
+        ]
+      },
+      "expected_response": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-window-overflow",
+        "diagnostics": [
+          {
+            "code": "skeleton_failure",
+            "message": "Could not build deterministic skeleton for task task-b: insufficient available window for deterministic skeleton placement"
+          }
+        ]
+      }
+    },
+    {
+      "name": "missing-starting-state-failure",
+      "covers": ["missing_starting_state"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-missing-starting-state",
+        "mode": "fresh_generation",
+        "rng_seed": 17,
+        "topological_order": ["task-a"],
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 1
+          }
+        ]
+      },
+      "expected_response": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-missing-starting-state",
+        "diagnostics": [
+          {
+            "code": "skeleton_failure",
+            "message": "Could not build deterministic skeleton for request: missing time_window starting state"
+          }
+        ]
+      }
+    },
+    {
+      "name": "impossible-dependency-order-failure",
+      "covers": ["impossible_dependency"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-impossible-dependency",
+        "mode": "fresh_generation",
+        "rng_seed": 18,
+        "time_window": {
+          "start": 0,
+          "end": 10
+        },
+        "topological_order": ["task-b", "task-a"],
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 1
+          },
+          {
+            "id": "task-b",
+            "duration": 1,
+            "depends_on": ["task-a"]
+          }
+        ]
+      },
+      "expected_response": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-impossible-dependency",
+        "diagnostics": [
+          {
+            "code": "skeleton_failure",
+            "message": "Could not build deterministic skeleton for task task-b: provided topological_order places dependency 'task-a' after task"
+          }
+        ]
+      }
+    },
+    {
+      "name": "cyclic-dependency-failure",
+      "covers": ["cyclic_dependency"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-cyclic-dependency",
+        "mode": "fresh_generation",
+        "rng_seed": 19,
+        "time_window": {
+          "start": 0,
+          "end": 10
+        },
+        "topological_order": ["task-a", "task-b"],
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 1,
+            "depends_on": ["task-b"]
+          },
+          {
+            "id": "task-b",
+            "duration": 1,
+            "depends_on": ["task-a"]
+          }
+        ]
+      },
+      "expected_response": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-cyclic-dependency",
+        "diagnostics": [
+          {
+            "code": "cyclic_dependency",
+            "message": "dependency graph must be acyclic"
+          }
+        ]
+      }
+    },
+    {
+      "name": "static-anchor-collision-failure",
+      "covers": ["static_collision"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-static-collision",
+        "mode": "fresh_generation",
+        "rng_seed": 20,
+        "time_window": {
+          "start": 0,
+          "end": 10
+        },
+        "topological_order": ["task-a", "task-b"],
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 4,
+            "static_anchor": {
+              "start": 0
+            }
+          },
+          {
+            "id": "task-b",
+            "duration": 2,
+            "static_anchor": {
+              "start": 2
+            }
+          }
+        ]
+      },
+      "expected_response": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-static-collision",
+        "diagnostics": [
+          {
+            "code": "skeleton_failure",
+            "message": "Could not build deterministic skeleton for task task-b: static anchor collides with scheduled task 'task-a'"
+          }
+        ]
+      }
+    },
+    {
+      "name": "repair-local-scope",
+      "covers": ["repair", "repair_scope_local", "preserve_completed", "preserve_in_progress", "preserve_user_override"],
+      "prior_plan": {
+        "plan_id": "plan-repair-prior",
+        "status": "candidate",
+        "steps": [
+          {
+            "task_id": "task-a",
+            "start": 0,
+            "end": 2
+          },
+          {
+            "task_id": "task-b",
+            "start": 2,
+            "end": 6,
+            "depends_on": ["task-a"]
+          },
+          {
+            "task_id": "task-c",
+            "start": 12,
+            "end": 14,
+            "depends_on": ["task-b"],
+            "static_anchor": true
+          },
+          {
+            "task_id": "task-d",
+            "start": 10,
+            "end": 14,
+            "depends_on": ["task-b"]
+          },
+          {
+            "task_id": "task-e",
+            "start": 16,
+            "end": 18,
+            "depends_on": ["task-d", "task-c"]
+          }
+        ]
+      },
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-repair-local",
+        "mode": "repair",
+        "rng_seed": 21,
+        "time_window": {
+          "start": 5,
+          "end": 20
+        },
+        "topological_order": ["task-a", "task-b", "task-c", "task-d", "task-e"],
+        "repair_context": {
+          "prior_plan_id": "plan-repair-prior",
+          "last_legitimate_plan_ref": "snapshot-repair-prior",
+          "observed_divergence_refs": ["task-d"],
+          "repair_scope": "local"
+        },
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 2
+          },
+          {
+            "id": "task-b",
+            "duration": 4,
+            "depends_on": ["task-a"]
+          },
+          {
+            "id": "task-c",
+            "duration": 2,
+            "depends_on": ["task-b"],
+            "static_anchor": {
+              "start": 12
+            }
+          },
+          {
+            "id": "task-d",
+            "duration": 4,
+            "depends_on": ["task-b"]
+          },
+          {
+            "id": "task-e",
+            "duration": 2,
+            "depends_on": ["task-d", "task-c"]
+          }
+        ]
+      },
+      "expected_response": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-repair-local",
+        "plan": {
+          "plan_id": "plan-golden-repair-local-0000000000000015-repair",
+          "status": "candidate",
+          "supersedes_plan_id": "plan-repair-prior",
+          "steps": [
+            {
+              "task_id": "task-a",
+              "start": 0,
+              "end": 2
+            },
+            {
+              "task_id": "task-b",
+              "start": 2,
+              "end": 6,
+              "depends_on": ["task-a"]
+            },
+            {
+              "task_id": "task-c",
+              "start": 12,
+              "end": 14,
+              "depends_on": ["task-b"],
+              "static_anchor": true
+            },
+            {
+              "task_id": "task-d",
+              "start": 6,
+              "end": 10,
+              "depends_on": ["task-b"]
+            },
+            {
+              "task_id": "task-e",
+              "start": 16,
+              "end": 18,
+              "depends_on": ["task-d", "task-c"]
+            }
+          ]
+        },
+        "diagnostics": [
+          {
+            "code": "not_yet_implemented",
+            "message": "semi-legitimization Legitimizer engine is not yet implemented"
+          },
+          {
+            "code": "not_yet_implemented",
+            "message": "full-legitimization Legitimizer engine is not yet implemented"
+          }
+        ]
+      }
+    },
+    {
+      "name": "repair-remaining-window-scope",
+      "covers": ["repair", "repair_scope_remaining_window", "preserve_completed", "preserve_in_progress", "preserve_user_override"],
+      "prior_plan": {
+        "plan_id": "plan-repair-prior",
+        "status": "candidate",
+        "steps": [
+          {
+            "task_id": "task-a",
+            "start": 0,
+            "end": 2
+          },
+          {
+            "task_id": "task-b",
+            "start": 2,
+            "end": 6,
+            "depends_on": ["task-a"]
+          },
+          {
+            "task_id": "task-c",
+            "start": 12,
+            "end": 14,
+            "depends_on": ["task-b"],
+            "static_anchor": true
+          },
+          {
+            "task_id": "task-d",
+            "start": 10,
+            "end": 14,
+            "depends_on": ["task-b"]
+          },
+          {
+            "task_id": "task-e",
+            "start": 16,
+            "end": 18,
+            "depends_on": ["task-d", "task-c"]
+          }
+        ]
+      },
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-repair-remaining",
+        "mode": "repair",
+        "rng_seed": 22,
+        "time_window": {
+          "start": 5,
+          "end": 20
+        },
+        "topological_order": ["task-a", "task-b", "task-c", "task-d", "task-e"],
+        "repair_context": {
+          "prior_plan_id": "plan-repair-prior",
+          "last_legitimate_plan_ref": "snapshot-repair-prior",
+          "observed_divergence_refs": ["task-d", "task-e"],
+          "repair_scope": "remaining_window"
+        },
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 2
+          },
+          {
+            "id": "task-b",
+            "duration": 4,
+            "depends_on": ["task-a"]
+          },
+          {
+            "id": "task-c",
+            "duration": 2,
+            "depends_on": ["task-b"],
+            "static_anchor": {
+              "start": 12
+            }
+          },
+          {
+            "id": "task-d",
+            "duration": 4,
+            "depends_on": ["task-b"]
+          },
+          {
+            "id": "task-e",
+            "duration": 2,
+            "depends_on": ["task-d", "task-c"]
+          }
+        ]
+      },
+      "expected_response": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-repair-remaining",
+        "plan": {
+          "plan_id": "plan-golden-repair-remaining-0000000000000016-repair",
+          "status": "candidate",
+          "supersedes_plan_id": "plan-repair-prior",
+          "steps": [
+            {
+              "task_id": "task-a",
+              "start": 0,
+              "end": 2
+            },
+            {
+              "task_id": "task-b",
+              "start": 2,
+              "end": 6,
+              "depends_on": ["task-a"]
+            },
+            {
+              "task_id": "task-c",
+              "start": 12,
+              "end": 14,
+              "depends_on": ["task-b"],
+              "static_anchor": true
+            },
+            {
+              "task_id": "task-d",
+              "start": 6,
+              "end": 10,
+              "depends_on": ["task-b"]
+            },
+            {
+              "task_id": "task-e",
+              "start": 14,
+              "end": 16,
+              "depends_on": ["task-d", "task-c"]
+            }
+          ]
+        },
+        "diagnostics": [
+          {
+            "code": "not_yet_implemented",
+            "message": "semi-legitimization Legitimizer engine is not yet implemented"
+          },
+          {
+            "code": "not_yet_implemented",
+            "message": "full-legitimization Legitimizer engine is not yet implemented"
+          }
+        ]
+      }
+    },
+    {
+      "name": "repair-full-window-scope",
+      "covers": ["repair", "repair_scope_full_window", "preserve_completed", "preserve_in_progress", "preserve_user_override"],
+      "prior_plan": {
+        "plan_id": "plan-repair-prior",
+        "status": "candidate",
+        "steps": [
+          {
+            "task_id": "task-a",
+            "start": 0,
+            "end": 2
+          },
+          {
+            "task_id": "task-b",
+            "start": 2,
+            "end": 6,
+            "depends_on": ["task-a"]
+          },
+          {
+            "task_id": "task-c",
+            "start": 12,
+            "end": 14,
+            "depends_on": ["task-b"],
+            "static_anchor": true
+          },
+          {
+            "task_id": "task-d",
+            "start": 10,
+            "end": 14,
+            "depends_on": ["task-b"]
+          },
+          {
+            "task_id": "task-e",
+            "start": 16,
+            "end": 18,
+            "depends_on": ["task-d", "task-c"]
+          }
+        ]
+      },
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-repair-full",
+        "mode": "repair",
+        "rng_seed": 23,
+        "time_window": {
+          "start": 5,
+          "end": 20
+        },
+        "topological_order": ["task-a", "task-b", "task-c", "task-d", "task-e"],
+        "repair_context": {
+          "prior_plan_id": "plan-repair-prior",
+          "last_legitimate_plan_ref": "snapshot-repair-prior",
+          "observed_divergence_refs": ["task-d", "task-e"],
+          "repair_scope": "full_window"
+        },
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 2
+          },
+          {
+            "id": "task-b",
+            "duration": 4,
+            "depends_on": ["task-a"]
+          },
+          {
+            "id": "task-c",
+            "duration": 2,
+            "depends_on": ["task-b"],
+            "static_anchor": {
+              "start": 12
+            }
+          },
+          {
+            "id": "task-d",
+            "duration": 4,
+            "depends_on": ["task-b"]
+          },
+          {
+            "id": "task-e",
+            "duration": 2,
+            "depends_on": ["task-d", "task-c"]
+          }
+        ]
+      },
+      "expected_response": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-repair-full",
+        "plan": {
+          "plan_id": "plan-golden-repair-full-0000000000000017-repair",
+          "status": "candidate",
+          "supersedes_plan_id": "plan-repair-prior",
+          "steps": [
+            {
+              "task_id": "task-a",
+              "start": 0,
+              "end": 2
+            },
+            {
+              "task_id": "task-b",
+              "start": 2,
+              "end": 6,
+              "depends_on": ["task-a"]
+            },
+            {
+              "task_id": "task-c",
+              "start": 12,
+              "end": 14,
+              "depends_on": ["task-b"],
+              "static_anchor": true
+            },
+            {
+              "task_id": "task-d",
+              "start": 6,
+              "end": 10,
+              "depends_on": ["task-b"]
+            },
+            {
+              "task_id": "task-e",
+              "start": 14,
+              "end": 16,
+              "depends_on": ["task-d", "task-c"]
+            }
+          ]
+        },
+        "diagnostics": [
+          {
+            "code": "not_yet_implemented",
+            "message": "semi-legitimization Legitimizer engine is not yet implemented"
+          },
+          {
+            "code": "not_yet_implemented",
+            "message": "full-legitimization Legitimizer engine is not yet implemented"
+          }
+        ]
+      }
+    }
+  ]
+}
