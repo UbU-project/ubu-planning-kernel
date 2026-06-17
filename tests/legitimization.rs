@@ -5,7 +5,8 @@ fn legitimization_stubs_are_explicit() {
     let plan = Plan {
         plan_id: "plan-legitimization".to_string(),
         status: PlanStatus::Candidate,
-        tasks: vec![ScheduledTask {
+        supersedes_plan_id: None,
+        steps: vec![ScheduledTask {
             task_id: "task-a".to_string(),
             start: 0,
             end: 1,

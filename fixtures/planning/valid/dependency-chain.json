@@ -1,6 +1,13 @@
 {
   "schema_version": "planning-kernel-contract/0.1",
   "request_id": "dependency-chain",
+  "mode": "fresh_generation",
+  "rng_seed": 42,
+  "time_window": {
+    "start": 0,
+    "end": 10
+  },
+  "topological_order": ["task-a", "task-b", "task-c"],
   "tasks": [
     {
       "id": "task-a",

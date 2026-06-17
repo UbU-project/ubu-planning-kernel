@@ -1,6 +1,13 @@
 {
   "schema_version": "planning-kernel-contract/0.1",
   "request_id": "cyclic-dependency",
+  "mode": "fresh_generation",
+  "rng_seed": 0,
+  "time_window": {
+    "start": 0,
+    "end": 10
+  },
+  "topological_order": ["task-a", "task-b"],
   "tasks": [
     {
       "id": "task-a",

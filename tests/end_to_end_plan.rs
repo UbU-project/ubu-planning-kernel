@@ -10,7 +10,7 @@ fn valid_fixture_produces_plan() {
     let response = ubu_planning_core::plan(request, &CpuStrategy);
     assert_eq!(response.schema_version, PLANNING_SCHEMA_VERSION);
     let plan = response.plan.expect("valid fixture should produce a plan");
-    let task_ids: Vec<_> = plan.tasks.iter().map(|task| task.task_id.as_str()).collect();
+    let task_ids: Vec<_> = plan.steps.iter().map(|task| task.task_id.as_str()).collect();
     assert_eq!(task_ids, ["task-a", "task-b", "task-c"]);
 }
 

@@ -1,7 +1,7 @@
 use std::collections::{HashMap, HashSet};
 
 use crate::diagnostics::{Diagnostic, DiagnosticCode};
-use crate::request::{PlanningRequest, PLANNING_SCHEMA_VERSION};
+use crate::request::{PlanningMode, PlanningRequest, PLANNING_SCHEMA_VERSION};
 use crate::response::{Plan, ValidationResult};
 
 pub fn validate_schema_version(schema_version: Option<&str>) -> Option<Diagnostic> {
@@ -24,15 +24,31 @@ pub fn validate_planning_request(request: &PlanningRequest) -> ValidationResult 
         diagnostics.push(diagnostic);
     }
 
-    if request.tasks.is_empty() {
+    if request.tasks().is_empty() {
         diagnostics.push(Diagnostic::new(
             DiagnosticCode::EmptyRequest,
             "planning request must include at least one task",
         ));
     }
 
+    if matches!(request.mode, PlanningMode::Repair) && request.repair_context.is_none() {
+        diagnostics.push(Diagnostic::new(
+            DiagnosticCode::SkeletonFailure,
+            "repair planning request must include repair_context",
+        ));
+    }
+
+    if let Some(time_window) = &request.time_window {
+        if !time_window.is_possible() {
+            diagnostics.push(Diagnostic::new(
+                DiagnosticCode::ImpossibleWindow,
+                "planning request time_window must have start before end",
+            ));
+        }
+    }
+
     let mut ids = HashSet::new();
-    for task in &request.tasks {
+    for task in request.tasks() {
         if !ids.insert(task.id.clone()) {
             diagnostics.push(Diagnostic::new(
                 DiagnosticCode::DuplicateTaskId,
@@ -55,19 +71,20 @@ pub fn validate_planning_request(request: &PlanningRequest) -> ValidationResult 
         }
         if let Some(anchor) = &task.static_anchor {
             if let Some(window) = &task.window {
-                if anchor.start < window.start || anchor.start + task.duration > window.end {
+                let Some(anchor_end) = anchor.start.checked_add(task.duration) else {
+                    diagnostics.push(Diagnostic::new(
+                        DiagnosticCode::ImpossibleWindow,
+                        format!("task '{}' static anchor overflows its duration", task.id),
+                    ));
+                    continue;
+                };
+                if anchor.start < window.start || anchor_end > window.end {
                     diagnostics.push(Diagnostic::new(
                         DiagnosticCode::ImpossibleWindow,
                         format!("task '{}' static anchor violates its time window", task.id),
                     ));
                 }
             }
-        }
-        if task.affect_required && !task.affect_current {
-            diagnostics.push(Diagnostic::new(
-                DiagnosticCode::StaleAffect,
-                format!("task '{}' requires current affect context", task.id),
-            ));
         }
     }
 
@@ -99,7 +116,7 @@ pub fn validate_planning_request(request: &PlanningRequest) -> ValidationResult 
 
 pub fn validate_plan(candidate: &Plan) -> ValidationResult {
     let mut diagnostics = Vec::new();
-    if candidate.tasks.is_empty() {
+    if candidate.steps.is_empty() {
         diagnostics.push(Diagnostic::new(
             DiagnosticCode::EmptyPlan,
             "plan must include at least one scheduled task",
@@ -108,7 +125,7 @@ pub fn validate_plan(candidate: &Plan) -> ValidationResult {
 
     let mut seen = HashSet::new();
     let mut positions = HashMap::new();
-    for (index, task) in candidate.tasks.iter().enumerate() {
+    for (index, task) in candidate.steps.iter().enumerate() {
         if !seen.insert(task.task_id.clone()) {
             diagnostics.push(Diagnostic::new(
                 DiagnosticCode::DuplicatePlanTask,
@@ -127,7 +144,7 @@ pub fn validate_plan(candidate: &Plan) -> ValidationResult {
         positions.insert(task.task_id.clone(), index);
     }
 
-    for (index, task) in candidate.tasks.iter().enumerate() {
+    for (index, task) in candidate.steps.iter().enumerate() {
         for dependency in &task.depends_on {
             match positions.get(dependency) {
                 Some(dependency_index) if *dependency_index < index => {}
@@ -186,7 +203,7 @@ fn has_cycle(request: &PlanningRequest) -> bool {
     }
 
     let mut graph: HashMap<String, Vec<String>> = HashMap::new();
-    for task in &request.tasks {
+    for task in request.tasks() {
         graph.entry(task.id.clone()).or_default();
         for dependency in &task.depends_on {
             graph
@@ -198,7 +215,7 @@ fn has_cycle(request: &PlanningRequest) -> bool {
 
     let mut marks = HashMap::new();
     request
-        .tasks
+        .tasks()
         .iter()
         .any(|task| visit(&task.id, &graph, &mut marks))
 }

@@ -18,7 +18,7 @@ pub struct ExplanationBundle {
 
 pub fn explain_plan(candidate: &Plan) -> ExplanationBundle {
     let fragments = candidate
-        .tasks
+        .steps
         .first()
         .map(|task| ExplanationFragment {
             task_id: task.task_id.clone(),

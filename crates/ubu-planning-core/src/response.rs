@@ -13,23 +13,32 @@ pub enum PlanStatus {
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
-pub struct ScheduledTask {
+pub struct PlanStep {
     pub task_id: TaskId,
     pub start: u64,
     pub end: u64,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub depends_on: Vec<TaskId>,
-    #[serde(default)]
+    #[serde(default, skip_serializing_if = "is_false")]
     pub static_anchor: bool,
 }
+
+pub type ScheduledTask = PlanStep;
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct Plan {
     pub plan_id: String,
     pub status: PlanStatus,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub supersedes_plan_id: Option<String>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
-    pub tasks: Vec<ScheduledTask>,
+    #[serde(rename = "steps", alias = "tasks")]
+    pub steps: Vec<PlanStep>,
+}
+
+fn is_false(value: &bool) -> bool {
+    !*value
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

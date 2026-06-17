@@ -12,4 +12,8 @@ fn cpu_strategy_is_deterministic_for_same_request() {
     let second = ubu_planning_core::plan(request, &CpuStrategy);
 
     assert_eq!(first.plan, second.plan);
+    assert_eq!(
+        serde_json::to_vec(&first.plan).unwrap(),
+        serde_json::to_vec(&second.plan).unwrap()
+    );
 }
