@@ -1,0 +1,879 @@
+{
+  "schema_version": "planning-golden-corpus/affect-legitimization.v1",
+  "human_reviewed_then_frozen": true,
+  "description": "Offline fixed-seed regression anchors for the Phase B affect legitimacy filter only.",
+  "cases": [
+    {
+      "name": "fully-feasible-all-dimensions",
+      "covers": ["fully_feasible"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "affect-feasible-all",
+        "mode": "fresh_generation",
+        "rng_seed": 6101,
+        "time_window": {
+          "start": 0,
+          "end": 10
+        },
+        "topological_order": ["task-a"],
+        "affect_profile": {
+          "mode": "enforce",
+          "dimensions": {
+            "energy": {
+              "direction": "higher_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            },
+            "stress": {
+              "direction": "lower_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            },
+            "mood_intensity": {
+              "direction": "lower_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            }
+          }
+        },
+        "affect_observation": {
+          "dimensions": {
+            "energy": {
+              "value": 6.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            },
+            "stress": {
+              "value": 4.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            },
+            "mood_intensity": {
+              "value": 4.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            }
+          }
+        },
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 1
+          }
+        ]
+      },
+      "expected_plan_present": true,
+      "expected_legitimization": {
+        "result": "passed",
+        "mode": "enforce",
+        "affect_feasible": true,
+        "affect_margin": 0.2310585786300049,
+        "dimensions": {
+          "energy": {
+            "satisfaction": 0.7310585786300049,
+            "threshold": 0.5,
+            "margin": 0.2310585786300049
+          },
+          "mood_intensity": {
+            "satisfaction": 0.7310585786300049,
+            "threshold": 0.5,
+            "margin": 0.2310585786300049
+          },
+          "stress": {
+            "satisfaction": 0.7310585786300049,
+            "threshold": 0.5,
+            "margin": 0.2310585786300049
+          }
+        }
+      }
+    },
+    {
+      "name": "energy-below-floor",
+      "covers": ["energy_violation", "enforce_mode"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "affect-energy-violation",
+        "mode": "fresh_generation",
+        "rng_seed": 6102,
+        "time_window": {
+          "start": 0,
+          "end": 10
+        },
+        "topological_order": ["task-a"],
+        "affect_profile": {
+          "mode": "enforce",
+          "dimensions": {
+            "energy": {
+              "direction": "higher_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            },
+            "stress": {
+              "direction": "lower_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            },
+            "mood_intensity": {
+              "direction": "lower_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            }
+          }
+        },
+        "affect_observation": {
+          "dimensions": {
+            "energy": {
+              "value": 4.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            },
+            "stress": {
+              "value": 4.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            },
+            "mood_intensity": {
+              "value": 4.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            }
+          }
+        },
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 1
+          }
+        ]
+      },
+      "expected_plan_present": false,
+      "expected_legitimization": {
+        "result": "failed",
+        "mode": "enforce",
+        "affect_feasible": false,
+        "affect_margin": -0.2310585786300049,
+        "violated_dimensions": ["energy"],
+        "dimensions": {
+          "energy": {
+            "satisfaction": 0.2689414213699951,
+            "threshold": 0.5,
+            "margin": -0.2310585786300049
+          },
+          "mood_intensity": {
+            "satisfaction": 0.7310585786300049,
+            "threshold": 0.5,
+            "margin": 0.2310585786300049
+          },
+          "stress": {
+            "satisfaction": 0.7310585786300049,
+            "threshold": 0.5,
+            "margin": 0.2310585786300049
+          }
+        }
+      }
+    },
+    {
+      "name": "stress-above-ceiling",
+      "covers": ["stress_violation", "enforce_mode"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "affect-stress-violation",
+        "mode": "fresh_generation",
+        "rng_seed": 6103,
+        "time_window": {
+          "start": 0,
+          "end": 10
+        },
+        "topological_order": ["task-a"],
+        "affect_profile": {
+          "mode": "enforce",
+          "dimensions": {
+            "energy": {
+              "direction": "higher_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            },
+            "stress": {
+              "direction": "lower_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            },
+            "mood_intensity": {
+              "direction": "lower_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            }
+          }
+        },
+        "affect_observation": {
+          "dimensions": {
+            "energy": {
+              "value": 6.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            },
+            "stress": {
+              "value": 6.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            },
+            "mood_intensity": {
+              "value": 4.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            }
+          }
+        },
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 1
+          }
+        ]
+      },
+      "expected_plan_present": false,
+      "expected_legitimization": {
+        "result": "failed",
+        "mode": "enforce",
+        "affect_feasible": false,
+        "affect_margin": -0.2310585786300049,
+        "violated_dimensions": ["stress"],
+        "dimensions": {
+          "energy": {
+            "satisfaction": 0.7310585786300049,
+            "threshold": 0.5,
+            "margin": 0.2310585786300049
+          },
+          "mood_intensity": {
+            "satisfaction": 0.7310585786300049,
+            "threshold": 0.5,
+            "margin": 0.2310585786300049
+          },
+          "stress": {
+            "satisfaction": 0.2689414213699951,
+            "threshold": 0.5,
+            "margin": -0.2310585786300049
+          }
+        }
+      }
+    },
+    {
+      "name": "mood-intensity-above-ceiling",
+      "covers": ["mood_intensity_violation", "enforce_mode"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "affect-mood-intensity-violation",
+        "mode": "fresh_generation",
+        "rng_seed": 6104,
+        "time_window": {
+          "start": 0,
+          "end": 10
+        },
+        "topological_order": ["task-a"],
+        "affect_profile": {
+          "mode": "enforce",
+          "dimensions": {
+            "energy": {
+              "direction": "higher_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            },
+            "stress": {
+              "direction": "lower_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            },
+            "mood_intensity": {
+              "direction": "lower_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            }
+          }
+        },
+        "affect_observation": {
+          "dimensions": {
+            "energy": {
+              "value": 6.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            },
+            "stress": {
+              "value": 4.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            },
+            "mood_intensity": {
+              "value": 6.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            }
+          }
+        },
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 1
+          }
+        ]
+      },
+      "expected_plan_present": false,
+      "expected_legitimization": {
+        "result": "failed",
+        "mode": "enforce",
+        "affect_feasible": false,
+        "affect_margin": -0.2310585786300049,
+        "violated_dimensions": ["mood_intensity"],
+        "dimensions": {
+          "energy": {
+            "satisfaction": 0.7310585786300049,
+            "threshold": 0.5,
+            "margin": 0.2310585786300049
+          },
+          "mood_intensity": {
+            "satisfaction": 0.2689414213699951,
+            "threshold": 0.5,
+            "margin": -0.2310585786300049
+          },
+          "stress": {
+            "satisfaction": 0.7310585786300049,
+            "threshold": 0.5,
+            "margin": 0.2310585786300049
+          }
+        }
+      }
+    },
+    {
+      "name": "multiple-dimensions-violated",
+      "covers": ["multi_violation", "energy_violation", "stress_violation", "mood_intensity_violation"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "affect-multi-violation",
+        "mode": "fresh_generation",
+        "rng_seed": 6105,
+        "time_window": {
+          "start": 0,
+          "end": 10
+        },
+        "topological_order": ["task-a"],
+        "affect_profile": {
+          "mode": "enforce",
+          "dimensions": {
+            "energy": {
+              "direction": "higher_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            },
+            "stress": {
+              "direction": "lower_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            },
+            "mood_intensity": {
+              "direction": "lower_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            }
+          }
+        },
+        "affect_observation": {
+          "dimensions": {
+            "energy": {
+              "value": 4.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            },
+            "stress": {
+              "value": 6.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            },
+            "mood_intensity": {
+              "value": 6.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            }
+          }
+        },
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 1
+          }
+        ]
+      },
+      "expected_plan_present": false,
+      "expected_legitimization": {
+        "result": "failed",
+        "mode": "enforce",
+        "affect_feasible": false,
+        "affect_margin": -0.2310585786300049,
+        "violated_dimensions": ["energy", "mood_intensity", "stress"],
+        "dimensions": {
+          "energy": {
+            "satisfaction": 0.2689414213699951,
+            "threshold": 0.5,
+            "margin": -0.2310585786300049
+          },
+          "mood_intensity": {
+            "satisfaction": 0.2689414213699951,
+            "threshold": 0.5,
+            "margin": -0.2310585786300049
+          },
+          "stress": {
+            "satisfaction": 0.2689414213699951,
+            "threshold": 0.5,
+            "margin": -0.2310585786300049
+          }
+        }
+      }
+    },
+    {
+      "name": "boundary-just-inside-threshold",
+      "covers": ["boundary_inside"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "affect-boundary-inside",
+        "mode": "fresh_generation",
+        "rng_seed": 6106,
+        "time_window": {
+          "start": 0,
+          "end": 10
+        },
+        "topological_order": ["task-a"],
+        "affect_profile": {
+          "mode": "enforce",
+          "dimensions": {
+            "energy": {
+              "direction": "higher_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.499999
+            }
+          }
+        },
+        "affect_observation": {
+          "dimensions": {
+            "energy": {
+              "value": 5.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            }
+          }
+        },
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 1
+          }
+        ]
+      },
+      "expected_plan_present": true,
+      "expected_legitimization": {
+        "result": "passed",
+        "mode": "enforce",
+        "affect_feasible": true,
+        "affect_margin": 0.00000099999999997324446,
+        "dimensions": {
+          "energy": {
+            "satisfaction": 0.5,
+            "threshold": 0.499999,
+            "margin": 0.00000099999999997324446
+          }
+        }
+      }
+    },
+    {
+      "name": "boundary-just-outside-threshold",
+      "covers": ["boundary_outside"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "affect-boundary-outside",
+        "mode": "fresh_generation",
+        "rng_seed": 6107,
+        "time_window": {
+          "start": 0,
+          "end": 10
+        },
+        "topological_order": ["task-a"],
+        "affect_profile": {
+          "mode": "enforce",
+          "dimensions": {
+            "energy": {
+              "direction": "higher_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.500001
+            }
+          }
+        },
+        "affect_observation": {
+          "dimensions": {
+            "energy": {
+              "value": 5.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            }
+          }
+        },
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 1
+          }
+        ]
+      },
+      "expected_plan_present": false,
+      "expected_legitimization": {
+        "result": "failed",
+        "mode": "enforce",
+        "affect_feasible": false,
+        "affect_margin": -0.0000010000000000287557,
+        "violated_dimensions": ["energy"],
+        "dimensions": {
+          "energy": {
+            "satisfaction": 0.5,
+            "threshold": 0.500001,
+            "margin": -0.0000010000000000287557
+          }
+        }
+      }
+    },
+    {
+      "name": "enforce-infeasible-input",
+      "covers": ["enforce_mode", "same_infeasible_input"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "affect-enforce-same-input",
+        "mode": "fresh_generation",
+        "rng_seed": 6108,
+        "time_window": {
+          "start": 0,
+          "end": 10
+        },
+        "topological_order": ["task-a"],
+        "affect_profile": {
+          "mode": "enforce",
+          "dimensions": {
+            "energy": {
+              "direction": "higher_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            }
+          }
+        },
+        "affect_observation": {
+          "dimensions": {
+            "energy": {
+              "value": 4.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            }
+          }
+        },
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 1
+          }
+        ]
+      },
+      "expected_plan_present": false,
+      "expected_legitimization": {
+        "result": "failed",
+        "mode": "enforce",
+        "affect_feasible": false,
+        "affect_margin": -0.2310585786300049,
+        "violated_dimensions": ["energy"],
+        "dimensions": {
+          "energy": {
+            "satisfaction": 0.2689414213699951,
+            "threshold": 0.5,
+            "margin": -0.2310585786300049
+          }
+        }
+      }
+    },
+    {
+      "name": "warn-only-same-infeasible-input",
+      "covers": ["warn_only_mode", "same_infeasible_input"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "affect-warn-only-same-input",
+        "mode": "fresh_generation",
+        "rng_seed": 6108,
+        "time_window": {
+          "start": 0,
+          "end": 10
+        },
+        "topological_order": ["task-a"],
+        "affect_profile": {
+          "mode": "warn_only",
+          "dimensions": {
+            "energy": {
+              "direction": "higher_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            }
+          }
+        },
+        "affect_observation": {
+          "dimensions": {
+            "energy": {
+              "value": 4.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            }
+          }
+        },
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 1
+          }
+        ]
+      },
+      "expected_plan_present": true,
+      "expected_legitimization": {
+        "result": "failed",
+        "mode": "warn_only",
+        "affect_feasible": false,
+        "affect_margin": -0.2310585786300049,
+        "violated_dimensions": ["energy"],
+        "dimensions": {
+          "energy": {
+            "satisfaction": 0.2689414213699951,
+            "threshold": 0.5,
+            "margin": -0.2310585786300049
+          }
+        }
+      }
+    },
+    {
+      "name": "bootstrap-default-profile-marked-priors",
+      "covers": ["bootstrap_default_profile_marked_priors"],
+      "review_warning": "Bootstrap default affect profile values are marked priors from UBU-D0236 §6 and are frozen here only as regression anchors.",
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "affect-bootstrap-default-priors",
+        "mode": "fresh_generation",
+        "rng_seed": 6109,
+        "time_window": {
+          "start": 0,
+          "end": 10
+        },
+        "topological_order": ["task-a"],
+        "affect_profile": {
+          "mode": "enforce",
+          "dimensions": {
+            "energy": {
+              "direction": "higher_is_better",
+              "location": 4.0,
+              "scale": 1.5,
+              "threshold": 0.5
+            },
+            "stress": {
+              "direction": "lower_is_better",
+              "location": 7.0,
+              "scale": 1.5,
+              "threshold": 0.5
+            },
+            "mood_intensity": {
+              "direction": "lower_is_better",
+              "location": 8.0,
+              "scale": 1.5,
+              "threshold": 0.5
+            }
+          }
+        },
+        "affect_observation": {
+          "dimensions": {
+            "energy": {
+              "value": 4.0,
+              "observed_at": 0,
+              "source_kind": "bootstrap_prior_fixture"
+            },
+            "stress": {
+              "value": 7.0,
+              "observed_at": 0,
+              "source_kind": "bootstrap_prior_fixture"
+            },
+            "mood_intensity": {
+              "value": 8.0,
+              "observed_at": 0,
+              "source_kind": "bootstrap_prior_fixture"
+            }
+          }
+        },
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 1
+          }
+        ]
+      },
+      "expected_plan_present": true,
+      "expected_legitimization": {
+        "result": "passed",
+        "mode": "enforce",
+        "affect_feasible": true,
+        "affect_margin": 0.0,
+        "dimensions": {
+          "energy": {
+            "satisfaction": 0.5,
+            "threshold": 0.5,
+            "margin": 0.0
+          },
+          "mood_intensity": {
+            "satisfaction": 0.5,
+            "threshold": 0.5,
+            "margin": 0.0
+          },
+          "stress": {
+            "satisfaction": 0.5,
+            "threshold": 0.5,
+            "margin": 0.0
+          }
+        }
+      }
+    },
+    {
+      "name": "stale-observation-evaluated-as-given",
+      "covers": ["stale_observation"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "affect-stale-observation",
+        "mode": "fresh_generation",
+        "rng_seed": 6110,
+        "time_window": {
+          "start": 0,
+          "end": 10
+        },
+        "topological_order": ["task-a"],
+        "affect_profile": {
+          "mode": "enforce",
+          "dimensions": {
+            "energy": {
+              "direction": "higher_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5,
+              "freshness_seconds": 5
+            }
+          }
+        },
+        "affect_observation": {
+          "dimensions": {
+            "energy": {
+              "value": 6.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            }
+          }
+        },
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 1,
+            "static_anchor": {
+              "start": 6
+            }
+          }
+        ]
+      },
+      "expected_plan_present": true,
+      "expected_legitimization": {
+        "result": "passed",
+        "mode": "enforce",
+        "affect_feasible": true,
+        "affect_margin": 0.2310585786300049,
+        "stale_dimensions": ["energy"],
+        "dimensions": {
+          "energy": {
+            "satisfaction": 0.7310585786300049,
+            "threshold": 0.5,
+            "margin": 0.2310585786300049,
+            "stale": true
+          }
+        }
+      }
+    },
+    {
+      "name": "missing-energy-observation-needs-clarification",
+      "covers": ["missing_observation"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "affect-missing-energy-observation",
+        "mode": "fresh_generation",
+        "rng_seed": 6111,
+        "time_window": {
+          "start": 0,
+          "end": 10
+        },
+        "topological_order": ["task-a"],
+        "affect_profile": {
+          "mode": "enforce",
+          "dimensions": {
+            "energy": {
+              "direction": "higher_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            },
+            "stress": {
+              "direction": "lower_is_better",
+              "location": 5.0,
+              "scale": 1.0,
+              "threshold": 0.5
+            }
+          }
+        },
+        "affect_observation": {
+          "dimensions": {
+            "stress": {
+              "value": 4.0,
+              "observed_at": 0,
+              "source_kind": "self_report"
+            }
+          }
+        },
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": 1
+          }
+        ]
+      },
+      "expected_plan_present": false,
+      "expected_legitimization": {
+        "result": "needs_clarification",
+        "mode": "enforce",
+        "affect_feasible": false,
+        "affect_margin": 0.2310585786300049,
+        "dimensions": {
+          "stress": {
+            "satisfaction": 0.7310585786300049,
+            "threshold": 0.5,
+            "margin": 0.2310585786300049
+          }
+        }
+      }
+    }
+  ]
+}
