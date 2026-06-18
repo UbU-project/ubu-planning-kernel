@@ -1,7 +1,10 @@
+use std::collections::BTreeMap;
+
 use serde::{Deserialize, Serialize};
 
 use crate::diagnostics::Diagnostic;
 use crate::graph::TaskId;
+use crate::request::AffectLegitimizationMode;
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -65,13 +68,15 @@ impl ValidationResult {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct PlanningResponse {
     pub schema_version: String,
     pub request_id: String,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub plan: Option<Plan>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub legitimization: Option<LegitimizationReport>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub diagnostics: Vec<Diagnostic>,
 }
@@ -87,6 +92,7 @@ impl PlanningResponse {
             schema_version,
             request_id,
             plan: Some(plan),
+            legitimization: None,
             diagnostics,
         }
     }
@@ -100,9 +106,49 @@ impl PlanningResponse {
             schema_version,
             request_id,
             plan: None,
+            legitimization: None,
             diagnostics,
         }
     }
+
+    pub fn with_legitimization(mut self, legitimization: LegitimizationReport) -> Self {
+        self.legitimization = Some(legitimization);
+        self
+    }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum LegitimizationResult {
+    Passed,
+    Failed,
+    NeedsClarification,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct AffectDimensionLegitimization {
+    pub satisfaction: f64,
+    pub threshold: f64,
+    pub margin: f64,
+    #[serde(default, skip_serializing_if = "is_false")]
+    pub stale: bool,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct LegitimizationReport {
+    pub result: LegitimizationResult,
+    pub mode: AffectLegitimizationMode,
+    pub affect_feasible: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub affect_margin: Option<f64>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub violated_dimensions: Vec<String>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub stale_dimensions: Vec<String>,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub dimensions: BTreeMap<String, AffectDimensionLegitimization>,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]

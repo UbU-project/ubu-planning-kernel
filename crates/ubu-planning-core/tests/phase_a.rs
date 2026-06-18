@@ -67,6 +67,8 @@ fn static_anchor_collision_returns_skeleton_failure() {
             topological_order: vec!["task-a".to_string(), "task-b".to_string()],
         },
         repair_context: None,
+        affect_profile: None,
+        affect_observation: None,
         prior_plan: None,
     };
 
@@ -115,6 +117,8 @@ fn repair_supersedes_prior_plan_and_preserves_past_and_in_progress_steps() {
             observed_divergence_refs: vec!["task-c".to_string()],
             repair_scope: RepairScope::RemainingWindow,
         }),
+        affect_profile: None,
+        affect_observation: None,
         prior_plan: Some(prior_plan),
     };
 
@@ -142,8 +146,6 @@ fn task_with_anchor(
             .collect(),
         window: None,
         static_anchor: static_anchor.map(|start| StaticAnchor { start }),
-        affect_required: false,
-        affect_current: false,
     }
 }
 

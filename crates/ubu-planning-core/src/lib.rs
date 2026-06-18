@@ -12,11 +12,13 @@ pub use diagnostics::{Diagnostic, DiagnosticCode, SkeletonFailureDiagnostic};
 pub use explanations::{explain_plan, ExplanationBundle, ExplanationFragment};
 pub use graph::{DependencyEdge, TaskId};
 pub use request::{
-    PlanningMode, PlanningRequest, RepairContext, RepairRequest, RepairScope, StaticAnchor,
-    TaskGraph, TaskSpec, TimeWindow, PLANNING_SCHEMA_VERSION,
+    AffectDirection, AffectLegitimizationMode, AffectObservation, AffectObservationValue,
+    AffectProfile, AffectTolerance, PlanningMode, PlanningRequest, RepairContext, RepairRequest,
+    RepairScope, StaticAnchor, TaskGraph, TaskSpec, TimeWindow, PLANNING_SCHEMA_VERSION,
 };
 pub use response::{
-    Plan, PlanStatus, PlanStep, PlanningResponse, RepairResponse, ScheduledTask, ValidationResult,
+    AffectDimensionLegitimization, LegitimizationReport, LegitimizationResult, Plan, PlanStatus,
+    PlanStep, PlanningResponse, RepairResponse, ScheduledTask, ValidationResult,
 };
 pub use strategy::{CandidateSet, PlannerStrategy};
 pub use validation::validate_plan;
@@ -52,24 +54,41 @@ pub fn plan(request: PlanningRequest, strategy: &impl PlannerStrategy) -> Planni
     }
 
     let mut diagnostics = candidates.diagnostics;
+    let mut last_legitimization = None;
     for candidate in candidates.plans {
         let validation = validate_plan(&candidate);
         if validation.is_valid {
             let semi = legitimization::semi_legitimize(&candidate);
             diagnostics.extend(semi.diagnostics);
-            let full = legitimization::full_legitimize(&candidate);
-            diagnostics.extend(full.diagnostics);
-            return PlanningResponse::success(
-                response_schema_version,
-                request_id,
-                candidate,
-                diagnostics,
+            let full = legitimization::full_legitimize(
+                &candidate,
+                request.affect_profile.as_ref(),
+                request.affect_observation.as_ref(),
             );
+            diagnostics.extend(full.validation.diagnostics);
+            last_legitimization = Some(full.report);
+            if full.validation.is_valid {
+                let mut response = PlanningResponse::success(
+                    response_schema_version,
+                    request_id,
+                    candidate,
+                    diagnostics,
+                );
+                if let Some(legitimization) = last_legitimization {
+                    response = response.with_legitimization(legitimization);
+                }
+                return response;
+            }
+            continue;
         }
         diagnostics.extend(validation.diagnostics);
     }
 
-    PlanningResponse::failure(response_schema_version, request_id, diagnostics)
+    let mut response = PlanningResponse::failure(response_schema_version, request_id, diagnostics);
+    if let Some(legitimization) = last_legitimization {
+        response = response.with_legitimization(legitimization);
+    }
+    response
 }
 
 pub fn repair(request: RepairRequest, strategy: &impl PlannerStrategy) -> RepairResponse {
@@ -111,6 +130,8 @@ pub fn repair(request: RepairRequest, strategy: &impl PlannerStrategy) -> Repair
             topological_order: request.topological_order,
         },
         repair_context: Some(repair_context),
+        affect_profile: request.affect_profile,
+        affect_observation: request.affect_observation,
         prior_plan: Some(request.candidate),
     };
     let response = plan(planning_request, strategy);

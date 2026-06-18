@@ -58,14 +58,15 @@
             }
           ]
         },
+        "legitimization": {
+          "result": "passed",
+          "mode": "enforce",
+          "affect_feasible": true
+        },
         "diagnostics": [
           {
             "code": "not_yet_implemented",
             "message": "semi-legitimization Legitimizer engine is not yet implemented"
-          },
-          {
-            "code": "not_yet_implemented",
-            "message": "full-legitimization Legitimizer engine is not yet implemented"
           }
         ]
       }
@@ -137,14 +138,15 @@
             }
           ]
         },
+        "legitimization": {
+          "result": "passed",
+          "mode": "enforce",
+          "affect_feasible": true
+        },
         "diagnostics": [
           {
             "code": "not_yet_implemented",
             "message": "semi-legitimization Legitimizer engine is not yet implemented"
-          },
-          {
-            "code": "not_yet_implemented",
-            "message": "full-legitimization Legitimizer engine is not yet implemented"
           }
         ]
       }
@@ -233,14 +235,15 @@
             }
           ]
         },
+        "legitimization": {
+          "result": "passed",
+          "mode": "enforce",
+          "affect_feasible": true
+        },
         "diagnostics": [
           {
             "code": "not_yet_implemented",
             "message": "semi-legitimization Legitimizer engine is not yet implemented"
-          },
-          {
-            "code": "not_yet_implemented",
-            "message": "full-legitimization Legitimizer engine is not yet implemented"
           }
         ]
       }
@@ -310,14 +313,15 @@
             }
           ]
         },
+        "legitimization": {
+          "result": "passed",
+          "mode": "enforce",
+          "affect_feasible": true
+        },
         "diagnostics": [
           {
             "code": "not_yet_implemented",
             "message": "semi-legitimization Legitimizer engine is not yet implemented"
-          },
-          {
-            "code": "not_yet_implemented",
-            "message": "full-legitimization Legitimizer engine is not yet implemented"
           }
         ]
       }
@@ -380,14 +384,15 @@
             }
           ]
         },
+        "legitimization": {
+          "result": "passed",
+          "mode": "enforce",
+          "affect_feasible": true
+        },
         "diagnostics": [
           {
             "code": "not_yet_implemented",
             "message": "semi-legitimization Legitimizer engine is not yet implemented"
-          },
-          {
-            "code": "not_yet_implemented",
-            "message": "full-legitimization Legitimizer engine is not yet implemented"
           }
         ]
       }
@@ -694,14 +699,15 @@
             }
           ]
         },
+        "legitimization": {
+          "result": "passed",
+          "mode": "enforce",
+          "affect_feasible": true
+        },
         "diagnostics": [
           {
             "code": "not_yet_implemented",
             "message": "semi-legitimization Legitimizer engine is not yet implemented"
-          },
-          {
-            "code": "not_yet_implemented",
-            "message": "full-legitimization Legitimizer engine is not yet implemented"
           }
         ]
       }
@@ -831,14 +837,15 @@
             }
           ]
         },
+        "legitimization": {
+          "result": "passed",
+          "mode": "enforce",
+          "affect_feasible": true
+        },
         "diagnostics": [
           {
             "code": "not_yet_implemented",
             "message": "semi-legitimization Legitimizer engine is not yet implemented"
-          },
-          {
-            "code": "not_yet_implemented",
-            "message": "full-legitimization Legitimizer engine is not yet implemented"
           }
         ]
       }
@@ -968,14 +975,15 @@
             }
           ]
         },
+        "legitimization": {
+          "result": "passed",
+          "mode": "enforce",
+          "affect_feasible": true
+        },
         "diagnostics": [
           {
             "code": "not_yet_implemented",
             "message": "semi-legitimization Legitimizer engine is not yet implemented"
-          },
-          {
-            "code": "not_yet_implemented",
-            "message": "full-legitimization Legitimizer engine is not yet implemented"
           }
         ]
       }

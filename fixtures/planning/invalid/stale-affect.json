@@ -8,12 +8,34 @@
     "end": 10
   },
   "topological_order": ["task-a"],
+  "affect_profile": {
+    "mode": "enforce",
+    "dimensions": {
+      "energy": {
+        "direction": "higher_is_better",
+        "location": 5.0,
+        "scale": 1.0,
+        "threshold": 0.5,
+        "freshness_seconds": 5
+      }
+    }
+  },
+  "affect_observation": {
+    "dimensions": {
+      "energy": {
+        "value": 4.0,
+        "observed_at": 0,
+        "source_kind": "self_report"
+      }
+    }
+  },
   "tasks": [
     {
       "id": "task-a",
       "duration": 1,
-      "affect_required": true,
-      "affect_current": false
+      "static_anchor": {
+        "start": 6
+      }
     }
   ]
 }

@@ -20,8 +20,6 @@ fn impossible_after_dependency_window_returns_skeleton_failure() {
                     depends_on: Vec::new(),
                     window: None,
                     static_anchor: None,
-                    affect_required: false,
-                    affect_current: false,
                 },
                 TaskSpec {
                     id: "task-b".to_string(),
@@ -29,13 +27,13 @@ fn impossible_after_dependency_window_returns_skeleton_failure() {
                     depends_on: vec!["task-a".to_string()],
                     window: Some(TimeWindow { start: 0, end: 5 }),
                     static_anchor: None,
-                    affect_required: false,
-                    affect_current: false,
                 },
             ],
             topological_order: vec!["task-a".to_string(), "task-b".to_string()],
         },
         repair_context: None,
+        affect_profile: None,
+        affect_observation: None,
         prior_plan: None,
     };
 

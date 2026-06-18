@@ -1,3 +1,5 @@
+use std::collections::BTreeMap;
+
 use serde::{Deserialize, Serialize};
 
 use crate::graph::{DependencyEdge, TaskId};
@@ -35,10 +37,56 @@ pub struct TaskSpec {
     pub window: Option<TimeWindow>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub static_anchor: Option<StaticAnchor>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum AffectLegitimizationMode {
+    #[default]
+    Enforce,
+    WarnOnly,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum AffectDirection {
+    HigherIsBetter,
+    LowerIsBetter,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct AffectTolerance {
+    pub direction: AffectDirection,
+    pub location: f64,
+    pub scale: f64,
+    pub threshold: f64,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub freshness_seconds: Option<u64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
+pub struct AffectProfile {
     #[serde(default)]
-    pub affect_required: bool,
-    #[serde(default)]
-    pub affect_current: bool,
+    pub mode: AffectLegitimizationMode,
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub dimensions: BTreeMap<String, AffectTolerance>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct AffectObservationValue {
+    pub value: f64,
+    pub observed_at: u64,
+    pub source_kind: String,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
+pub struct AffectObservation {
+    #[serde(default, skip_serializing_if = "BTreeMap::is_empty")]
+    pub dimensions: BTreeMap<String, AffectObservationValue>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
@@ -77,7 +125,7 @@ pub struct RepairContext {
     pub repair_scope: RepairScope,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct PlanningRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -93,6 +141,10 @@ pub struct PlanningRequest {
     pub task_graph: TaskGraph,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub repair_context: Option<RepairContext>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub affect_profile: Option<AffectProfile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub affect_observation: Option<AffectObservation>,
     #[serde(skip)]
     pub prior_plan: Option<Plan>,
 }
@@ -119,7 +171,7 @@ impl PlanningRequest {
     }
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct RepairRequest {
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -136,4 +188,8 @@ pub struct RepairRequest {
     pub topological_order: Vec<TaskId>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub repair_context: Option<RepairContext>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub affect_profile: Option<AffectProfile>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub affect_observation: Option<AffectObservation>,
 }
