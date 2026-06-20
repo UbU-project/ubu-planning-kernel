@@ -1,0 +1,4489 @@
+{
+  "cases": [
+    {
+      "covers": [
+        "abundant_slack",
+        "cap_sixteen",
+        "utility_heavy",
+        "weighting_sensitive",
+        "candidate_role_highest_utility",
+        "candidate_role_most_robust",
+        "candidate_role_most_schedule_diverse",
+        "candidate_role_other"
+      ],
+      "expected_generated_candidate_count": 16,
+      "expected_plan_candidates": [
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d",
+          "candidate_role": "highest_utility",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 1,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 30,
+                "start": 20,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.0,
+            "total_score": 0.8551724137931034,
+            "utility_score": 0.8551724137931034
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c07",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 2,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c07",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 44,
+                "start": 34,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.04666666666666667,
+            "total_score": 0.8455172413793103,
+            "utility_score": 0.8455172413793103
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c14",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 3,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c14",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 48,
+                "start": 38,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.06,
+            "total_score": 0.8427586206896551,
+            "utility_score": 0.8427586206896551
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c02",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 4,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c02",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 72,
+                "start": 62,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.14,
+            "total_score": 0.8262068965517241,
+            "utility_score": 0.8262068965517241
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c10",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 5,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c10",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 29,
+                "start": 19,
+                "task_id": "dependent"
+              },
+              {
+                "end": 39,
+                "start": 29,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.5123333333333333,
+            "schedule_diversity_score": 0.06,
+            "total_score": 0.8210344827586207,
+            "utility_score": 0.8210344827586207
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c13",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 6,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c13",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 81,
+                "start": 71,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.17,
+            "total_score": 0.82,
+            "utility_score": 0.82
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c08",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 7,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c08",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 86,
+                "start": 76,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.18666666666666668,
+            "total_score": 0.816551724137931,
+            "utility_score": 0.816551724137931
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c12",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 8,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c12",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 100,
+                "start": 90,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.2333333333333333,
+            "total_score": 0.8068965517241379,
+            "utility_score": 0.8068965517241379
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c03",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 9,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c03",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 34,
+                "start": 24,
+                "task_id": "dependent"
+              },
+              {
+                "end": 44,
+                "start": 34,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.5273333333333333,
+            "schedule_diversity_score": 0.09333333333333334,
+            "total_score": 0.8020689655172414,
+            "utility_score": 0.8020689655172414
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c09",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 10,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c09",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 43,
+                "start": 33,
+                "task_id": "dependent"
+              },
+              {
+                "end": 53,
+                "start": 43,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.5543333333333333,
+            "schedule_diversity_score": 0.15333333333333335,
+            "total_score": 0.7679310344827586,
+            "utility_score": 0.7679310344827586
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c11",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 11,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c11",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 76,
+                "start": 66,
+                "task_id": "dependent"
+              },
+              {
+                "end": 86,
+                "start": 76,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.6533333333333333,
+            "schedule_diversity_score": 0.37333333333333335,
+            "total_score": 0.6427586206896552,
+            "utility_score": 0.6427586206896552
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c01",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 12,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c01",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 33,
+                "start": 23,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 43,
+                "start": 33,
+                "task_id": "dependent"
+              },
+              {
+                "end": 53,
+                "start": 43,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.23,
+            "total_score": 0.6251724137931034,
+            "utility_score": 0.6251724137931034
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c06",
+          "candidate_role": "most_robust",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 13,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c06",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 90,
+                "start": 80,
+                "task_id": "dependent"
+              },
+              {
+                "end": 100,
+                "start": 90,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.6953333333333334,
+            "schedule_diversity_score": 0.4666666666666666,
+            "total_score": 0.5896551724137931,
+            "utility_score": 0.5896551724137931
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c05",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 14,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c05",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 52,
+                "start": 42,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 62,
+                "start": 52,
+                "task_id": "dependent"
+              },
+              {
+                "end": 72,
+                "start": 62,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.42,
+            "total_score": 0.4351724137931035,
+            "utility_score": 0.4351724137931035
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c04",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 15,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c04",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 56,
+                "start": 46,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 66,
+                "start": 56,
+                "task_id": "dependent"
+              },
+              {
+                "end": 76,
+                "start": 66,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.46,
+            "total_score": 0.3951724137931034,
+            "utility_score": 0.3951724137931034
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c15",
+          "candidate_role": "most_schedule_diverse",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 16,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c15",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 61,
+                "start": 51,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 71,
+                "start": 61,
+                "task_id": "dependent"
+              },
+              {
+                "end": 81,
+                "start": 71,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.51,
+            "total_score": 0.3451724137931035,
+            "utility_score": 0.3451724137931035
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        }
+      ],
+      "expected_selected_candidate_id": "plan-p8-weighting-0000000078c3404d",
+      "expected_semi_rejected_count": 0,
+      "name": "abundant-slack-utility-heavy",
+      "request": {
+        "mode": "fresh_generation",
+        "request_id": "p8-weighting",
+        "rng_seed": 2026061901,
+        "schema_version": "planning-kernel-contract/0.1",
+        "scoring_policy": {
+          "affect_margin_weight": 0.0,
+          "robustness_weight": 0.0,
+          "schedule_diversity_weight": 0.0,
+          "utility_weight": 1.0
+        },
+        "tasks": [
+          {
+            "duration": {
+              "seconds": 10,
+              "type": "fixed"
+            },
+            "id": "foundation",
+            "priority": 2.0,
+            "value": 9.0
+          },
+          {
+            "depends_on": [
+              "foundation"
+            ],
+            "duration": {
+              "seconds": 10,
+              "type": "fixed"
+            },
+            "id": "dependent",
+            "priority": 1.5,
+            "value": 6.0
+          },
+          {
+            "duration": {
+              "min_seconds": 2,
+              "mode_seconds": 10,
+              "p95_seconds": 25,
+              "type": "shifted_lognormal_p95"
+            },
+            "id": "independent",
+            "priority": 1.0,
+            "value": 2.0
+          }
+        ],
+        "time_window": {
+          "end": 100,
+          "start": 0
+        },
+        "topological_order": [
+          "foundation",
+          "dependent",
+          "independent"
+        ]
+      }
+    },
+    {
+      "covers": [
+        "abundant_slack",
+        "cap_sixteen",
+        "robustness_heavy",
+        "weighting_sensitive"
+      ],
+      "expected_generated_candidate_count": 16,
+      "expected_plan_candidates": [
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c06",
+          "candidate_role": "most_robust",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 1,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c06",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 90,
+                "start": 80,
+                "task_id": "dependent"
+              },
+              {
+                "end": 100,
+                "start": 90,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.6953333333333334,
+            "schedule_diversity_score": 0.4666666666666666,
+            "total_score": 0.6953333333333334,
+            "utility_score": 0.5896551724137931
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c11",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 2,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c11",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 76,
+                "start": 66,
+                "task_id": "dependent"
+              },
+              {
+                "end": 86,
+                "start": 76,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.6533333333333333,
+            "schedule_diversity_score": 0.37333333333333335,
+            "total_score": 0.6533333333333333,
+            "utility_score": 0.6427586206896552
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c09",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 3,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c09",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 43,
+                "start": 33,
+                "task_id": "dependent"
+              },
+              {
+                "end": 53,
+                "start": 43,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.5543333333333333,
+            "schedule_diversity_score": 0.15333333333333335,
+            "total_score": 0.5543333333333333,
+            "utility_score": 0.7679310344827586
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c03",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 4,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c03",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 34,
+                "start": 24,
+                "task_id": "dependent"
+              },
+              {
+                "end": 44,
+                "start": 34,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.5273333333333333,
+            "schedule_diversity_score": 0.09333333333333334,
+            "total_score": 0.5273333333333333,
+            "utility_score": 0.8020689655172414
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c10",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 5,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c10",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 29,
+                "start": 19,
+                "task_id": "dependent"
+              },
+              {
+                "end": 39,
+                "start": 29,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.5123333333333333,
+            "schedule_diversity_score": 0.06,
+            "total_score": 0.5123333333333333,
+            "utility_score": 0.8210344827586207
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d",
+          "candidate_role": "highest_utility",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 6,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 30,
+                "start": 20,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.0,
+            "total_score": 0.48533333333333334,
+            "utility_score": 0.8551724137931034
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c07",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 7,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c07",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 44,
+                "start": 34,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.04666666666666667,
+            "total_score": 0.48533333333333334,
+            "utility_score": 0.8455172413793103
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c14",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 8,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c14",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 48,
+                "start": 38,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.06,
+            "total_score": 0.48533333333333334,
+            "utility_score": 0.8427586206896551
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c02",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 9,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c02",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 72,
+                "start": 62,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.14,
+            "total_score": 0.48533333333333334,
+            "utility_score": 0.8262068965517241
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c13",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 10,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c13",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 81,
+                "start": 71,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.17,
+            "total_score": 0.48533333333333334,
+            "utility_score": 0.82
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c08",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 11,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c08",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 86,
+                "start": 76,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.18666666666666668,
+            "total_score": 0.48533333333333334,
+            "utility_score": 0.816551724137931
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c12",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 12,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c12",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 100,
+                "start": 90,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.2333333333333333,
+            "total_score": 0.48533333333333334,
+            "utility_score": 0.8068965517241379
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c01",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 13,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c01",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 33,
+                "start": 23,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 43,
+                "start": 33,
+                "task_id": "dependent"
+              },
+              {
+                "end": 53,
+                "start": 43,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.23,
+            "total_score": 0.48533333333333334,
+            "utility_score": 0.6251724137931034
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c05",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 14,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c05",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 52,
+                "start": 42,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 62,
+                "start": 52,
+                "task_id": "dependent"
+              },
+              {
+                "end": 72,
+                "start": 62,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.42,
+            "total_score": 0.48533333333333334,
+            "utility_score": 0.4351724137931035
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c04",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 15,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c04",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 56,
+                "start": 46,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 66,
+                "start": 56,
+                "task_id": "dependent"
+              },
+              {
+                "end": 76,
+                "start": 66,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.46,
+            "total_score": 0.48533333333333334,
+            "utility_score": 0.3951724137931034
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c15",
+          "candidate_role": "most_schedule_diverse",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 16,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c15",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 61,
+                "start": 51,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 71,
+                "start": 61,
+                "task_id": "dependent"
+              },
+              {
+                "end": 81,
+                "start": 71,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.51,
+            "total_score": 0.48533333333333334,
+            "utility_score": 0.3451724137931035
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        }
+      ],
+      "expected_selected_candidate_id": "plan-p8-weighting-0000000078c3404d-c06",
+      "expected_semi_rejected_count": 0,
+      "name": "abundant-slack-robustness-heavy",
+      "request": {
+        "mode": "fresh_generation",
+        "request_id": "p8-weighting",
+        "rng_seed": 2026061901,
+        "schema_version": "planning-kernel-contract/0.1",
+        "scoring_policy": {
+          "affect_margin_weight": 0.0,
+          "robustness_weight": 1.0,
+          "schedule_diversity_weight": 0.0,
+          "utility_weight": 0.0
+        },
+        "tasks": [
+          {
+            "duration": {
+              "seconds": 10,
+              "type": "fixed"
+            },
+            "id": "foundation",
+            "priority": 2.0,
+            "value": 9.0
+          },
+          {
+            "depends_on": [
+              "foundation"
+            ],
+            "duration": {
+              "seconds": 10,
+              "type": "fixed"
+            },
+            "id": "dependent",
+            "priority": 1.5,
+            "value": 6.0
+          },
+          {
+            "duration": {
+              "min_seconds": 2,
+              "mode_seconds": 10,
+              "p95_seconds": 25,
+              "type": "shifted_lognormal_p95"
+            },
+            "id": "independent",
+            "priority": 1.0,
+            "value": 2.0
+          }
+        ],
+        "time_window": {
+          "end": 100,
+          "start": 0
+        },
+        "topological_order": [
+          "foundation",
+          "dependent",
+          "independent"
+        ]
+      }
+    },
+    {
+      "covers": [
+        "abundant_slack",
+        "cap_sixteen",
+        "diversity_heavy",
+        "weighting_sensitive"
+      ],
+      "expected_generated_candidate_count": 16,
+      "expected_plan_candidates": [
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c15",
+          "candidate_role": "most_schedule_diverse",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 1,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c15",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 61,
+                "start": 51,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 71,
+                "start": 61,
+                "task_id": "dependent"
+              },
+              {
+                "end": 81,
+                "start": 71,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.51,
+            "total_score": 0.51,
+            "utility_score": 0.3451724137931035
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c06",
+          "candidate_role": "most_robust",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 2,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c06",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 90,
+                "start": 80,
+                "task_id": "dependent"
+              },
+              {
+                "end": 100,
+                "start": 90,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.6953333333333334,
+            "schedule_diversity_score": 0.4666666666666666,
+            "total_score": 0.4666666666666666,
+            "utility_score": 0.5896551724137931
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c04",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 3,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c04",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 56,
+                "start": 46,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 66,
+                "start": 56,
+                "task_id": "dependent"
+              },
+              {
+                "end": 76,
+                "start": 66,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.46,
+            "total_score": 0.46,
+            "utility_score": 0.3951724137931034
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c05",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 4,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c05",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 52,
+                "start": 42,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 62,
+                "start": 52,
+                "task_id": "dependent"
+              },
+              {
+                "end": 72,
+                "start": 62,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.42,
+            "total_score": 0.42,
+            "utility_score": 0.4351724137931035
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c11",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 5,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c11",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 76,
+                "start": 66,
+                "task_id": "dependent"
+              },
+              {
+                "end": 86,
+                "start": 76,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.6533333333333333,
+            "schedule_diversity_score": 0.37333333333333335,
+            "total_score": 0.37333333333333335,
+            "utility_score": 0.6427586206896552
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c12",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 6,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c12",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 100,
+                "start": 90,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.2333333333333333,
+            "total_score": 0.2333333333333333,
+            "utility_score": 0.8068965517241379
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c01",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 7,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c01",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 33,
+                "start": 23,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 43,
+                "start": 33,
+                "task_id": "dependent"
+              },
+              {
+                "end": 53,
+                "start": 43,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.23,
+            "total_score": 0.23,
+            "utility_score": 0.6251724137931034
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c08",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 8,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c08",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 86,
+                "start": 76,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.18666666666666668,
+            "total_score": 0.18666666666666668,
+            "utility_score": 0.816551724137931
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c13",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 9,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c13",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 81,
+                "start": 71,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.17,
+            "total_score": 0.17,
+            "utility_score": 0.82
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c09",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 10,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c09",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 43,
+                "start": 33,
+                "task_id": "dependent"
+              },
+              {
+                "end": 53,
+                "start": 43,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.5543333333333333,
+            "schedule_diversity_score": 0.15333333333333335,
+            "total_score": 0.15333333333333335,
+            "utility_score": 0.7679310344827586
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c02",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 11,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c02",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 72,
+                "start": 62,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.14,
+            "total_score": 0.14,
+            "utility_score": 0.8262068965517241
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c03",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 12,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c03",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 34,
+                "start": 24,
+                "task_id": "dependent"
+              },
+              {
+                "end": 44,
+                "start": 34,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.5273333333333333,
+            "schedule_diversity_score": 0.09333333333333334,
+            "total_score": 0.09333333333333334,
+            "utility_score": 0.8020689655172414
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c14",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 13,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c14",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 48,
+                "start": 38,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.06,
+            "total_score": 0.06,
+            "utility_score": 0.8427586206896551
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c10",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 14,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c10",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 29,
+                "start": 19,
+                "task_id": "dependent"
+              },
+              {
+                "end": 39,
+                "start": 29,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.5123333333333333,
+            "schedule_diversity_score": 0.06,
+            "total_score": 0.06,
+            "utility_score": 0.8210344827586207
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d-c07",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 15,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d-c07",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 44,
+                "start": 34,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.04666666666666667,
+            "total_score": 0.04666666666666667,
+            "utility_score": 0.8455172413793103
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-weighting-0000000078c3404d",
+          "candidate_role": "highest_utility",
+          "explanation_fragments": [
+            {
+              "taskId": "foundation",
+              "text": "Task 'foundation' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 16,
+          "schedule": {
+            "plan_id": "plan-p8-weighting-0000000078c3404d",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "foundation"
+              },
+              {
+                "depends_on": [
+                  "foundation"
+                ],
+                "end": 20,
+                "start": 10,
+                "task_id": "dependent"
+              },
+              {
+                "end": 30,
+                "start": 20,
+                "task_id": "independent"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.48533333333333334,
+            "schedule_diversity_score": 0.0,
+            "total_score": 0.0,
+            "utility_score": 0.8551724137931034
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        }
+      ],
+      "expected_selected_candidate_id": "plan-p8-weighting-0000000078c3404d-c15",
+      "expected_semi_rejected_count": 0,
+      "name": "abundant-slack-diversity-heavy",
+      "request": {
+        "mode": "fresh_generation",
+        "request_id": "p8-weighting",
+        "rng_seed": 2026061901,
+        "schema_version": "planning-kernel-contract/0.1",
+        "scoring_policy": {
+          "affect_margin_weight": 0.0,
+          "robustness_weight": 0.0,
+          "schedule_diversity_weight": 1.0,
+          "utility_weight": 0.0
+        },
+        "tasks": [
+          {
+            "duration": {
+              "seconds": 10,
+              "type": "fixed"
+            },
+            "id": "foundation",
+            "priority": 2.0,
+            "value": 9.0
+          },
+          {
+            "depends_on": [
+              "foundation"
+            ],
+            "duration": {
+              "seconds": 10,
+              "type": "fixed"
+            },
+            "id": "dependent",
+            "priority": 1.5,
+            "value": 6.0
+          },
+          {
+            "duration": {
+              "min_seconds": 2,
+              "mode_seconds": 10,
+              "p95_seconds": 25,
+              "type": "shifted_lognormal_p95"
+            },
+            "id": "independent",
+            "priority": 1.0,
+            "value": 2.0
+          }
+        ],
+        "time_window": {
+          "end": 100,
+          "start": 0
+        },
+        "topological_order": [
+          "foundation",
+          "dependent",
+          "independent"
+        ]
+      }
+    },
+    {
+      "covers": [
+        "tightly_constrained",
+        "single_candidate"
+      ],
+      "expected_generated_candidate_count": 1,
+      "expected_plan_candidates": [
+        {
+          "candidate_id": "plan-p8-tight-00000000000003df",
+          "candidate_role": "highest_utility",
+          "explanation_fragments": [
+            {
+              "taskId": "tight-a",
+              "text": "Task 'tight-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 1,
+          "schedule": {
+            "plan_id": "plan-p8-tight-00000000000003df",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 28,
+                "start": 20,
+                "task_id": "tight-a"
+              },
+              {
+                "end": 40,
+                "start": 28,
+                "task_id": "tight-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.7899999999999999,
+            "schedule_diversity_score": 0.0,
+            "total_score": 0.3383333333333333,
+            "utility_score": 0.22499999999999998
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        }
+      ],
+      "expected_selected_candidate_id": "plan-p8-tight-00000000000003df",
+      "expected_semi_rejected_count": 0,
+      "name": "tightly-constrained-single-candidate",
+      "request": {
+        "mode": "fresh_generation",
+        "request_id": "p8-tight",
+        "rng_seed": 991,
+        "schema_version": "planning-kernel-contract/0.1",
+        "scoring_policy": {
+          "affect_margin_weight": 0.0,
+          "robustness_weight": 1.0,
+          "schedule_diversity_weight": 1.0,
+          "utility_weight": 1.0
+        },
+        "tasks": [
+          {
+            "duration": {
+              "seconds": 8,
+              "type": "fixed"
+            },
+            "id": "tight-a",
+            "priority": 1.0,
+            "value": 3.0
+          },
+          {
+            "duration": {
+              "seconds": 12,
+              "type": "fixed"
+            },
+            "id": "tight-b",
+            "priority": 1.0,
+            "value": 5.0
+          }
+        ],
+        "time_window": {
+          "end": 40,
+          "start": 20
+        },
+        "topological_order": [
+          "tight-a",
+          "tight-b"
+        ]
+      }
+    },
+    {
+      "covers": [
+        "semi_legitimization_pruned",
+        "reject_obvious"
+      ],
+      "expected_generated_candidate_count": 16,
+      "expected_plan_candidates": [
+        {
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c06",
+          "candidate_role": "most_schedule_diverse",
+          "explanation_fragments": [
+            {
+              "taskId": "anchor",
+              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 1,
+          "schedule": {
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c06",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 12,
+                "start": 10,
+                "static_anchor": true,
+                "task_id": "anchor"
+              },
+              {
+                "end": 20,
+                "start": 18,
+                "task_id": "movable"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.76,
+            "schedule_diversity_score": 0.45,
+            "total_score": 0.6191666666666666,
+            "utility_score": 0.26666666666666666
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c08",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "anchor",
+              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 2,
+          "schedule": {
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c08",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 12,
+                "start": 10,
+                "static_anchor": true,
+                "task_id": "anchor"
+              },
+              {
+                "end": 18,
+                "start": 16,
+                "task_id": "movable"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.7749999999999999,
+            "schedule_diversity_score": 0.4,
+            "total_score": 0.61875,
+            "utility_score": 0.3
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c10",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "anchor",
+              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 3,
+          "schedule": {
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c10",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 12,
+                "start": 10,
+                "static_anchor": true,
+                "task_id": "anchor"
+              },
+              {
+                "end": 17,
+                "start": 15,
+                "task_id": "movable"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.7825,
+            "schedule_diversity_score": 0.375,
+            "total_score": 0.6185416666666667,
+            "utility_score": 0.3166666666666667
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c09",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "anchor",
+              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 4,
+          "schedule": {
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c09",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 12,
+                "start": 10,
+                "static_anchor": true,
+                "task_id": "anchor"
+              },
+              {
+                "end": 16,
+                "start": 14,
+                "task_id": "movable"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.7899999999999999,
+            "schedule_diversity_score": 0.35,
+            "total_score": 0.6183333333333333,
+            "utility_score": 0.3333333333333333
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c13",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "anchor",
+              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 5,
+          "schedule": {
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c13",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 12,
+                "start": 10,
+                "static_anchor": true,
+                "task_id": "anchor"
+              },
+              {
+                "end": 15,
+                "start": 13,
+                "task_id": "movable"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.7975,
+            "schedule_diversity_score": 0.325,
+            "total_score": 0.618125,
+            "utility_score": 0.35000000000000003
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c05",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "anchor",
+              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 6,
+          "schedule": {
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c05",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 12,
+                "start": 10,
+                "static_anchor": true,
+                "task_id": "anchor"
+              },
+              {
+                "end": 14,
+                "start": 12,
+                "task_id": "movable"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.8049999999999999,
+            "schedule_diversity_score": 0.3,
+            "total_score": 0.6179166666666667,
+            "utility_score": 0.3666666666666667
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c07",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "anchor",
+              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 7,
+          "schedule": {
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c07",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 12,
+                "start": 10,
+                "static_anchor": true,
+                "task_id": "anchor"
+              },
+              {
+                "end": 10,
+                "start": 8,
+                "task_id": "movable"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.835,
+            "schedule_diversity_score": 0.2,
+            "total_score": 0.6170833333333334,
+            "utility_score": 0.43333333333333335
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c14",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "anchor",
+              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 8,
+          "schedule": {
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c14",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 12,
+                "start": 10,
+                "static_anchor": true,
+                "task_id": "anchor"
+              },
+              {
+                "end": 9,
+                "start": 7,
+                "task_id": "movable"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.8425,
+            "schedule_diversity_score": 0.175,
+            "total_score": 0.616875,
+            "utility_score": 0.45
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c12",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "anchor",
+              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 9,
+          "schedule": {
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c12",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 12,
+                "start": 10,
+                "static_anchor": true,
+                "task_id": "anchor"
+              },
+              {
+                "end": 8,
+                "start": 6,
+                "task_id": "movable"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.85,
+            "schedule_diversity_score": 0.15,
+            "total_score": 0.6166666666666666,
+            "utility_score": 0.4666666666666666
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c15",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "anchor",
+              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 10,
+          "schedule": {
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c15",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 12,
+                "start": 10,
+                "static_anchor": true,
+                "task_id": "anchor"
+              },
+              {
+                "end": 6,
+                "start": 4,
+                "task_id": "movable"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.865,
+            "schedule_diversity_score": 0.1,
+            "total_score": 0.6162500000000001,
+            "utility_score": 0.5
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c02",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "anchor",
+              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 11,
+          "schedule": {
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c02",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 12,
+                "start": 10,
+                "static_anchor": true,
+                "task_id": "anchor"
+              },
+              {
+                "end": 5,
+                "start": 3,
+                "task_id": "movable"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.8724999999999999,
+            "schedule_diversity_score": 0.075,
+            "total_score": 0.6160416666666667,
+            "utility_score": 0.5166666666666667
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c11",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "anchor",
+              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 12,
+          "schedule": {
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c11",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 12,
+                "start": 10,
+                "static_anchor": true,
+                "task_id": "anchor"
+              },
+              {
+                "end": 4,
+                "start": 2,
+                "task_id": "movable"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.88,
+            "schedule_diversity_score": 0.05,
+            "total_score": 0.6158333333333332,
+            "utility_score": 0.5333333333333333
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c01",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "anchor",
+              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 13,
+          "schedule": {
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c01",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 12,
+                "start": 10,
+                "static_anchor": true,
+                "task_id": "anchor"
+              },
+              {
+                "end": 3,
+                "start": 1,
+                "task_id": "movable"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.8875,
+            "schedule_diversity_score": 0.025,
+            "total_score": 0.615625,
+            "utility_score": 0.5499999999999999
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7",
+          "candidate_role": "highest_utility",
+          "explanation_fragments": [
+            {
+              "taskId": "anchor",
+              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 14,
+          "schedule": {
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 12,
+                "start": 10,
+                "static_anchor": true,
+                "task_id": "anchor"
+              },
+              {
+                "end": 2,
+                "start": 0,
+                "task_id": "movable"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.895,
+            "schedule_diversity_score": 0.0,
+            "total_score": 0.6154166666666667,
+            "utility_score": 0.5666666666666668
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        }
+      ],
+      "expected_selected_candidate_id": "plan-p8-semi-prune-00000000000d6db7-c06",
+      "expected_semi_rejected_count": 2,
+      "name": "static-anchor-semi-legitimization-prunes",
+      "request": {
+        "mode": "fresh_generation",
+        "request_id": "p8-semi-prune",
+        "rng_seed": 880055,
+        "schema_version": "planning-kernel-contract/0.1",
+        "scoring_policy": {
+          "affect_margin_weight": 1.0,
+          "robustness_weight": 1.0,
+          "schedule_diversity_weight": 1.0,
+          "utility_weight": 1.0
+        },
+        "tasks": [
+          {
+            "duration": {
+              "seconds": 2,
+              "type": "fixed"
+            },
+            "id": "anchor",
+            "priority": 1.0,
+            "static_anchor": {
+              "start": 10
+            },
+            "value": 4.0
+          },
+          {
+            "duration": {
+              "seconds": 2,
+              "type": "fixed"
+            },
+            "id": "movable",
+            "priority": 1.0,
+            "value": 2.0
+          }
+        ],
+        "time_window": {
+          "end": 20,
+          "start": 0
+        },
+        "topological_order": [
+          "anchor",
+          "movable"
+        ]
+      }
+    },
+    {
+      "covers": [
+        "deterministic_tiebreak",
+        "exact_score_tie"
+      ],
+      "expected_generated_candidate_count": 16,
+      "expected_plan_candidates": [
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85-c10",
+          "candidate_role": "most_schedule_diverse",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 1,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85-c10",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 84,
+                "start": 74,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 94,
+                "start": 84,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.733,
+            "schedule_diversity_score": 0.74,
+            "total_score": 0.61825,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85-c08",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 2,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85-c08",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 79,
+                "start": 69,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 89,
+                "start": 79,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.748,
+            "schedule_diversity_score": 0.69,
+            "total_score": 0.6094999999999999,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85-c15",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 3,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85-c15",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 63,
+                "start": 53,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 73,
+                "start": 63,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.7959999999999999,
+            "schedule_diversity_score": 0.53,
+            "total_score": 0.5814999999999999,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85-c01",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 4,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85-c01",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 100,
+                "start": 90,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.835,
+            "schedule_diversity_score": 0.4,
+            "total_score": 0.55875,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85-c07",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 5,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85-c07",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 47,
+                "start": 37,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 57,
+                "start": 47,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.844,
+            "schedule_diversity_score": 0.37,
+            "total_score": 0.5535,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85-c05",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 6,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85-c05",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 84,
+                "start": 74,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.859,
+            "schedule_diversity_score": 0.32,
+            "total_score": 0.54475,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85-c14",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 7,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85-c14",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 42,
+                "start": 32,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 52,
+                "start": 42,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.859,
+            "schedule_diversity_score": 0.32,
+            "total_score": 0.54475,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85-c09",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 8,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85-c09",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 78,
+                "start": 68,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.868,
+            "schedule_diversity_score": 0.29,
+            "total_score": 0.5395,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85-c11",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 9,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85-c11",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 36,
+                "start": 26,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 46,
+                "start": 36,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.877,
+            "schedule_diversity_score": 0.26,
+            "total_score": 0.53425,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85-c02",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 10,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85-c02",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 62,
+                "start": 52,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.8919999999999999,
+            "schedule_diversity_score": 0.21,
+            "total_score": 0.5255,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85-c12",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 11,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85-c12",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 31,
+                "start": 21,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 41,
+                "start": 31,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.8919999999999999,
+            "schedule_diversity_score": 0.21,
+            "total_score": 0.5255,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85-c04",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 12,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85-c04",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 57,
+                "start": 47,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.8995,
+            "schedule_diversity_score": 0.185,
+            "total_score": 0.521125,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85-c03",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 13,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85-c03",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 26,
+                "start": 16,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 36,
+                "start": 26,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.9069999999999999,
+            "schedule_diversity_score": 0.16,
+            "total_score": 0.51675,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85-c13",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 14,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85-c13",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 15,
+                "start": 5,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 25,
+                "start": 15,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.94,
+            "schedule_diversity_score": 0.05,
+            "total_score": 0.4975,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85-c06",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 15,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85-c06",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 25,
+                "start": 15,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.9474999999999999,
+            "schedule_diversity_score": 0.025,
+            "total_score": 0.4931249999999999,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-tie-0000000000001c85",
+          "candidate_role": "highest_utility",
+          "explanation_fragments": [
+            {
+              "taskId": "zero-a",
+              "text": "Task 'zero-a' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 16,
+          "schedule": {
+            "plan_id": "plan-p8-tie-0000000000001c85",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 10,
+                "start": 0,
+                "task_id": "zero-a"
+              },
+              {
+                "end": 20,
+                "start": 10,
+                "task_id": "zero-b"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.955,
+            "schedule_diversity_score": 0.0,
+            "total_score": 0.48875,
+            "utility_score": 0.0
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        }
+      ],
+      "expected_selected_candidate_id": "plan-p8-tie-0000000000001c85-c10",
+      "expected_semi_rejected_count": 0,
+      "name": "exact-score-ties-use-candidate-id",
+      "request": {
+        "mode": "fresh_generation",
+        "request_id": "p8-tie",
+        "rng_seed": 7301,
+        "schema_version": "planning-kernel-contract/0.1",
+        "scoring_policy": {
+          "affect_margin_weight": 1.0,
+          "robustness_weight": 1.0,
+          "schedule_diversity_weight": 1.0,
+          "utility_weight": 1.0
+        },
+        "tasks": [
+          {
+            "duration": {
+              "seconds": 10,
+              "type": "fixed"
+            },
+            "id": "zero-a",
+            "priority": 1.0,
+            "value": 0.0
+          },
+          {
+            "duration": {
+              "seconds": 10,
+              "type": "fixed"
+            },
+            "id": "zero-b",
+            "priority": 1.0,
+            "value": 0.0
+          }
+        ],
+        "time_window": {
+          "end": 100,
+          "start": 0
+        },
+        "topological_order": [
+          "zero-a",
+          "zero-b"
+        ]
+      }
+    }
+  ],
+  "description": "Offline fixed-seed C-1 scoring, semi-legitimization, candidate-role, and selection regression anchors.",
+  "human_reviewed_then_frozen": true,
+  "kernel_revision": "2ae6552f6157c44f6490e4c99aaf4a418fc70e67",
+  "schema_version": "planning-golden-corpus/scoring-selection-c1.v1"
+}

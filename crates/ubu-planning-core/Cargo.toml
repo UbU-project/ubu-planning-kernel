@@ -13,5 +13,6 @@ thiserror.workspace = true
 ubu_core.workspace = true
 
 [dev-dependencies]
+serde_json = { workspace = true, features = ["raw_value"] }
 ubu_planning_advisory_protocol = { path = "../ubu-planning-advisory-protocol" }
 ubu_planning_cpu.workspace = true
