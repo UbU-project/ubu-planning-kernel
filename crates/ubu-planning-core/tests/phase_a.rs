@@ -58,6 +58,9 @@ fn static_anchor_collision_returns_skeleton_failure() {
         request_id: "static-collision".to_string(),
         mode: PlanningMode::FreshGeneration,
         rng_seed: 0,
+        n_rollouts: 0,
+        top_k: 3,
+        strict_validation: false,
         time_window: Some(TimeWindow { start: 0, end: 10 }),
         task_graph: TaskGraph {
             tasks: vec![
@@ -99,6 +102,9 @@ fn repair_supersedes_prior_plan_and_preserves_past_and_in_progress_steps() {
         request_id: "repair-skeleton".to_string(),
         mode: PlanningMode::Repair,
         rng_seed: 7,
+        n_rollouts: 0,
+        top_k: 3,
+        strict_validation: false,
         time_window: Some(TimeWindow { start: 5, end: 20 }),
         task_graph: TaskGraph {
             tasks: vec![

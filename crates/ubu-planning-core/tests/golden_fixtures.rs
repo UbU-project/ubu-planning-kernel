@@ -52,6 +52,8 @@ fn phase_a_goldens_match_byte_exact_responses() {
     for case in corpus.cases {
         let mut request = case.request;
         request.prior_plan = case.prior_plan;
+        // This frozen corpus verifies the Phase A skeleton, before Stage 4 finalist pruning.
+        request.n_rollouts = 0;
 
         let actual = ubu_planning_core::plan(request, &CpuStrategy);
         if let Some(expected_plan) = case.expected_response.plan {

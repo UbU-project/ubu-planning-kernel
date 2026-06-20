@@ -78,6 +78,7 @@ pub fn score_and_rank(request: &PlanningRequest, inputs: Vec<ScoringInput>) -> V
                 semi_legitimization_summary: input.semi_legitimization,
                 // C-2 owns probability estimation. Keep the contract object present and empty.
                 probability_summary: ProbabilitySummary::default(),
+                rollout_diagnostics: None,
                 explanation_fragments,
                 validation_hints: Vec::new(),
             }
@@ -232,7 +233,7 @@ fn weighted_total(
         / weight_sum
 }
 
-fn assign_roles(candidates: &mut [PlanCandidate]) {
+pub(crate) fn assign_roles(candidates: &mut [PlanCandidate]) {
     let utility = metric_winner(candidates, |candidate| {
         candidate.score_summary.utility_score
     });

@@ -26,6 +26,9 @@ fn request_for_plan() -> PlanningRequest {
         request_id: "semi".to_string(),
         mode: PlanningMode::FreshGeneration,
         rng_seed: 0,
+        n_rollouts: 0,
+        top_k: 3,
+        strict_validation: false,
         time_window: Some(TimeWindow { start: 0, end: 10 }),
         task_graph: TaskGraph {
             tasks: vec![TaskSpec {

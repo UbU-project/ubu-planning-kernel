@@ -179,6 +179,16 @@ pub struct ProbabilityInterval {
     pub upper: f64,
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
+pub enum ProbabilityQuality {
+    Estimated,
+    DegradedNumericJitter,
+    DegradedIndependence,
+    #[default]
+    NotEstimated,
+}
+
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "snake_case")]
 pub struct ProbabilitySummary {
@@ -187,9 +197,29 @@ pub struct ProbabilitySummary {
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub log_probability: Option<f64>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probability_interval_low: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probability_interval_high: Option<f64>,
+    /// Kept for backwards-compatible deserialization; Stage 4 uses the explicit bounds above.
+    #[serde(default, skip_serializing_if = "Option::is_none")]
     pub probability_interval: Option<ProbabilityInterval>,
     #[serde(default)]
+    pub probability_quality: ProbabilityQuality,
+    #[serde(default)]
     pub provenance_refs: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct RolloutDiagnostics {
+    pub n_rollouts: usize,
+    pub feasible_rollouts: usize,
+    pub feasibility_frequency: f64,
+    pub robustness_percentile: f64,
+    pub stage_seed: u64,
+    pub probability_quality: ProbabilityQuality,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub warnings: Vec<String>,
 }
 
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
@@ -203,6 +233,8 @@ pub struct PlanCandidate {
     pub feasibility_summary: FeasibilitySummary,
     pub semi_legitimization_summary: SemiLegitimizationSummary,
     pub probability_summary: ProbabilitySummary,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub rollout_diagnostics: Option<RolloutDiagnostics>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub explanation_fragments: Vec<ExplanationFragment>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]

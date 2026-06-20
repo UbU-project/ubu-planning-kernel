@@ -11,6 +11,9 @@ fn impossible_after_dependency_window_returns_skeleton_failure() {
         request_id: "skeleton-failure".to_string(),
         mode: PlanningMode::FreshGeneration,
         rng_seed: 0,
+        n_rollouts: 0,
+        top_k: 3,
+        strict_validation: false,
         time_window: Some(TimeWindow { start: 0, end: 20 }),
         task_graph: TaskGraph {
             tasks: vec![

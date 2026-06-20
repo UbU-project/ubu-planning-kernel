@@ -55,7 +55,9 @@ fn scoring_and_selection_goldens_match_byte_exact_ranked_candidates() {
     let mut observed_roles = BTreeSet::new();
     let mut observed_exact_score_tie = false;
 
-    for case in corpus.cases {
+    for mut case in corpus.cases {
+        // This frozen corpus is specifically the pre-rollout C-1 regression anchor.
+        case.request.n_rollouts = 0;
         let first_generated = CpuStrategy.generate_candidates(&case.request);
         let second_generated = CpuStrategy.generate_candidates(&case.request);
         assert_byte_exact(
@@ -125,6 +127,14 @@ fn scoring_and_selection_goldens_match_byte_exact_ranked_candidates() {
             first.plan_candidates.iter().all(|candidate| {
                 candidate.probability_summary.display_probability.is_none()
                     && candidate.probability_summary.log_probability.is_none()
+                    && candidate
+                        .probability_summary
+                        .probability_interval_low
+                        .is_none()
+                    && candidate
+                        .probability_summary
+                        .probability_interval_high
+                        .is_none()
                     && candidate.probability_summary.probability_interval.is_none()
                     && candidate.probability_summary.provenance_refs.is_empty()
             }),
@@ -226,7 +236,19 @@ where
     T: Serialize,
 {
     let expected_bytes = compact_json_lexically(expected.get());
-    let canonical_actual = serde_json::to_value(actual).expect("canonicalize actual JSON");
+    let mut canonical_actual = serde_json::to_value(actual).expect("canonicalize actual JSON");
+    // P9 extends the response envelope even when Stage 4 is explicitly skipped.
+    // Remove that one new marker before comparing the frozen C-1 score/rank payload.
+    if let Some(candidates) = canonical_actual.as_array_mut() {
+        for candidate in candidates {
+            if let Some(summary) = candidate
+                .get_mut("probability_summary")
+                .and_then(serde_json::Value::as_object_mut)
+            {
+                summary.remove("probability_quality");
+            }
+        }
+    }
     let actual_bytes = serde_json::to_vec(&canonical_actual).expect("serialize actual bytes");
     assert_eq!(
         actual_bytes,

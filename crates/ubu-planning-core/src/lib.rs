@@ -4,6 +4,7 @@ pub mod graph;
 pub mod legitimization;
 pub mod request;
 pub mod response;
+pub mod rollout;
 pub mod scoring;
 pub mod strategy;
 pub mod validation;
@@ -15,13 +16,15 @@ pub use request::{
     AffectDirection, AffectLegitimizationMode, AffectObservation, AffectObservationValue,
     AffectProfile, AffectTolerance, CorrelationGroup, DurationModel, PlanningMode, PlanningRequest,
     RepairContext, RepairRequest, RepairScope, ScoringPolicy, StaticAnchor, TaskGraph, TaskSpec,
-    TimeWindow, PLANNING_SCHEMA_VERSION,
+    TimeWindow, DEFAULT_N_ROLLOUTS, DEFAULT_ROLLOUT_TOP_K, MAX_N_ROLLOUTS, MAX_ROLLOUT_TOP_K,
+    PLANNING_SCHEMA_VERSION,
 };
 pub use response::{
     AffectDimensionLegitimization, CandidateRole, FeasibilitySummary, LegitimizationReport,
     LegitimizationResult, Plan, PlanCandidate, PlanStatus, PlanStep, PlanningResponse,
-    ProbabilityInterval, ProbabilitySummary, RepairResponse, ScheduledTask, ScoreSummary,
-    SemiLegitimizationResult, SemiLegitimizationSummary, ValidationResult,
+    ProbabilityInterval, ProbabilityQuality, ProbabilitySummary, RepairResponse,
+    RolloutDiagnostics, ScheduledTask, ScoreSummary, SemiLegitimizationResult,
+    SemiLegitimizationSummary, ValidationResult,
 };
 pub use strategy::{CandidateSet, PlannerStrategy};
 pub use validation::validate_plan;
@@ -88,6 +91,16 @@ pub fn plan(request: PlanningRequest, strategy: &impl PlannerStrategy) -> Planni
     if plan_candidates.is_empty() {
         PlanningResponse::failure(response_schema_version, request_id, diagnostics)
     } else {
+        let plan_candidates = match rollout::rollout_and_rerank(&request, plan_candidates) {
+            Ok(result) => {
+                diagnostics.extend(result.diagnostics);
+                result.candidates
+            }
+            Err(diagnostic) => {
+                diagnostics.push(diagnostic);
+                return PlanningResponse::failure(response_schema_version, request_id, diagnostics);
+            }
+        };
         PlanningResponse::success(
             response_schema_version,
             request_id,
@@ -128,6 +141,9 @@ pub fn repair(request: RepairRequest, strategy: &impl PlannerStrategy) -> Repair
         request_id: request.request_id.clone(),
         mode: PlanningMode::Repair,
         rng_seed: request.rng_seed,
+        n_rollouts: DEFAULT_N_ROLLOUTS,
+        top_k: DEFAULT_ROLLOUT_TOP_K,
+        strict_validation: false,
         time_window: request
             .time_window
             .or_else(|| candidate_time_window(&request.candidate)),

@@ -2,7 +2,7 @@ use std::fs;
 
 use ubu_planning_core::{
     AffectDirection, AffectLegitimizationMode, AffectObservation, AffectObservationValue,
-    AffectProfile, AffectTolerance, PlanningRequest,
+    AffectProfile, AffectTolerance, CorrelationGroup, DurationModel, PlanningRequest,
 };
 use ubu_planning_cpu::CpuStrategy;
 
@@ -63,6 +63,20 @@ fn cpu_strategy_is_deterministic_for_same_request() {
         .into_iter()
         .collect(),
     });
+    for (index, task) in request.task_graph.tasks.iter_mut().enumerate() {
+        task.duration = DurationModel::ShiftedLognormalP95 {
+            min_seconds: 0,
+            mode_seconds: 1,
+            p95_seconds: 2 + index as u64,
+        };
+        task.correlation_groups = vec![CorrelationGroup {
+            group: "shared-load".to_string(),
+            strength: 0.7,
+        }];
+    }
+    request.n_rollouts = 750;
+    request.top_k = 3;
+    let expected_stage_seed = request.rng_seed + 3;
 
     let first = ubu_planning_core::plan(request.clone(), &CpuStrategy);
     let second = ubu_planning_core::plan(request, &CpuStrategy);
@@ -76,5 +90,14 @@ fn cpu_strategy_is_deterministic_for_same_request() {
         serde_json::to_vec(&first.plan_candidates).unwrap(),
         serde_json::to_vec(&second.plan_candidates).unwrap()
     );
-    assert!(first.plan_candidates.len() <= 16);
+    assert!(first.plan_candidates.len() <= 3);
+    assert!(first.plan_candidates.iter().all(|candidate| {
+        candidate.probability_summary.display_probability.is_some()
+            && candidate
+                .rollout_diagnostics
+                .as_ref()
+                .is_some_and(|diagnostics| {
+                    diagnostics.n_rollouts == 750 && diagnostics.stage_seed == expected_stage_seed
+                })
+    }));
 }

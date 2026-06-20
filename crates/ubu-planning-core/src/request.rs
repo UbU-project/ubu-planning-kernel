@@ -6,6 +6,18 @@ use crate::graph::{DependencyEdge, TaskId};
 use crate::response::Plan;
 
 pub const PLANNING_SCHEMA_VERSION: &str = "planning-kernel-contract/0.1";
+pub const DEFAULT_N_ROLLOUTS: usize = 1_000;
+pub const MAX_N_ROLLOUTS: usize = 5_000;
+pub const DEFAULT_ROLLOUT_TOP_K: usize = 3;
+pub const MAX_ROLLOUT_TOP_K: usize = 8;
+
+fn default_n_rollouts() -> usize {
+    DEFAULT_N_ROLLOUTS
+}
+
+fn default_rollout_top_k() -> usize {
+    DEFAULT_ROLLOUT_TOP_K
+}
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
@@ -305,6 +317,15 @@ pub struct PlanningRequest {
     pub mode: PlanningMode,
     #[serde(default)]
     pub rng_seed: u64,
+    /// Number of Stage 4 samples per finalist. Zero explicitly disables rollout.
+    #[serde(default = "default_n_rollouts")]
+    pub n_rollouts: usize,
+    /// Number of Stage 3-ranked finalists admitted to Stage 4.
+    #[serde(default = "default_rollout_top_k")]
+    pub top_k: usize,
+    /// Reject rather than fall back to independent samples after numeric factorization failure.
+    #[serde(default)]
+    pub strict_validation: bool,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub time_window: Option<TimeWindow>,
     #[serde(flatten)]
@@ -342,6 +363,14 @@ impl Default for ScoringPolicy {
 }
 
 impl PlanningRequest {
+    pub fn effective_n_rollouts(&self) -> usize {
+        self.n_rollouts.min(MAX_N_ROLLOUTS)
+    }
+
+    pub fn effective_rollout_top_k(&self) -> usize {
+        self.top_k.min(MAX_ROLLOUT_TOP_K)
+    }
+
     pub fn tasks(&self) -> &[TaskSpec] {
         &self.task_graph.tasks
     }

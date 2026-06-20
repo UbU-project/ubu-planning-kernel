@@ -18,6 +18,8 @@ pub enum DiagnosticCode {
     MissingSchemaVersion,
     UnknownSchemaVersion,
     NotYetImplemented,
+    RolloutValidation,
+    RolloutDegraded,
 }
 
 #[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
