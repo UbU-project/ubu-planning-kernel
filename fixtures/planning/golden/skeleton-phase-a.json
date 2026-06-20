@@ -18,16 +18,16 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 2
+            "duration": {"type": "fixed", "seconds": 2}
           },
           {
             "id": "task-b",
-            "duration": 3,
+            "duration": {"type": "fixed", "seconds": 3},
             "depends_on": ["task-a"]
           },
           {
             "id": "task-c",
-            "duration": 1,
+            "duration": {"type": "fixed", "seconds": 1},
             "depends_on": ["task-b"]
           }
         ]
@@ -87,21 +87,21 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 2
+            "duration": {"type": "fixed", "seconds": 2}
           },
           {
             "id": "task-b",
-            "duration": 3,
+            "duration": {"type": "fixed", "seconds": 3},
             "depends_on": ["task-a"]
           },
           {
             "id": "task-c",
-            "duration": 4,
+            "duration": {"type": "fixed", "seconds": 4},
             "depends_on": ["task-a"]
           },
           {
             "id": "task-d",
-            "duration": 1,
+            "duration": {"type": "fixed", "seconds": 1},
             "depends_on": ["task-b", "task-c"]
           }
         ]
@@ -173,26 +173,26 @@
         "tasks": [
           {
             "id": "task-root",
-            "duration": 1
+            "duration": {"type": "fixed", "seconds": 1}
           },
           {
             "id": "task-branch-a",
-            "duration": 2,
+            "duration": {"type": "fixed", "seconds": 2},
             "depends_on": ["task-root"]
           },
           {
             "id": "task-branch-b",
-            "duration": 3,
+            "duration": {"type": "fixed", "seconds": 3},
             "depends_on": ["task-root"]
           },
           {
             "id": "task-branch-c",
-            "duration": 1,
+            "duration": {"type": "fixed", "seconds": 1},
             "depends_on": ["task-root"]
           },
           {
             "id": "task-join",
-            "duration": 2,
+            "duration": {"type": "fixed", "seconds": 2},
             "depends_on": ["task-branch-a", "task-branch-b", "task-branch-c"]
           }
         ]
@@ -264,20 +264,20 @@
         "tasks": [
           {
             "id": "alpha-start",
-            "duration": 2
+            "duration": {"type": "fixed", "seconds": 2}
           },
           {
             "id": "alpha-end",
-            "duration": 1,
+            "duration": {"type": "fixed", "seconds": 1},
             "depends_on": ["alpha-start"]
           },
           {
             "id": "beta-start",
-            "duration": 3
+            "duration": {"type": "fixed", "seconds": 3}
           },
           {
             "id": "beta-end",
-            "duration": 1,
+            "duration": {"type": "fixed", "seconds": 1},
             "depends_on": ["beta-start"]
           }
         ]
@@ -342,18 +342,18 @@
         "tasks": [
           {
             "id": "task-prep",
-            "duration": 2
+            "duration": {"type": "fixed", "seconds": 2}
           },
           {
             "id": "task-anchored",
-            "duration": 3,
+            "duration": {"type": "fixed", "seconds": 3},
             "static_anchor": {
               "start": 8
             }
           },
           {
             "id": "task-follow",
-            "duration": 2,
+            "duration": {"type": "fixed", "seconds": 2},
             "depends_on": ["task-anchored"]
           }
         ]
@@ -413,11 +413,11 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 3
+            "duration": {"type": "fixed", "seconds": 3}
           },
           {
             "id": "task-b",
-            "duration": 3,
+            "duration": {"type": "fixed", "seconds": 3},
             "depends_on": ["task-a"]
           }
         ]
@@ -445,7 +445,7 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 1
+            "duration": {"type": "fixed", "seconds": 1}
           }
         ]
       },
@@ -476,11 +476,11 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 1
+            "duration": {"type": "fixed", "seconds": 1}
           },
           {
             "id": "task-b",
-            "duration": 1,
+            "duration": {"type": "fixed", "seconds": 1},
             "depends_on": ["task-a"]
           }
         ]
@@ -512,12 +512,12 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 1,
+            "duration": {"type": "fixed", "seconds": 1},
             "depends_on": ["task-b"]
           },
           {
             "id": "task-b",
-            "duration": 1,
+            "duration": {"type": "fixed", "seconds": 1},
             "depends_on": ["task-a"]
           }
         ]
@@ -549,14 +549,14 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 4,
+            "duration": {"type": "fixed", "seconds": 4},
             "static_anchor": {
               "start": 0
             }
           },
           {
             "id": "task-b",
-            "duration": 2,
+            "duration": {"type": "fixed", "seconds": 2},
             "static_anchor": {
               "start": 2
             }
@@ -632,16 +632,16 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 2
+            "duration": {"type": "fixed", "seconds": 2}
           },
           {
             "id": "task-b",
-            "duration": 4,
+            "duration": {"type": "fixed", "seconds": 4},
             "depends_on": ["task-a"]
           },
           {
             "id": "task-c",
-            "duration": 2,
+            "duration": {"type": "fixed", "seconds": 2},
             "depends_on": ["task-b"],
             "static_anchor": {
               "start": 12
@@ -649,12 +649,12 @@
           },
           {
             "id": "task-d",
-            "duration": 4,
+            "duration": {"type": "fixed", "seconds": 4},
             "depends_on": ["task-b"]
           },
           {
             "id": "task-e",
-            "duration": 2,
+            "duration": {"type": "fixed", "seconds": 2},
             "depends_on": ["task-d", "task-c"]
           }
         ]
@@ -770,16 +770,16 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 2
+            "duration": {"type": "fixed", "seconds": 2}
           },
           {
             "id": "task-b",
-            "duration": 4,
+            "duration": {"type": "fixed", "seconds": 4},
             "depends_on": ["task-a"]
           },
           {
             "id": "task-c",
-            "duration": 2,
+            "duration": {"type": "fixed", "seconds": 2},
             "depends_on": ["task-b"],
             "static_anchor": {
               "start": 12
@@ -787,12 +787,12 @@
           },
           {
             "id": "task-d",
-            "duration": 4,
+            "duration": {"type": "fixed", "seconds": 4},
             "depends_on": ["task-b"]
           },
           {
             "id": "task-e",
-            "duration": 2,
+            "duration": {"type": "fixed", "seconds": 2},
             "depends_on": ["task-d", "task-c"]
           }
         ]
@@ -908,16 +908,16 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 2
+            "duration": {"type": "fixed", "seconds": 2}
           },
           {
             "id": "task-b",
-            "duration": 4,
+            "duration": {"type": "fixed", "seconds": 4},
             "depends_on": ["task-a"]
           },
           {
             "id": "task-c",
-            "duration": 2,
+            "duration": {"type": "fixed", "seconds": 2},
             "depends_on": ["task-b"],
             "static_anchor": {
               "start": 12
@@ -925,12 +925,12 @@
           },
           {
             "id": "task-d",
-            "duration": 4,
+            "duration": {"type": "fixed", "seconds": 4},
             "depends_on": ["task-b"]
           },
           {
             "id": "task-e",
-            "duration": 2,
+            "duration": {"type": "fixed", "seconds": 2},
             "depends_on": ["task-d", "task-c"]
           }
         ]

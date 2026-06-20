@@ -13,12 +13,15 @@ pub use explanations::{explain_plan, ExplanationBundle, ExplanationFragment};
 pub use graph::{DependencyEdge, TaskId};
 pub use request::{
     AffectDirection, AffectLegitimizationMode, AffectObservation, AffectObservationValue,
-    AffectProfile, AffectTolerance, PlanningMode, PlanningRequest, RepairContext, RepairRequest,
-    RepairScope, StaticAnchor, TaskGraph, TaskSpec, TimeWindow, PLANNING_SCHEMA_VERSION,
+    AffectProfile, AffectTolerance, CorrelationGroup, DurationModel, PlanningMode, PlanningRequest,
+    RepairContext, RepairRequest, RepairScope, ScoringPolicy, StaticAnchor, TaskGraph, TaskSpec,
+    TimeWindow, PLANNING_SCHEMA_VERSION,
 };
 pub use response::{
-    AffectDimensionLegitimization, LegitimizationReport, LegitimizationResult, Plan, PlanStatus,
-    PlanStep, PlanningResponse, RepairResponse, ScheduledTask, ValidationResult,
+    AffectDimensionLegitimization, CandidateRole, FeasibilitySummary, LegitimizationReport,
+    LegitimizationResult, Plan, PlanCandidate, PlanStatus, PlanStep, PlanningResponse,
+    ProbabilityInterval, ProbabilitySummary, RepairResponse, ScheduledTask, ScoreSummary,
+    SemiLegitimizationResult, SemiLegitimizationSummary, ValidationResult,
 };
 pub use strategy::{CandidateSet, PlannerStrategy};
 pub use validation::validate_plan;
@@ -54,41 +57,44 @@ pub fn plan(request: PlanningRequest, strategy: &impl PlannerStrategy) -> Planni
     }
 
     let mut diagnostics = candidates.diagnostics;
-    let mut last_legitimization = None;
+    let mut scoring_inputs = Vec::new();
     for candidate in candidates.plans {
         let validation = validate_plan(&candidate);
         if validation.is_valid {
-            let semi = legitimization::semi_legitimize(&candidate);
-            diagnostics.extend(semi.diagnostics);
             let full = legitimization::full_legitimize(
                 &candidate,
                 request.affect_profile.as_ref(),
                 request.affect_observation.as_ref(),
             );
-            diagnostics.extend(full.validation.diagnostics);
-            last_legitimization = Some(full.report);
-            if full.validation.is_valid {
-                let mut response = PlanningResponse::success(
-                    response_schema_version,
-                    request_id,
-                    candidate,
-                    diagnostics,
-                );
-                if let Some(legitimization) = last_legitimization {
-                    response = response.with_legitimization(legitimization);
-                }
-                return response;
+            diagnostics.extend(full.validation.diagnostics.clone());
+            if !full.validation.is_valid {
+                continue;
             }
+            let semi = legitimization::semi_legitimize(&candidate, &request, &full);
+            if semi.result == response::SemiLegitimizationResult::RejectObvious {
+                continue;
+            }
+            scoring_inputs.push(scoring::ScoringInput {
+                schedule: candidate,
+                full_legitimization: full,
+                semi_legitimization: semi,
+            });
             continue;
         }
         diagnostics.extend(validation.diagnostics);
     }
 
-    let mut response = PlanningResponse::failure(response_schema_version, request_id, diagnostics);
-    if let Some(legitimization) = last_legitimization {
-        response = response.with_legitimization(legitimization);
+    let plan_candidates = scoring::score_and_rank(&request, scoring_inputs);
+    if plan_candidates.is_empty() {
+        PlanningResponse::failure(response_schema_version, request_id, diagnostics)
+    } else {
+        PlanningResponse::success(
+            response_schema_version,
+            request_id,
+            plan_candidates,
+            diagnostics,
+        )
     }
-    response
 }
 
 pub fn repair(request: RepairRequest, strategy: &impl PlannerStrategy) -> RepairResponse {
@@ -132,13 +138,18 @@ pub fn repair(request: RepairRequest, strategy: &impl PlannerStrategy) -> Repair
         repair_context: Some(repair_context),
         affect_profile: request.affect_profile,
         affect_observation: request.affect_observation,
+        scoring_policy: request::ScoringPolicy::default(),
         prior_plan: Some(request.candidate),
     };
     let response = plan(planning_request, strategy);
     RepairResponse {
         schema_version: response.schema_version,
         request_id: request.request_id,
-        repaired_plan: response.plan,
+        repaired_plan: response
+            .plan_candidates
+            .into_iter()
+            .next()
+            .map(|candidate| candidate.schedule),
         diagnostics: response.diagnostics,
     }
 }

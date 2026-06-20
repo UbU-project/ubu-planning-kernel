@@ -61,7 +61,7 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 1
+            "duration": {"type": "fixed", "seconds": 1}
           }
         ]
       },
@@ -148,7 +148,7 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 1
+            "duration": {"type": "fixed", "seconds": 1}
           }
         ]
       },
@@ -236,7 +236,7 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 1
+            "duration": {"type": "fixed", "seconds": 1}
           }
         ]
       },
@@ -324,7 +324,7 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 1
+            "duration": {"type": "fixed", "seconds": 1}
           }
         ]
       },
@@ -412,7 +412,7 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 1
+            "duration": {"type": "fixed", "seconds": 1}
           }
         ]
       },
@@ -478,7 +478,7 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 1
+            "duration": {"type": "fixed", "seconds": 1}
           }
         ]
       },
@@ -533,7 +533,7 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 1
+            "duration": {"type": "fixed", "seconds": 1}
           }
         ]
       },
@@ -589,7 +589,7 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 1
+            "duration": {"type": "fixed", "seconds": 1}
           }
         ]
       },
@@ -645,7 +645,7 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 1
+            "duration": {"type": "fixed", "seconds": 1}
           }
         ]
       },
@@ -724,7 +724,7 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 1
+            "duration": {"type": "fixed", "seconds": 1}
           }
         ]
       },
@@ -790,7 +790,7 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 1,
+            "duration": {"type": "fixed", "seconds": 1},
             "static_anchor": {
               "start": 6
             }
@@ -856,7 +856,7 @@
         "tasks": [
           {
             "id": "task-a",
-            "duration": 1
+            "duration": {"type": "fixed", "seconds": 1}
           }
         ]
       },

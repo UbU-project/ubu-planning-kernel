@@ -3,17 +3,84 @@ use std::collections::BTreeMap;
 use crate::diagnostics::{Diagnostic, DiagnosticCode};
 use crate::request::{
     AffectDirection, AffectLegitimizationMode, AffectObservation, AffectProfile, AffectTolerance,
+    PlanningRequest,
 };
 use crate::response::{
     AffectDimensionLegitimization, LegitimizationReport, LegitimizationResult, Plan,
-    ValidationResult,
+    SemiLegitimizationResult, SemiLegitimizationSummary, ValidationResult,
 };
 
-pub fn semi_legitimize(_candidate: &Plan) -> ValidationResult {
-    ValidationResult::invalid(vec![Diagnostic::new(
-        DiagnosticCode::NotYetImplemented,
-        "semi-legitimization Legitimizer engine is not yet implemented",
-    )])
+pub fn semi_legitimize(
+    candidate: &Plan,
+    request: &PlanningRequest,
+    full: &FullLegitimization,
+) -> SemiLegitimizationSummary {
+    // Preserve Phase B warn-only behavior: affect_budget_ok reflects whether the
+    // existing full_legitimize filter admits the candidate, not raw feasibility.
+    let affect_budget_ok = full.validation.is_valid;
+    let slack_preserved = preserves_slack(candidate, request);
+    let result = if !affect_budget_ok || !slack_preserved {
+        SemiLegitimizationResult::RejectObvious
+    } else if full.report.result == LegitimizationResult::NeedsClarification {
+        SemiLegitimizationResult::NeedsFullLegitimization
+    } else {
+        SemiLegitimizationResult::PassesCheapChecks
+    };
+
+    SemiLegitimizationSummary {
+        result,
+        affect_budget_ok: Some(affect_budget_ok),
+        slack_preserved: Some(slack_preserved),
+        // TODO(P7/C-1): implement dependency-fragility, user-mode compatibility,
+        // local-repair viability, and legitimacy-delta estimate heuristics.
+        dependency_fragility_ok: None,
+        user_mode_compatible: None,
+        local_repair_viable: None,
+        legitimacy_delta_estimate: None,
+    }
+}
+
+fn preserves_slack(candidate: &Plan, request: &PlanningRequest) -> bool {
+    let by_id: BTreeMap<_, _> = candidate
+        .steps
+        .iter()
+        .map(|step| (step.task_id.as_str(), step))
+        .collect();
+
+    candidate.steps.iter().all(|step| {
+        let Some(task) = request.tasks().iter().find(|task| task.id == step.task_id) else {
+            return false;
+        };
+        let plan_window_ok = request.time_window.as_ref().is_none_or(|window| {
+            if request.mode == crate::request::PlanningMode::Repair {
+                // Repair skeletons deliberately retain completed and in-progress
+                // history before the active window.
+                step.end <= window.end || step.start < window.start
+            } else {
+                step.start >= window.start && step.end <= window.end
+            }
+        });
+        let task_window_ok = task
+            .window
+            .as_ref()
+            .is_none_or(|window| step.start >= window.start && step.end <= window.end);
+        let anchor_ok = task
+            .static_anchor
+            .as_ref()
+            .is_none_or(|anchor| step.start == anchor.start);
+        let dependencies_ok = task.depends_on.iter().all(|dependency| {
+            by_id
+                .get(dependency.as_str())
+                .is_some_and(|dependency_step| dependency_step.end <= step.start)
+        });
+        plan_window_ok && task_window_ok && anchor_ok && dependencies_ok
+    }) && candidate.steps.iter().enumerate().all(|(index, left)| {
+        candidate
+            .steps
+            .iter()
+            .skip(index + 1)
+            .all(|right| left.end <= right.start || right.end <= left.start)
+    })
 }
 
 #[derive(Debug, Clone, PartialEq)]

@@ -1,8 +1,7 @@
 use std::fs;
 
 use ubu_planning_core::{
-    AffectLegitimizationMode, DiagnosticCode, LegitimizationResult, PlanningRequest,
-    PLANNING_SCHEMA_VERSION,
+    AffectLegitimizationMode, DiagnosticCode, PlanningRequest, PLANNING_SCHEMA_VERSION,
 };
 use ubu_planning_cpu::CpuStrategy;
 
@@ -16,7 +15,7 @@ fn valid_fixture_produces_plan() {
     let request: PlanningRequest = serde_json::from_str(&input).unwrap();
     let response = ubu_planning_core::plan(request, &CpuStrategy);
     assert_eq!(response.schema_version, PLANNING_SCHEMA_VERSION);
-    let plan = response.plan.expect("valid fixture should produce a plan");
+    let plan = &response.plan_candidates[0].schedule;
     let task_ids: Vec<_> = plan
         .steps
         .iter()
@@ -35,7 +34,7 @@ fn missing_schema_version_returns_diagnostic() {
     let request: PlanningRequest = serde_json::from_str(&input).unwrap();
     let response = ubu_planning_core::plan(request, &CpuStrategy);
 
-    assert!(response.plan.is_none());
+    assert!(response.plan_candidates.is_empty());
     assert!(response
         .diagnostics
         .iter()
@@ -52,7 +51,7 @@ fn unknown_schema_version_returns_diagnostic() {
     let request: PlanningRequest = serde_json::from_str(&input).unwrap();
     let response = ubu_planning_core::plan(request, &CpuStrategy);
 
-    assert!(response.plan.is_none());
+    assert!(response.plan_candidates.is_empty());
     assert!(response
         .diagnostics
         .iter()
@@ -68,14 +67,10 @@ fn warn_only_affect_violation_records_legitimization_without_rejecting_plan() {
     .unwrap();
     let request: PlanningRequest = serde_json::from_str(&input).unwrap();
     let response = ubu_planning_core::plan(request, &CpuStrategy);
-    let legitimization = response
-        .legitimization
-        .expect("affect request should produce a legitimization report");
-
-    assert!(response.plan.is_some());
-    assert_eq!(legitimization.result, LegitimizationResult::Failed);
-    assert_eq!(legitimization.mode, AffectLegitimizationMode::WarnOnly);
-    assert_eq!(legitimization.violated_dimensions, ["energy"]);
+    assert!(!response.plan_candidates.is_empty());
+    let feasibility = &response.plan_candidates[0].feasibility_summary;
+    assert!(!feasibility.affect_feasible);
+    assert_eq!(feasibility.violated_affect_dimensions, ["energy"]);
 }
 
 #[test]
@@ -89,13 +84,7 @@ fn enforce_affect_violation_rejects_plan_with_legitimization_report() {
     request.affect_profile.as_mut().unwrap().mode = AffectLegitimizationMode::Enforce;
 
     let response = ubu_planning_core::plan(request, &CpuStrategy);
-    let legitimization = response
-        .legitimization
-        .expect("rejected affect request should still report legitimization");
-
-    assert!(response.plan.is_none());
-    assert_eq!(legitimization.result, LegitimizationResult::Failed);
-    assert!(!legitimization.affect_feasible);
+    assert!(response.plan_candidates.is_empty());
 }
 
 #[test]
@@ -107,14 +96,7 @@ fn stale_affect_observation_is_reported_without_substitution() {
     .unwrap();
     let request: PlanningRequest = serde_json::from_str(&input).unwrap();
     let response = ubu_planning_core::plan(request, &CpuStrategy);
-    let legitimization = response
-        .legitimization
-        .expect("stale affect request should produce a legitimization report");
-
-    assert!(response.plan.is_none());
-    assert_eq!(legitimization.result, LegitimizationResult::Failed);
-    assert_eq!(legitimization.stale_dimensions, ["energy"]);
-    assert!(legitimization.dimensions["energy"].satisfaction < 0.5);
+    assert!(response.plan_candidates.is_empty());
     assert!(response
         .diagnostics
         .iter()

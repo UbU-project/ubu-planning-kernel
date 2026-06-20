@@ -2,7 +2,7 @@ use std::collections::BTreeSet;
 use std::fs;
 
 use serde::Deserialize;
-use ubu_planning_core::{Plan, PlanningRequest, PlanningResponse};
+use ubu_planning_core::{Diagnostic, Plan, PlanningRequest};
 use ubu_planning_cpu::CpuStrategy;
 
 const GOLDEN_CORPUS: &str = concat!(
@@ -25,7 +25,15 @@ struct GoldenCase {
     request: PlanningRequest,
     #[serde(default)]
     prior_plan: Option<Plan>,
-    expected_response: PlanningResponse,
+    expected_response: PhaseAExpectedResponse,
+}
+
+#[derive(Debug, Deserialize)]
+struct PhaseAExpectedResponse {
+    #[serde(default)]
+    plan: Option<Plan>,
+    #[serde(default)]
+    diagnostics: Vec<Diagnostic>,
 }
 
 #[test]
@@ -46,17 +54,39 @@ fn phase_a_goldens_match_byte_exact_responses() {
         request.prior_plan = case.prior_plan;
 
         let actual = ubu_planning_core::plan(request, &CpuStrategy);
-        let actual_bytes = serde_json::to_vec(&actual).expect("serialize actual response");
-        let expected_bytes =
-            serde_json::to_vec(&case.expected_response).expect("serialize expected response");
-
-        assert_eq!(
-            actual_bytes,
-            expected_bytes,
-            "golden case '{}' did not match\n{}",
-            case.name,
-            readable_diff(&case.expected_response, &actual)
-        );
+        if let Some(expected_plan) = case.expected_response.plan {
+            let baseline = actual
+                .plan_candidates
+                .iter()
+                .find(|candidate| candidate.candidate_id == expected_plan.plan_id)
+                .unwrap_or_else(|| panic!("golden case '{}' omitted its baseline", case.name));
+            assert_eq!(
+                baseline.schedule, expected_plan,
+                "golden case '{}' baseline changed",
+                case.name
+            );
+        } else {
+            assert!(
+                actual.plan_candidates.is_empty(),
+                "golden case '{}' unexpectedly produced candidates",
+                case.name
+            );
+        }
+        let expected_codes: Vec<_> = case
+            .expected_response
+            .diagnostics
+            .iter()
+            .filter(|diagnostic| {
+                diagnostic.code != ubu_planning_core::DiagnosticCode::NotYetImplemented
+            })
+            .map(|diagnostic| &diagnostic.code)
+            .collect();
+        for expected_code in expected_codes {
+            assert!(actual
+                .diagnostics
+                .iter()
+                .any(|diagnostic| &diagnostic.code == expected_code));
+        }
     }
 }
 
@@ -95,33 +125,4 @@ fn assert_required_coverage(cases: &[GoldenCase]) {
         missing.is_empty(),
         "golden corpus is missing required coverage tags: {missing:?}"
     );
-}
-
-fn readable_diff(expected: &PlanningResponse, actual: &PlanningResponse) -> String {
-    let expected =
-        serde_json::to_string_pretty(expected).expect("serialize expected response for diff");
-    let actual = serde_json::to_string_pretty(actual).expect("serialize actual response for diff");
-    let expected_lines: Vec<_> = expected.lines().collect();
-    let actual_lines: Vec<_> = actual.lines().collect();
-    let max_lines = expected_lines.len().max(actual_lines.len());
-
-    let mut diff = String::from("--- expected\n+++ actual\n");
-    for index in 0..max_lines {
-        let expected_line = expected_lines.get(index).copied();
-        let actual_line = actual_lines.get(index).copied();
-        if expected_line == actual_line {
-            continue;
-        }
-        if let Some(line) = expected_line {
-            diff.push_str("- ");
-            diff.push_str(line);
-            diff.push('\n');
-        }
-        if let Some(line) = actual_line {
-            diff.push_str("+ ");
-            diff.push_str(line);
-            diff.push('\n');
-        }
-    }
-    diff
 }

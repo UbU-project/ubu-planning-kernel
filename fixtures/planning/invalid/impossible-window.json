@@ -11,7 +11,7 @@
   "tasks": [
     {
       "id": "task-a",
-      "duration": 5,
+      "duration": {"type": "fixed", "seconds": 5},
       "window": {
         "start": 1,
         "end": 3

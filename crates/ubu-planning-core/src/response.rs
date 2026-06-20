@@ -3,6 +3,7 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 
 use crate::diagnostics::Diagnostic;
+use crate::explanations::ExplanationFragment;
 use crate::graph::TaskId;
 use crate::request::AffectLegitimizationMode;
 
@@ -73,10 +74,8 @@ impl ValidationResult {
 pub struct PlanningResponse {
     pub schema_version: String,
     pub request_id: String,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub plan: Option<Plan>,
-    #[serde(default, skip_serializing_if = "Option::is_none")]
-    pub legitimization: Option<LegitimizationReport>,
+    #[serde(default)]
+    pub plan_candidates: Vec<PlanCandidate>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub diagnostics: Vec<Diagnostic>,
 }
@@ -85,14 +84,13 @@ impl PlanningResponse {
     pub fn success(
         schema_version: String,
         request_id: String,
-        plan: Plan,
+        plan_candidates: Vec<PlanCandidate>,
         diagnostics: Vec<Diagnostic>,
     ) -> Self {
         Self {
             schema_version,
             request_id,
-            plan: Some(plan),
-            legitimization: None,
+            plan_candidates,
             diagnostics,
         }
     }
@@ -105,16 +103,110 @@ impl PlanningResponse {
         Self {
             schema_version,
             request_id,
-            plan: None,
-            legitimization: None,
+            plan_candidates: Vec::new(),
             diagnostics,
         }
     }
 
-    pub fn with_legitimization(mut self, legitimization: LegitimizationReport) -> Self {
-        self.legitimization = Some(legitimization);
-        self
+    pub fn default_plan(&self) -> Option<&Plan> {
+        self.plan_candidates
+            .first()
+            .map(|candidate| &candidate.schedule)
     }
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum CandidateRole {
+    HighestUtility,
+    MostRobust,
+    MostScheduleDiverse,
+    Other,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct ScoreSummary {
+    pub utility_score: f64,
+    pub robustness_score: f64,
+    pub affect_margin_score: f64,
+    pub schedule_diversity_score: f64,
+    pub total_score: f64,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct FeasibilitySummary {
+    /// Advisory only: the engine is not a hard-constraint proof system.
+    pub hard_constraints_assumed_satisfied_by_engine: bool,
+    pub affect_feasible: bool,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub minimum_affect_score: Option<f64>,
+    #[serde(default)]
+    pub violated_affect_dimensions: Vec<String>,
+}
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum SemiLegitimizationResult {
+    PassesCheapChecks,
+    RejectObvious,
+    NeedsFullLegitimization,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct SemiLegitimizationSummary {
+    pub result: SemiLegitimizationResult,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub affect_budget_ok: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub slack_preserved: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub dependency_fragility_ok: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub user_mode_compatible: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub local_repair_viable: Option<bool>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub legitimacy_delta_estimate: Option<f64>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct ProbabilityInterval {
+    pub lower: f64,
+    pub upper: f64,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize, Default)]
+#[serde(rename_all = "snake_case")]
+pub struct ProbabilitySummary {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub display_probability: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub log_probability: Option<f64>,
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub probability_interval: Option<ProbabilityInterval>,
+    #[serde(default)]
+    pub provenance_refs: Vec<String>,
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub struct PlanCandidate {
+    pub candidate_id: String,
+    pub rank: usize,
+    pub candidate_role: CandidateRole,
+    pub schedule: Plan,
+    pub score_summary: ScoreSummary,
+    pub feasibility_summary: FeasibilitySummary,
+    pub semi_legitimization_summary: SemiLegitimizationSummary,
+    pub probability_summary: ProbabilitySummary,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub explanation_fragments: Vec<ExplanationFragment>,
+    #[serde(default, skip_serializing_if = "Vec::is_empty")]
+    pub validation_hints: Vec<String>,
 }
 
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]

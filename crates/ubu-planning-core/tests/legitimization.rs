@@ -2,16 +2,50 @@ use std::collections::BTreeMap;
 
 use ubu_planning_core::{
     legitimization, AffectDirection, AffectLegitimizationMode, AffectObservation,
-    AffectObservationValue, AffectProfile, AffectTolerance, DiagnosticCode, LegitimizationResult,
-    Plan, PlanStatus, ScheduledTask,
+    AffectObservationValue, AffectProfile, AffectTolerance, DiagnosticCode, DurationModel,
+    LegitimizationResult, Plan, PlanStatus, PlanningMode, PlanningRequest, ScheduledTask,
+    SemiLegitimizationResult, TaskGraph, TaskSpec, TimeWindow, PLANNING_SCHEMA_VERSION,
 };
 
 #[test]
-fn semi_legitimization_stub_stays_explicit() {
-    let semi = legitimization::semi_legitimize(&plan_starting_at(0));
+fn semi_legitimization_runs_implemented_cheap_checks() {
+    let plan = plan_starting_at(0);
+    let request = request_for_plan();
+    let full = legitimization::full_legitimize(&plan, None, None);
+    let semi = legitimization::semi_legitimize(&plan, &request, &full);
 
-    assert!(!semi.is_valid);
-    assert_eq!(semi.diagnostics[0].code, DiagnosticCode::NotYetImplemented);
+    assert_eq!(semi.result, SemiLegitimizationResult::PassesCheapChecks);
+    assert_eq!(semi.affect_budget_ok, Some(true));
+    assert_eq!(semi.slack_preserved, Some(true));
+    assert!(semi.dependency_fragility_ok.is_none());
+}
+
+fn request_for_plan() -> PlanningRequest {
+    PlanningRequest {
+        schema_version: Some(PLANNING_SCHEMA_VERSION.to_string()),
+        request_id: "semi".to_string(),
+        mode: PlanningMode::FreshGeneration,
+        rng_seed: 0,
+        time_window: Some(TimeWindow { start: 0, end: 10 }),
+        task_graph: TaskGraph {
+            tasks: vec![TaskSpec {
+                id: "task-a".to_string(),
+                duration: DurationModel::Fixed { seconds: 1 },
+                correlation_groups: Vec::new(),
+                value: 1.0,
+                priority: 1.0,
+                depends_on: Vec::new(),
+                window: None,
+                static_anchor: None,
+            }],
+            topological_order: Vec::new(),
+        },
+        repair_context: None,
+        affect_profile: None,
+        affect_observation: None,
+        scoring_policy: Default::default(),
+        prior_plan: None,
+    }
 }
 
 #[test]

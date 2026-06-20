@@ -17,7 +17,7 @@ fn emitted_plan_uses_canonical_steps_field() {
     let request: PlanningRequest = serde_json::from_str(&input).unwrap();
 
     let response = ubu_planning_core::plan(request, &CpuStrategy);
-    let plan = response.plan.expect("valid fixture should produce a plan");
+    let plan = &response.plan_candidates[0].schedule;
     let value = serde_json::to_value(plan).unwrap();
 
     assert!(value.get("steps").is_some());
@@ -44,7 +44,7 @@ fn provided_topological_order_must_respect_dependencies() {
 
     let response = ubu_planning_core::plan(request, &CpuStrategy);
 
-    assert!(response.plan.is_none());
+    assert!(response.plan_candidates.is_empty());
     assert!(response
         .diagnostics
         .iter()
@@ -69,12 +69,13 @@ fn static_anchor_collision_returns_skeleton_failure() {
         repair_context: None,
         affect_profile: None,
         affect_observation: None,
+        scoring_policy: Default::default(),
         prior_plan: None,
     };
 
     let response = ubu_planning_core::plan(request, &CpuStrategy);
 
-    assert!(response.plan.is_none());
+    assert!(response.plan_candidates.is_empty());
     assert!(response
         .diagnostics
         .iter()
@@ -119,11 +120,17 @@ fn repair_supersedes_prior_plan_and_preserves_past_and_in_progress_steps() {
         }),
         affect_profile: None,
         affect_observation: None,
+        scoring_policy: Default::default(),
         prior_plan: Some(prior_plan),
     };
 
     let response = ubu_planning_core::plan(request, &CpuStrategy);
-    let plan = response.plan.expect("repair should produce a plan");
+    let plan = &response
+        .plan_candidates
+        .iter()
+        .find(|candidate| candidate.candidate_id == "plan-repair-skeleton-0000000000000007-repair")
+        .expect("repair response should retain its baseline candidate")
+        .schedule;
 
     assert_eq!(plan.supersedes_plan_id.as_deref(), Some("plan-prior"));
     assert_eq!(plan.steps[0], step("task-a", 0, 2, &[], false));
@@ -139,7 +146,10 @@ fn task_with_anchor(
 ) -> TaskSpec {
     TaskSpec {
         id: id.to_string(),
-        duration,
+        duration: ubu_planning_core::DurationModel::Fixed { seconds: duration },
+        correlation_groups: Vec::new(),
+        value: 1.0,
+        priority: 1.0,
         depends_on: depends_on
             .iter()
             .map(|dependency| dependency.to_string())

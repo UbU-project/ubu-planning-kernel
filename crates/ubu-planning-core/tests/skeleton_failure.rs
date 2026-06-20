@@ -1,5 +1,5 @@
 use ubu_planning_core::{
-    DiagnosticCode, PlanningMode, PlanningRequest, TaskGraph, TaskSpec, TimeWindow,
+    DiagnosticCode, DurationModel, PlanningMode, PlanningRequest, TaskGraph, TaskSpec, TimeWindow,
     PLANNING_SCHEMA_VERSION,
 };
 use ubu_planning_cpu::CpuStrategy;
@@ -16,14 +16,20 @@ fn impossible_after_dependency_window_returns_skeleton_failure() {
             tasks: vec![
                 TaskSpec {
                     id: "task-a".to_string(),
-                    duration: 10,
+                    duration: DurationModel::Fixed { seconds: 10 },
+                    correlation_groups: Vec::new(),
+                    value: 1.0,
+                    priority: 1.0,
                     depends_on: Vec::new(),
                     window: None,
                     static_anchor: None,
                 },
                 TaskSpec {
                     id: "task-b".to_string(),
-                    duration: 1,
+                    duration: DurationModel::Fixed { seconds: 1 },
+                    correlation_groups: Vec::new(),
+                    value: 1.0,
+                    priority: 1.0,
                     depends_on: vec!["task-a".to_string()],
                     window: Some(TimeWindow { start: 0, end: 5 }),
                     static_anchor: None,
@@ -34,12 +40,13 @@ fn impossible_after_dependency_window_returns_skeleton_failure() {
         repair_context: None,
         affect_profile: None,
         affect_observation: None,
+        scoring_policy: Default::default(),
         prior_plan: None,
     };
 
     let response = ubu_planning_core::plan(request, &CpuStrategy);
 
-    assert!(response.plan.is_none());
+    assert!(response.plan_candidates.is_empty());
     assert!(response
         .diagnostics
         .iter()

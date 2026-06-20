@@ -10,7 +10,7 @@
   "tasks": [
     {
       "id": "task-a",
-      "duration": 1
+      "duration": {"type": "fixed", "seconds": 1}
     }
   ]
 }

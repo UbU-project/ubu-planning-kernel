@@ -2,6 +2,7 @@ use std::collections::BTreeSet;
 use std::fs;
 
 use serde::{Deserialize, Serialize};
+use ubu_planning_core::strategy::PlannerStrategy;
 use ubu_planning_core::{
     legitimization, AffectDirection, AffectTolerance, LegitimizationReport, PlanningRequest,
 };
@@ -50,16 +51,22 @@ fn affect_goldens_match_byte_exact_legitimization_reports() {
     assert_bootstrap_priors_are_marked(&corpus.cases);
 
     for case in corpus.cases {
-        let actual = ubu_planning_core::plan(case.request, &CpuStrategy);
+        let generated = CpuStrategy.generate_candidates(&case.request);
+        let plan = generated
+            .plans
+            .first()
+            .expect("affect golden request must generate a skeleton");
+        let actual = legitimization::full_legitimize(
+            plan,
+            case.request.affect_profile.as_ref(),
+            case.request.affect_observation.as_ref(),
+        );
         assert_eq!(
-            actual.plan.is_some(),
-            case.expected_plan_present,
+            actual.validation.is_valid, case.expected_plan_present,
             "golden case '{}' plan presence changed",
             case.name
         );
-        let actual_legitimization = actual
-            .legitimization
-            .expect("affect golden must produce a legitimization report");
+        let actual_legitimization = actual.report;
 
         let expected_bytes = serde_json::to_vec(&case.expected_legitimization)
             .expect("serialize expected legitimization");

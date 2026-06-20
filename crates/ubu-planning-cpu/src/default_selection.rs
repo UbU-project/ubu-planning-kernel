@@ -1,7 +1,8 @@
-use ubu_planning_core::response::Plan;
+use ubu_planning_core::response::PlanCandidate;
+use ubu_planning_core::scoring::compare_candidates;
 
-pub fn select_default(mut candidates: Vec<Plan>) -> Plan {
-    candidates.sort_by(|left, right| left.plan_id.cmp(&right.plan_id));
+pub fn select_default(mut candidates: Vec<PlanCandidate>) -> PlanCandidate {
+    candidates.sort_by(compare_candidates);
     candidates
         .into_iter()
         .next()

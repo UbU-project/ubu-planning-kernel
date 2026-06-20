@@ -282,6 +282,7 @@ fn place_task(
     earliest_start: u64,
     occupied: &[OccupiedInterval],
 ) -> Result<PlanStep, SkeletonFailureDiagnostic> {
+    let duration = task.duration.placement_seconds();
     let window = task_effective_window(task, plan_window)?;
     let minimum_start = earliest_start.max(window.start);
 
@@ -291,7 +292,7 @@ fn place_task(
 
     let mut start = minimum_start;
     loop {
-        let Some(end) = start.checked_add(task.duration) else {
+        let Some(end) = start.checked_add(duration) else {
             return Err(SkeletonFailureDiagnostic {
                 task_id: Some(task.id.clone()),
                 reason: "task duration overflows its start".to_string(),
@@ -319,13 +320,14 @@ fn anchored_step(
     window_end: u64,
     occupied: &[OccupiedInterval],
 ) -> Result<PlanStep, SkeletonFailureDiagnostic> {
+    let duration = task.duration.placement_seconds();
     if start < minimum_start {
         return Err(SkeletonFailureDiagnostic {
             task_id: Some(task.id.clone()),
             reason: "static anchor collides with dependencies or window start".to_string(),
         });
     }
-    let Some(end) = start.checked_add(task.duration) else {
+    let Some(end) = start.checked_add(duration) else {
         return Err(SkeletonFailureDiagnostic {
             task_id: Some(task.id.clone()),
             reason: "static anchor overflows task duration".to_string(),
@@ -358,7 +360,9 @@ fn task_effective_window(
         window.start = window.start.max(task_window.start);
         window.end = window.end.min(task_window.end);
     }
-    if !window.is_possible() || window.end.saturating_sub(window.start) < task.duration {
+    if !window.is_possible()
+        || window.end.saturating_sub(window.start) < task.duration.placement_seconds()
+    {
         return Err(SkeletonFailureDiagnostic {
             task_id: Some(task.id.clone()),
             reason: "task has insufficient available window".to_string(),

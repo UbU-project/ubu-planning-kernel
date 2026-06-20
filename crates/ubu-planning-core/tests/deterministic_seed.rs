@@ -67,13 +67,14 @@ fn cpu_strategy_is_deterministic_for_same_request() {
     let first = ubu_planning_core::plan(request.clone(), &CpuStrategy);
     let second = ubu_planning_core::plan(request, &CpuStrategy);
 
-    assert_eq!(first.plan, second.plan);
     assert_eq!(
-        serde_json::to_vec(&first.plan).unwrap(),
-        serde_json::to_vec(&second.plan).unwrap()
+        serde_json::to_vec(&first).unwrap(),
+        serde_json::to_vec(&second).unwrap()
     );
+    assert_eq!(first.plan_candidates, second.plan_candidates);
     assert_eq!(
-        serde_json::to_vec(&first.legitimization).unwrap(),
-        serde_json::to_vec(&second.legitimization).unwrap()
+        serde_json::to_vec(&first.plan_candidates).unwrap(),
+        serde_json::to_vec(&second.plan_candidates).unwrap()
     );
+    assert!(first.plan_candidates.len() <= 16);
 }

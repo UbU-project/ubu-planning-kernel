@@ -55,14 +55,12 @@ pub fn validate_planning_request(request: &PlanningRequest) -> ValidationResult 
                 format!("duplicate task id '{}'", task.id),
             ));
         }
-        if task.duration == 0 {
-            diagnostics.push(Diagnostic::new(
-                DiagnosticCode::ImpossibleWindow,
-                format!("task '{}' has zero duration", task.id),
-            ));
+        if let Err(reason) = task.validate_contract() {
+            diagnostics.push(Diagnostic::new(DiagnosticCode::ImpossibleWindow, reason));
         }
+        let duration = task.duration.placement_seconds();
         if let Some(window) = &task.window {
-            if !window.is_possible() || window.end.saturating_sub(window.start) < task.duration {
+            if !window.is_possible() || window.end.saturating_sub(window.start) < duration {
                 diagnostics.push(Diagnostic::new(
                     DiagnosticCode::ImpossibleWindow,
                     format!("task '{}' cannot fit inside its time window", task.id),
@@ -71,7 +69,7 @@ pub fn validate_planning_request(request: &PlanningRequest) -> ValidationResult 
         }
         if let Some(anchor) = &task.static_anchor {
             if let Some(window) = &task.window {
-                let Some(anchor_end) = anchor.start.checked_add(task.duration) else {
+                let Some(anchor_end) = anchor.start.checked_add(duration) else {
                     diagnostics.push(Diagnostic::new(
                         DiagnosticCode::ImpossibleWindow,
                         format!("task '{}' static anchor overflows its duration", task.id),
@@ -86,6 +84,23 @@ pub fn validate_planning_request(request: &PlanningRequest) -> ValidationResult 
                 }
             }
         }
+    }
+
+    let weights = [
+        request.scoring_policy.utility_weight,
+        request.scoring_policy.robustness_weight,
+        request.scoring_policy.affect_margin_weight,
+        request.scoring_policy.schedule_diversity_weight,
+    ];
+    if weights
+        .iter()
+        .any(|weight| !weight.is_finite() || *weight < 0.0)
+        || weights.iter().all(|weight| *weight == 0.0)
+    {
+        diagnostics.push(Diagnostic::new(
+            DiagnosticCode::ImpossibleWindow,
+            "scoring_policy weights must be finite and non-negative, with at least one positive weight",
+        ));
     }
 
     for edge in request.dependency_edges() {

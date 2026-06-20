@@ -11,16 +11,16 @@
   "tasks": [
     {
       "id": "task-a",
-      "duration": 1
+      "duration": {"type": "fixed", "seconds": 1}
     },
     {
       "id": "task-b",
-      "duration": 1,
+      "duration": {"type": "fixed", "seconds": 1},
       "depends_on": ["task-a"]
     },
     {
       "id": "task-c",
-      "duration": 1,
+      "duration": {"type": "fixed", "seconds": 1},
       "depends_on": ["task-b"]
     }
   ]
