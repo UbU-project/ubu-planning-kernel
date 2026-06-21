@@ -77,6 +77,11 @@ fn cpu_strategy_is_deterministic_for_same_request() {
     request.n_rollouts = 750;
     request.top_k = 3;
     let expected_stage_seed = request.rng_seed + 3;
+    let mut no_rollout_request = request.clone();
+    no_rollout_request.n_rollouts = 0;
+    let expected_candidate_count = ubu_planning_core::plan(no_rollout_request, &CpuStrategy)
+        .plan_candidates
+        .len();
 
     let first = ubu_planning_core::plan(request.clone(), &CpuStrategy);
     let second = ubu_planning_core::plan(request, &CpuStrategy);
@@ -90,8 +95,8 @@ fn cpu_strategy_is_deterministic_for_same_request() {
         serde_json::to_vec(&first.plan_candidates).unwrap(),
         serde_json::to_vec(&second.plan_candidates).unwrap()
     );
-    assert!(first.plan_candidates.len() <= 3);
-    assert!(first.plan_candidates.iter().all(|candidate| {
+    assert_eq!(first.plan_candidates.len(), expected_candidate_count);
+    assert!(first.plan_candidates.iter().take(3).all(|candidate| {
         candidate.probability_summary.display_probability.is_some()
             && candidate
                 .rollout_diagnostics
@@ -99,5 +104,10 @@ fn cpu_strategy_is_deterministic_for_same_request() {
                 .is_some_and(|diagnostics| {
                     diagnostics.n_rollouts == 750 && diagnostics.stage_seed == expected_stage_seed
                 })
+    }));
+    assert!(first.plan_candidates.iter().skip(3).all(|candidate| {
+        candidate.probability_summary.probability_quality
+            == ubu_planning_core::ProbabilityQuality::NotEstimated
+            && candidate.rollout_diagnostics.is_none()
     }));
 }

@@ -1,3 +1,4 @@
+use std::collections::{BTreeMap, BTreeSet};
 use std::fs;
 
 use ubu_planning_core::{DurationModel, PlanningRequest, SemiLegitimizationResult, TaskSpec};
@@ -73,33 +74,73 @@ fn stage_four_response_is_bounded_ranked_and_probability_populated() {
     let request: PlanningRequest = serde_json::from_str(&input).unwrap();
     let mut no_rollout_request = request.clone();
     no_rollout_request.n_rollouts = 0;
-    let proxy_default = ubu_planning_core::plan(no_rollout_request, &CpuStrategy)
-        .plan_candidates
-        .remove(0)
-        .candidate_id;
+    let no_rollout_candidates =
+        ubu_planning_core::plan(no_rollout_request, &CpuStrategy).plan_candidates;
+    let proxy_default = no_rollout_candidates[0].candidate_id.clone();
+    let candidate_count = no_rollout_candidates.len();
+    assert_eq!(candidate_count, 16);
+    let top_k = request.effective_rollout_top_k();
+    let finalist_ids: BTreeSet<_> = no_rollout_candidates
+        .iter()
+        .take(top_k)
+        .map(|candidate| candidate.candidate_id.clone())
+        .collect();
+    let c1_scores: BTreeMap<_, _> = no_rollout_candidates
+        .iter()
+        .map(|candidate| {
+            (
+                candidate.candidate_id.clone(),
+                candidate.score_summary.clone(),
+            )
+        })
+        .collect();
     let response = ubu_planning_core::plan(request, &CpuStrategy);
 
     assert!(!response.plan_candidates.is_empty());
-    assert!(response.plan_candidates.len() <= 3);
+    assert_eq!(response.plan_candidates.len(), candidate_count);
     assert_eq!(response.plan_candidates[0].rank, 1);
     assert_ne!(response.plan_candidates[0].candidate_id, proxy_default);
+    assert!(finalist_ids.contains(&response.plan_candidates[0].candidate_id));
     assert!(response
         .plan_candidates
-        .windows(2)
-        .all(|pair| pair[0].score_summary.total_score >= pair[1].score_summary.total_score));
+        .iter()
+        .take(top_k)
+        .all(|candidate| finalist_ids.contains(&candidate.candidate_id)));
+    assert!(response
+        .plan_candidates
+        .iter()
+        .skip(top_k)
+        .all(|candidate| !finalist_ids.contains(&candidate.candidate_id)));
+    assert!(response
+        .plan_candidates
+        .iter()
+        .enumerate()
+        .all(|(index, candidate)| {
+            candidate.rank == index + 1
+                && candidate.semi_legitimization_summary.result
+                    != SemiLegitimizationResult::RejectObvious
+        }));
     assert!(response.plan_candidates.iter().all(|candidate| {
-        candidate.probability_summary.display_probability.is_some()
-            && candidate.probability_summary.log_probability.is_some()
-            && candidate
-                .probability_summary
-                .probability_interval_low
-                .is_some()
-            && candidate
-                .probability_summary
-                .probability_interval_high
-                .is_some()
-            && candidate.rollout_diagnostics.is_some()
-            && candidate.semi_legitimization_summary.result
-                != SemiLegitimizationResult::RejectObvious
+        if finalist_ids.contains(&candidate.candidate_id) {
+            candidate.probability_summary.display_probability.is_some()
+                && candidate.probability_summary.log_probability.is_some()
+                && candidate
+                    .probability_summary
+                    .probability_interval_low
+                    .is_some()
+                && candidate
+                    .probability_summary
+                    .probability_interval_high
+                    .is_some()
+                && candidate.probability_summary.probability_quality
+                    == ubu_planning_core::ProbabilityQuality::Full
+                && candidate.rollout_diagnostics.is_some()
+        } else {
+            candidate.score_summary == c1_scores[&candidate.candidate_id]
+                && candidate.probability_summary.probability_quality
+                    == ubu_planning_core::ProbabilityQuality::NotEstimated
+                && candidate.probability_summary.display_probability.is_none()
+                && candidate.rollout_diagnostics.is_none()
+        }
     }));
 }

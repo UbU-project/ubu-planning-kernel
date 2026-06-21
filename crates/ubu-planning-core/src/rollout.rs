@@ -22,8 +22,8 @@ struct CorrelationFactor {
     warnings: Vec<String>,
 }
 
-/// Runs Stage 4 only over the Stage 3 top-K finalists. With rollout enabled,
-/// these finalists become the probability-grounded response candidate set.
+/// Runs Stage 4 only over the Stage 3 top-K finalists while retaining the full
+/// bounded Stage 3 candidate set in the response.
 pub fn rollout_and_rerank(
     request: &PlanningRequest,
     mut candidates: Vec<PlanCandidate>,
@@ -66,7 +66,7 @@ pub fn rollout_and_rerank(
             warning.clone(),
         ));
     }
-    if factor.quality != ProbabilityQuality::Estimated {
+    if factor.quality != ProbabilityQuality::Full {
         diagnostics.push(Diagnostic::new(
             DiagnosticCode::RolloutDegraded,
             format!("rollout probability quality is {:?}", factor.quality),
@@ -76,12 +76,17 @@ pub fn rollout_and_rerank(
     for candidate in candidates.iter_mut().take(top_k) {
         rollout_candidate(request, candidate, n_rollouts, stage_seed, &factor);
     }
+    for candidate in candidates.iter_mut().skip(top_k) {
+        candidate.probability_summary.probability_quality = ProbabilityQuality::NotEstimated;
+    }
 
-    // Stage 4 emits the rolled finalist set. This prevents unestimated candidates
-    // from being interleaved with probability-grounded candidates in the final rank.
-    candidates.truncate(top_k);
     assign_roles(&mut candidates);
-    candidates[..top_k].sort_by(compare_candidates);
+    let (finalists, non_finalists) = candidates.split_at_mut(top_k);
+    // Keep the two cohorts distinct: rollout-grounded finalists always precede
+    // C-1-scored non-finalists. Within each cohort, compare_candidates orders by
+    // composite descending and uses candidate_id ascending as its final tiebreak.
+    finalists.sort_by(compare_candidates);
+    non_finalists.sort_by(compare_candidates);
     for (index, candidate) in candidates.iter_mut().enumerate() {
         candidate.rank = index + 1;
     }
@@ -250,7 +255,7 @@ fn factor_matrix(
     match cholesky(matrix) {
         Ok(lower) => Ok(CorrelationFactor {
             lower,
-            quality: ProbabilityQuality::Estimated,
+            quality: ProbabilityQuality::Full,
             warnings,
         }),
         Err(_) => {
@@ -539,6 +544,10 @@ mod tests {
 
     #[test]
     fn factorization_policy_uses_jitter_then_strict_or_independent_fallback() {
+        let full = factor_matrix(&identity(2), 2, true, Vec::new()).unwrap();
+        assert_eq!(full.quality, ProbabilityQuality::Full);
+        assert_eq!(serde_json::to_string(&full.quality).unwrap(), "\"full\"");
+
         let singular = vec![vec![1.0, 1.0], vec![1.0, 1.0]];
         let jittered = factor_matrix(&singular, 2, true, Vec::new()).unwrap();
         assert_eq!(jittered.quality, ProbabilityQuality::DegradedNumericJitter);

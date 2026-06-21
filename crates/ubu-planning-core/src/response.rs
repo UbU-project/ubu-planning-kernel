@@ -182,7 +182,7 @@ pub struct ProbabilityInterval {
 #[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize, Default)]
 #[serde(rename_all = "snake_case")]
 pub enum ProbabilityQuality {
-    Estimated,
+    Full,
     DegradedNumericJitter,
     DegradedIndependence,
     #[default]
