@@ -1,0 +1,31 @@
+{
+  "schema_version": "planning-golden-corpus/rollout-degraded-c2.v1",
+  "human_reviewed_then_frozen": true,
+  "kernel_revision": "3fd25a93d725300212d15da8c00e113ccd8a648b",
+  "description": "Offline synthetic correlation matrices freezing Stage 4 degradation policy; these matrices are not request inputs.",
+  "cases": [
+    {
+      "name": "singular-matrix-uses-jitter",
+      "matrix": [[1.0, 1.0], [1.0, 1.0]],
+      "dimension": 2,
+      "strict_validation": true,
+      "expected_probability_quality": "degraded_numeric_jitter",
+      "expected_warnings": ["correlation Cholesky required diagonal jitter 1e-12"]
+    },
+    {
+      "name": "indefinite-matrix-degrades-to-independence",
+      "matrix": [[1.0, 2.0], [2.0, 1.0]],
+      "dimension": 2,
+      "strict_validation": false,
+      "expected_probability_quality": "degraded_independence",
+      "expected_warnings": ["correlation factorization failed; using independent duration samples"]
+    },
+    {
+      "name": "indefinite-matrix-strictly-rejected",
+      "matrix": [[1.0, 2.0], [2.0, 1.0]],
+      "dimension": 2,
+      "strict_validation": true,
+      "expected_error": "correlation matrix factorization failed after bounded diagonal jitter"
+    }
+  ]
+}

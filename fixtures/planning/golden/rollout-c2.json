@@ -1,0 +1,264 @@
+{
+  "schema_version": "planning-golden-corpus/rollout-c2.v1",
+  "human_reviewed_then_frozen": true,
+  "kernel_revision": "3fd25a93d725300212d15da8c00e113ccd8a648b",
+  "description": "Offline fixed-seed Stage 4 rollout projections frozen after human review.",
+  "cases": [
+    {
+      "name": "fully-feasible-and-reranked",
+      "covers": ["fully_feasible", "wilson_nonzero_width", "rerank_changes_default", "stage_seed_plus_three"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "dependency-chain",
+        "mode": "fresh_generation",
+        "rng_seed": 42,
+        "n_rollouts": 1000,
+        "top_k": 3,
+        "time_window": {"start": 0, "end": 10},
+        "topological_order": ["task-a", "task-b", "task-c"],
+        "tasks": [
+          {"id": "task-a", "duration": {"type": "fixed", "seconds": 1}},
+          {"id": "task-b", "duration": {"type": "fixed", "seconds": 1}, "depends_on": ["task-a"]},
+          {"id": "task-c", "duration": {"type": "fixed", "seconds": 1}, "depends_on": ["task-b"]}
+        ]
+      },
+      "expected": {
+        "candidate_order": [
+          "plan-dependency-chain-000000000000002a-c02",
+          "plan-dependency-chain-000000000000002a-c14",
+          "plan-dependency-chain-000000000000002a-c11",
+          "plan-dependency-chain-000000000000002a-c08",
+          "plan-dependency-chain-000000000000002a-c10",
+          "plan-dependency-chain-000000000000002a-c12",
+          "plan-dependency-chain-000000000000002a-c01",
+          "plan-dependency-chain-000000000000002a-c05",
+          "plan-dependency-chain-000000000000002a",
+          "plan-dependency-chain-000000000000002a-c06",
+          "plan-dependency-chain-000000000000002a-c03",
+          "plan-dependency-chain-000000000000002a-c07",
+          "plan-dependency-chain-000000000000002a-c13",
+          "plan-dependency-chain-000000000000002a-c09",
+          "plan-dependency-chain-000000000000002a-c04",
+          "plan-dependency-chain-000000000000002a-c15"
+        ],
+        "pre_rollout_default": {
+          "candidate_id": "plan-dependency-chain-000000000000002a-c11",
+          "robustness_score": 0.8049999999999999,
+          "total_score": 0.65125
+        },
+        "rollout_summaries": [
+          {
+            "candidate_id": "plan-dependency-chain-000000000000002a-c02",
+            "rank": 1,
+            "robustness_score": 0.2,
+            "total_score": 0.6,
+            "display_probability": 1.0,
+            "probability_interval_low": 0.996173241514445,
+            "probability_interval_high": 1.0,
+            "probability_quality": "full",
+            "feasible_rollouts": 1000,
+            "feasibility_frequency": 1.0,
+            "stage_seed": 45
+          },
+          {
+            "candidate_id": "plan-dependency-chain-000000000000002a-c14",
+            "rank": 2,
+            "robustness_score": 0.1,
+            "total_score": 0.5875000000000001,
+            "display_probability": 1.0,
+            "probability_interval_low": 0.996173241514445,
+            "probability_interval_high": 1.0,
+            "probability_quality": "full",
+            "feasible_rollouts": 1000,
+            "feasibility_frequency": 1.0,
+            "stage_seed": 45
+          },
+          {
+            "candidate_id": "plan-dependency-chain-000000000000002a-c11",
+            "rank": 3,
+            "robustness_score": 0.0,
+            "total_score": 0.575,
+            "display_probability": 1.0,
+            "probability_interval_low": 0.996173241514445,
+            "probability_interval_high": 1.0,
+            "probability_quality": "full",
+            "feasible_rollouts": 1000,
+            "feasibility_frequency": 1.0,
+            "stage_seed": 45
+          }
+        ]
+      }
+    },
+    {
+      "name": "fragile-low-probability",
+      "covers": ["fragile", "low_probability", "p10_robustness"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "p10-fragile",
+        "mode": "fresh_generation",
+        "rng_seed": 2026062002,
+        "n_rollouts": 1000,
+        "top_k": 3,
+        "time_window": {"start": 0, "end": 30},
+        "topological_order": ["a", "b", "c"],
+        "tasks": [
+          {"id": "a", "duration": {"type": "shifted_lognormal_p95", "min_seconds": 2, "mode_seconds": 10, "p95_seconds": 40}},
+          {"id": "b", "duration": {"type": "shifted_lognormal_p95", "min_seconds": 2, "mode_seconds": 10, "p95_seconds": 40}},
+          {"id": "c", "duration": {"type": "shifted_lognormal_p95", "min_seconds": 2, "mode_seconds": 10, "p95_seconds": 40}}
+        ]
+      },
+      "expected": {
+        "candidate_order": ["plan-p10-fragile-0000000078c340b2"],
+        "pre_rollout_default": {
+          "candidate_id": "plan-p10-fragile-0000000078c340b2",
+          "robustness_score": 0.135,
+          "total_score": 0.3670833333333333
+        },
+        "rollout_summaries": [
+          {
+            "candidate_id": "plan-p10-fragile-0000000078c340b2",
+            "rank": 1,
+            "robustness_score": 0.0,
+            "total_score": 0.33658333333333335,
+            "display_probability": 0.026,
+            "probability_interval_low": 0.017803938201616326,
+            "probability_interval_high": 0.03782382884268993,
+            "probability_quality": "full",
+            "feasible_rollouts": 26,
+            "feasibility_frequency": 0.026,
+            "stage_seed": 2026062005
+          }
+        ]
+      }
+    },
+    {
+      "name": "independent-durations",
+      "covers": ["independent_baseline", "correlation_changes_frequency"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "p10-correlation",
+        "mode": "fresh_generation",
+        "rng_seed": 2026062002,
+        "n_rollouts": 1000,
+        "top_k": 3,
+        "time_window": {"start": 0, "end": 30},
+        "topological_order": ["a", "b", "c"],
+        "tasks": [
+          {"id": "a", "duration": {"type": "shifted_lognormal_p95", "min_seconds": 2, "mode_seconds": 10, "p95_seconds": 40}},
+          {"id": "b", "duration": {"type": "shifted_lognormal_p95", "min_seconds": 2, "mode_seconds": 10, "p95_seconds": 40}},
+          {"id": "c", "duration": {"type": "shifted_lognormal_p95", "min_seconds": 2, "mode_seconds": 10, "p95_seconds": 40}}
+        ]
+      },
+      "expected": {
+        "candidate_order": ["plan-p10-correlation-0000000078c340b2"],
+        "pre_rollout_default": {
+          "candidate_id": "plan-p10-correlation-0000000078c340b2",
+          "robustness_score": 0.135,
+          "total_score": 0.3670833333333333
+        },
+        "rollout_summaries": [
+          {
+            "candidate_id": "plan-p10-correlation-0000000078c340b2",
+            "rank": 1,
+            "robustness_score": 0.0,
+            "total_score": 0.33695833333333336,
+            "display_probability": 0.029,
+            "probability_interval_low": 0.02026644815669875,
+            "probability_interval_high": 0.04133835833669418,
+            "probability_quality": "full",
+            "feasible_rollouts": 29,
+            "feasibility_frequency": 0.029,
+            "stage_seed": 2026062005
+          }
+        ]
+      }
+    },
+    {
+      "name": "shared-correlated-durations",
+      "covers": ["shared_correlation_group", "correlation_changes_frequency"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "p10-correlation",
+        "mode": "fresh_generation",
+        "rng_seed": 2026062002,
+        "n_rollouts": 1000,
+        "top_k": 3,
+        "time_window": {"start": 0, "end": 30},
+        "topological_order": ["a", "b", "c"],
+        "tasks": [
+          {"id": "a", "duration": {"type": "shifted_lognormal_p95", "min_seconds": 2, "mode_seconds": 10, "p95_seconds": 40}, "correlation_groups": [{"group": "shared", "strength": 0.8}]},
+          {"id": "b", "duration": {"type": "shifted_lognormal_p95", "min_seconds": 2, "mode_seconds": 10, "p95_seconds": 40}, "correlation_groups": [{"group": "shared", "strength": 0.8}]},
+          {"id": "c", "duration": {"type": "shifted_lognormal_p95", "min_seconds": 2, "mode_seconds": 10, "p95_seconds": 40}, "correlation_groups": [{"group": "shared", "strength": 0.8}]}
+        ]
+      },
+      "expected": {
+        "candidate_order": ["plan-p10-correlation-0000000078c340b2"],
+        "pre_rollout_default": {
+          "candidate_id": "plan-p10-correlation-0000000078c340b2",
+          "robustness_score": 0.135,
+          "total_score": 0.3670833333333333
+        },
+        "rollout_summaries": [
+          {
+            "candidate_id": "plan-p10-correlation-0000000078c340b2",
+            "rank": 1,
+            "robustness_score": 0.0,
+            "total_score": 0.3509583333333333,
+            "display_probability": 0.141,
+            "probability_interval_low": 0.12080112670494819,
+            "probability_interval_high": 0.1639464858876804,
+            "probability_quality": "full",
+            "feasible_rollouts": 141,
+            "feasibility_frequency": 0.141,
+            "stage_seed": 2026062005
+          }
+        ]
+      }
+    },
+    {
+      "name": "rollout-disabled-c1-proxy",
+      "covers": ["not_estimated", "c1_proxy", "zero_rollouts"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "dependency-chain",
+        "mode": "fresh_generation",
+        "rng_seed": 42,
+        "n_rollouts": 0,
+        "top_k": 3,
+        "time_window": {"start": 0, "end": 10},
+        "topological_order": ["task-a", "task-b", "task-c"],
+        "tasks": [
+          {"id": "task-a", "duration": {"type": "fixed", "seconds": 1}},
+          {"id": "task-b", "duration": {"type": "fixed", "seconds": 1}, "depends_on": ["task-a"]},
+          {"id": "task-c", "duration": {"type": "fixed", "seconds": 1}, "depends_on": ["task-b"]}
+        ]
+      },
+      "expected": {
+        "candidate_order": [
+          "plan-dependency-chain-000000000000002a-c11",
+          "plan-dependency-chain-000000000000002a-c14",
+          "plan-dependency-chain-000000000000002a-c02",
+          "plan-dependency-chain-000000000000002a-c08",
+          "plan-dependency-chain-000000000000002a-c10",
+          "plan-dependency-chain-000000000000002a-c12",
+          "plan-dependency-chain-000000000000002a-c01",
+          "plan-dependency-chain-000000000000002a-c05",
+          "plan-dependency-chain-000000000000002a",
+          "plan-dependency-chain-000000000000002a-c06",
+          "plan-dependency-chain-000000000000002a-c03",
+          "plan-dependency-chain-000000000000002a-c07",
+          "plan-dependency-chain-000000000000002a-c13",
+          "plan-dependency-chain-000000000000002a-c09",
+          "plan-dependency-chain-000000000000002a-c04",
+          "plan-dependency-chain-000000000000002a-c15"
+        ],
+        "pre_rollout_default": {
+          "candidate_id": "plan-dependency-chain-000000000000002a-c11",
+          "robustness_score": 0.8049999999999999,
+          "total_score": 0.65125
+        },
+        "rollout_summaries": []
+      }
+    }
+  ]
+}

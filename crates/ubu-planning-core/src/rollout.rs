@@ -497,24 +497,97 @@ fn stable_hash(bytes: &[u8]) -> u64 {
 mod tests {
     use super::*;
     use crate::request::CorrelationGroup;
+    use serde::Deserialize;
+
+    const DEGRADED_GOLDEN_CORPUS: &str = concat!(
+        env!("CARGO_MANIFEST_DIR"),
+        "/../../fixtures/planning/golden/rollout-degraded-c2.json"
+    );
+
+    #[derive(Deserialize)]
+    struct DegradedGoldenCorpus {
+        schema_version: String,
+        human_reviewed_then_frozen: bool,
+        kernel_revision: String,
+        cases: Vec<DegradedGoldenCase>,
+    }
+
+    #[derive(Deserialize)]
+    struct DegradedGoldenCase {
+        name: String,
+        matrix: Vec<Vec<f64>>,
+        dimension: usize,
+        strict_validation: bool,
+        expected_probability_quality: Option<ProbabilityQuality>,
+        #[serde(default)]
+        expected_warnings: Vec<String>,
+        expected_error: Option<String>,
+    }
 
     #[test]
-    fn fixed_is_delta_and_shifted_parameters_hit_mode_and_p95() {
+    fn shifted_lognormal_closed_form_hits_p95_and_has_an_unbounded_tail() {
         assert_eq!(
             sample_duration(&DurationModel::Fixed { seconds: 7 }, -20.0),
             7.0
         );
-        let model = DurationModel::ShiftedLognormalP95 {
-            min_seconds: 2,
-            mode_seconds: 7,
-            p95_seconds: 20,
-        };
-        let at_p95 = sample_duration(&model, 1.644_853_626_951_472_2);
-        assert!((at_p95 - 20.0).abs() < 1.0e-10);
+        const Z95: f64 = 1.644_853_626_951_472_2;
+        for (min_seconds, mode_seconds, p95_seconds) in
+            [(0, 1, 2), (2, 7, 20), (10, 30, 120), (60, 300, 900)]
+        {
+            let model = DurationModel::ShiftedLognormalP95 {
+                min_seconds,
+                mode_seconds,
+                p95_seconds,
+            };
+            let a = (mode_seconds - min_seconds) as f64;
+            let b = (p95_seconds - min_seconds) as f64;
+            let sigma = (-Z95 + (Z95 * Z95 + 4.0 * (b / a).ln()).sqrt()) / 2.0;
+            let mu = a.ln() + sigma * sigma;
+
+            let at_zero = sample_duration(&model, 0.0);
+            let at_p95 = sample_duration(&model, Z95);
+            let beyond_p95 = sample_duration(&model, Z95 + 1.0);
+            assert!((at_zero - (min_seconds as f64 + mu.exp())).abs() < 1.0e-10);
+            assert!((at_p95 - p95_seconds as f64).abs() < 1.0e-9);
+            assert!(beyond_p95 > p95_seconds as f64);
+        }
     }
 
     #[test]
-    fn correlation_is_unit_diagonal_symmetric_and_caps_loadings() {
+    fn valid_correlation_construction_is_symmetric_unit_diagonal_nonnegative_and_psd() {
+        for dimension in 1..=8 {
+            let tasks: Vec<_> = (0..dimension)
+                .map(|index| {
+                    let mut task =
+                        TaskSpec::new(format!("task-{index}"), DurationModel::Fixed { seconds: 1 })
+                            .unwrap();
+                    task.correlation_groups = vec![
+                        CorrelationGroup {
+                            group: "shared".to_string(),
+                            strength: (index + 1) as f64 / (dimension + 2) as f64,
+                        },
+                        CorrelationGroup {
+                            group: format!("local-{}", index % 3),
+                            strength: 0.2,
+                        },
+                    ];
+                    task
+                })
+                .collect();
+            let (matrix, _) = build_correlation_matrix(&tasks).unwrap();
+            for (i, row) in matrix.iter().enumerate() {
+                assert!((row[i] - 1.0).abs() < 1.0e-12);
+                for (j, &value) in row.iter().enumerate() {
+                    assert!(value >= 0.0);
+                    assert!((value - matrix[j][i]).abs() < 1.0e-12);
+                }
+            }
+            assert!(cholesky(&matrix).is_ok());
+        }
+    }
+
+    #[test]
+    fn loading_norm_cap_scales_to_point_nine_five_and_warns() {
         let mut task = TaskSpec::new("a".to_string(), DurationModel::Fixed { seconds: 1 }).unwrap();
         task.correlation_groups = vec![
             CorrelationGroup {
@@ -529,11 +602,23 @@ mod tests {
         let (matrix, warnings) = build_correlation_matrix(&[task.clone(), task]).unwrap();
         assert_eq!(matrix[0][0], 1.0);
         assert_eq!(matrix[0][1], matrix[1][0]);
+        assert!((matrix[0][1] - 0.95 * 0.95).abs() < 1.0e-12);
         assert_eq!(warnings.len(), 2);
+        assert!(warnings
+            .iter()
+            .all(|warning| warning.contains("scaled to 0.95")));
     }
 
     #[test]
-    fn wilson_has_width_at_extremes() {
+    fn wilson_is_bounded_for_all_counts_and_has_width_at_extremes() {
+        for total in 1..=256 {
+            for feasible in 0..=total {
+                let (low, high) = wilson_interval(feasible, total);
+                assert!((0.0..=1.0).contains(&low));
+                assert!((0.0..=1.0).contains(&high));
+                assert!(low <= high);
+            }
+        }
         let (zero_low, zero_high) = wilson_interval(0, 1000);
         let (one_low, one_high) = wilson_interval(1000, 1000);
         assert!(zero_low < 1.0e-15);
@@ -543,19 +628,66 @@ mod tests {
     }
 
     #[test]
-    fn factorization_policy_uses_jitter_then_strict_or_independent_fallback() {
+    fn degraded_branch_goldens_freeze_jitter_independence_and_strict_policy() {
         let full = factor_matrix(&identity(2), 2, true, Vec::new()).unwrap();
         assert_eq!(full.quality, ProbabilityQuality::Full);
         assert_eq!(serde_json::to_string(&full.quality).unwrap(), "\"full\"");
 
-        let singular = vec![vec![1.0, 1.0], vec![1.0, 1.0]];
-        let jittered = factor_matrix(&singular, 2, true, Vec::new()).unwrap();
-        assert_eq!(jittered.quality, ProbabilityQuality::DegradedNumericJitter);
+        let input = std::fs::read_to_string(DEGRADED_GOLDEN_CORPUS)
+            .expect("read degraded rollout golden corpus");
+        let corpus: DegradedGoldenCorpus =
+            serde_json::from_str(&input).expect("parse degraded rollout golden corpus");
+        assert_eq!(
+            corpus.schema_version,
+            "planning-golden-corpus/rollout-degraded-c2.v1"
+        );
+        assert!(corpus.human_reviewed_then_frozen);
+        assert_eq!(
+            corpus.kernel_revision,
+            "3fd25a93d725300212d15da8c00e113ccd8a648b"
+        );
 
-        let indefinite = vec![vec![1.0, 2.0], vec![2.0, 1.0]];
-        assert!(factor_matrix(&indefinite, 2, true, Vec::new()).is_err());
-        let degraded = factor_matrix(&indefinite, 2, false, Vec::new()).unwrap();
-        assert_eq!(degraded.quality, ProbabilityQuality::DegradedIndependence);
-        assert_eq!(degraded.lower, identity(2));
+        for case in corpus.cases {
+            let result = factor_matrix(
+                &case.matrix,
+                case.dimension,
+                case.strict_validation,
+                Vec::new(),
+            );
+            if let Some(expected_error) = case.expected_error {
+                let error = match result {
+                    Ok(_) => panic!("golden case '{}' unexpectedly succeeded", case.name),
+                    Err(error) => error,
+                };
+                assert_eq!(error.message, expected_error, "golden case '{}'", case.name);
+            } else {
+                let factor = result.unwrap_or_else(|error| {
+                    panic!("golden case '{}' unexpectedly failed: {error:?}", case.name)
+                });
+                assert_eq!(
+                    Some(factor.quality),
+                    case.expected_probability_quality,
+                    "golden case '{}'",
+                    case.name
+                );
+                assert_eq!(
+                    factor.warnings, case.expected_warnings,
+                    "golden case '{}'",
+                    case.name
+                );
+                if factor.quality == ProbabilityQuality::DegradedIndependence {
+                    assert_eq!(factor.lower, identity(case.dimension));
+                }
+            }
+        }
+    }
+
+    #[test]
+    fn source_has_no_psd_repair_path() {
+        let source = include_str!("rollout.rs");
+        let forbidden_snake_case = ["nearest", "psd"].join("_");
+        let forbidden_hyphenated = ["nearest", "PSD"].join("-");
+        assert!(!source.contains(&forbidden_snake_case));
+        assert!(!source.contains(&forbidden_hyphenated));
     }
 }
