@@ -42,6 +42,21 @@ pub fn build_skeleton(request: &PlanningRequest) -> Result<Plan, SkeletonFailure
         push_occupied(&mut occupied, step)?;
     }
 
+    // DESIGN.md §15.2.2: affix all Static Tasks before placing Dynamic Tasks.
+    let mut affixed = HashMap::new();
+    for task_id in &ordered_tasks {
+        if preserved.contains_key(task_id) {
+            continue;
+        }
+        let task = task_by_id[task_id];
+        if let Some(anchor) = &task.static_anchor {
+            let window = task_effective_window(task, plan_window)?;
+            let step = anchored_step(task, anchor.start, window.start, window.end, &occupied)?;
+            push_occupied(&mut occupied, &step)?;
+            affixed.insert(task_id.clone(), step);
+        }
+    }
+
     for task_id in &ordered_tasks {
         if let Some(step) = preserved.get(task_id) {
             validate_preserved_step(step, &scheduled_by_id)?;
@@ -57,6 +72,16 @@ pub fn build_skeleton(request: &PlanningRequest) -> Result<Plan, SkeletonFailure
             })?;
         let dependency_end = dependency_end(task, &scheduled_by_id)?;
         let earliest_start = plan_window.start.max(dependency_end);
+        if let Some(step) = affixed.remove(task_id) {
+            if step.start < earliest_start {
+                return Err(SkeletonFailureDiagnostic {
+                    task_id: Some(task_id.clone()),
+                    reason: "static anchor collides with dependencies or window start".to_string(),
+                });
+            }
+            scheduled_by_id.insert(task_id.clone(), step);
+            continue;
+        }
         let step = place_task(task, plan_window, earliest_start, &occupied)?;
         push_occupied(&mut occupied, &step)?;
         scheduled_by_id.insert(task_id.clone(), step);

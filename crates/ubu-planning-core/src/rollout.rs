@@ -183,7 +183,10 @@ fn simulate(
     let mut previous_end = 0.0f64;
     let mut feasible = true;
 
-    for step in &candidate.schedule.steps {
+    // Simulation follows time, while the emitted (topological) order stays frozen.
+    let mut steps: Vec<_> = candidate.schedule.steps.iter().collect();
+    steps.sort_by_key(|step| (step.start, step.end, &step.task_id));
+    for step in steps {
         let Some(&task_index) = task_indices.get(step.task_id.as_str()) else {
             return (false, 0.0);
         };
