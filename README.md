@@ -47,3 +47,28 @@ python -m pytest tests
 ```
 
 No default build path requires GPU hardware, CUDA, torch, or Python.
+
+## Planner strategies
+
+`ubu-planning plan <path> [--strategy greedy|chunked]` and
+`ubu-planning repair <path> [--strategy greedy|chunked]` default to `greedy`.
+Unknown strategy values are errors. The default preserves fixture-oriented CLI output.
+
+The greedy `CpuStrategy` builds a first-fit skeleton in topological order and
+adds bounded suffix delays. `ChunkedSweepStrategy` partitions free time around
+Static and preserved placements, then sweeps the chunks with a bounded beam.
+Its strategy parameters are `alternatives_per_chunk` (K, default 3, clamped to
+1–3) and `beam_width` (B, default 16, minimum 1). K selects value-first,
+most-constrained-first, and value-density fills in that order. Dependency bounds,
+forced placements, capacity look-ahead, and merging by remaining Task set keep
+the search bounded and deterministic.
+
+The candidate set contains sweep plans, the greedy baseline when distinct, and
+chunk-tail delay variants, capped at 16. The greedy baseline remains available
+even when the sweep fails. Chunk-tail delays preserve Task windows and fixed
+boundaries while providing alternatives within chunks.
+
+Rollouts are unchanged: all candidates use the existing shared latent duration
+draws, and overrunning a Static boundary makes a rollout infeasible. Per-chunk
+rollout structure, streaming, splittable Tasks, partial placement, and mandatory
+routine constraints remain later work. No request or response fields change.
