@@ -491,3 +491,137 @@ pub fn sweep_plans(
         })
         .collect())
 }
+
+impl ubu_planning_core::PlannerStrategy for ChunkedSweepStrategy {
+    fn generate_candidates(&self, request: &PlanningRequest) -> ubu_planning_core::CandidateSet {
+        let sweep = sweep_plans(request, self);
+        let greedy = crate::skeleton::build_skeleton(request);
+        let mut plans = match sweep {
+            Ok(plans) => plans,
+            Err(diagnostic) => {
+                if greedy.is_err() {
+                    return ubu_planning_core::CandidateSet {
+                        plans: Vec::new(),
+                        diagnostics: vec![diagnostic.into()],
+                    };
+                }
+                Vec::new()
+            }
+        };
+        if let Ok(mut baseline) = greedy {
+            let key = placement_key(baseline.steps.iter());
+            if !plans
+                .iter()
+                .any(|plan| placement_key(plan.steps.iter()) == key)
+            {
+                baseline.plan_id.push_str("-greedy");
+                if plans.len() == MAX_SWEEP_CANDIDATES {
+                    plans.pop();
+                }
+                plans.push(baseline);
+            }
+        }
+        add_tail_delays(request, &mut plans);
+        ubu_planning_core::CandidateSet {
+            plans,
+            diagnostics: Vec::new(),
+        }
+    }
+}
+
+fn add_tail_delays(request: &PlanningRequest, plans: &mut Vec<Plan>) {
+    let Some(first) = plans.first().cloned() else {
+        return;
+    };
+    let Ok(fixed) = affix_fixed(request) else {
+        return;
+    };
+    let chunks = partition(
+        fixed.plan_window,
+        &fixed
+            .occupied
+            .iter()
+            .map(|interval| (interval.start, interval.end))
+            .collect::<Vec<_>>(),
+    );
+    let mut proposals = Vec::new();
+    // Indices reference the first candidate, whose step order may be topological.
+    let tails: Vec<Vec<usize>> = chunks
+        .iter()
+        .map(|chunk| {
+            let mut indices: Vec<_> = first
+                .steps
+                .iter()
+                .enumerate()
+                .filter(|(_, step)| {
+                    !step.static_anchor
+                        && !fixed.preserved.contains_key(&step.task_id)
+                        && step.start >= chunk.start
+                        && step.end <= chunk.end
+                })
+                .map(|(index, _)| index)
+                .collect();
+            indices.sort_by_key(|&index| {
+                let step = &first.steps[index];
+                (step.start, step.end, &step.task_id)
+            });
+            indices
+        })
+        .collect();
+    for (chunk_index, indices) in tails.iter().enumerate() {
+        for pivot in 0..indices.len() {
+            let maximum_shift = indices[pivot..]
+                .iter()
+                .map(|&index| {
+                    let step = &first.steps[index];
+                    let window_end = request
+                        .tasks()
+                        .iter()
+                        .find(|task| task.id == step.task_id)
+                        .and_then(|task| task.window.as_ref())
+                        .map_or(chunks[chunk_index].end, |w| {
+                            w.end.min(chunks[chunk_index].end)
+                        });
+                    window_end.saturating_sub(step.end)
+                })
+                .min()
+                .unwrap_or(0);
+            for ordinal in 1..=maximum_shift.min(15) {
+                let shift = (u128::from(ordinal) * u128::from(maximum_shift)
+                    / u128::from(maximum_shift.min(15))) as u64;
+                proposals.push((
+                    crate::candidate_generation::proposal_key(
+                        request.rng_seed,
+                        (chunk_index << 16) | pivot,
+                        shift,
+                    ),
+                    chunk_index,
+                    pivot,
+                    shift,
+                ));
+            }
+        }
+    }
+    proposals.sort_unstable();
+    let mut seen: BTreeSet<_> = plans
+        .iter()
+        .map(|plan| placement_key(plan.steps.iter()))
+        .collect();
+    let mut ordinal = 1;
+    for (_, chunk_index, pivot, shift) in proposals {
+        if plans.len() == MAX_SWEEP_CANDIDATES {
+            break;
+        }
+        let mut candidate = first.clone();
+        for &index in &tails[chunk_index][pivot..] {
+            candidate.steps[index].start += shift;
+            candidate.steps[index].end += shift;
+        }
+        if !seen.insert(placement_key(candidate.steps.iter())) {
+            continue;
+        }
+        candidate.plan_id = format!("{}-d{ordinal:02}", first.plan_id);
+        ordinal += 1;
+        plans.push(candidate);
+    }
+}
