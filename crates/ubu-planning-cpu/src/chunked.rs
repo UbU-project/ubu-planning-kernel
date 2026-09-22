@@ -625,3 +625,55 @@ fn add_tail_delays(request: &PlanningRequest, plans: &mut Vec<Plan>) {
         plans.push(candidate);
     }
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn partition_sorts_and_merges_touching_intervals() {
+        assert_eq!(
+            partition(
+                &TimeWindow { start: 0, end: 100 },
+                &[(50, 60), (10, 20), (20, 30)]
+            ),
+            vec![
+                Chunk { start: 0, end: 10 },
+                Chunk { start: 30, end: 50 },
+                Chunk {
+                    start: 60,
+                    end: 100
+                }
+            ]
+        );
+    }
+
+    #[test]
+    fn partition_clips_overlaps_and_drops_empty_gaps() {
+        let window = TimeWindow { start: 10, end: 90 };
+        assert_eq!(
+            partition(&window, &[(0, 20), (15, 30), (80, 120), (40, 40)]),
+            vec![Chunk { start: 30, end: 80 }]
+        );
+        assert!(partition(&window, &[(0, 100)]).is_empty());
+        assert_eq!(partition(&window, &[]), vec![Chunk { start: 10, end: 90 }]);
+    }
+
+    #[test]
+    fn defaults_and_rule_order_are_stable() {
+        let strategy = ChunkedSweepStrategy::default();
+        assert_eq!(
+            (strategy.alternatives_per_chunk, strategy.beam_width),
+            (3, 16)
+        );
+        assert_eq!(MAX_SWEEP_CANDIDATES, 16);
+        assert_eq!(
+            FILL_RULES,
+            [
+                FillRule::ValueFirst,
+                FillRule::MostConstrainedFirst,
+                FillRule::ValueDensity
+            ]
+        );
+    }
+}

@@ -37,3 +37,35 @@ pub fn strategy_args(args: &[String], command: &str) -> Result<(String, Strategy
     };
     Ok((path.clone(), strategy))
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn plan_and_repair_strategy_arguments_are_strict_and_default_to_greedy() {
+        for command in ["plan", "repair"] {
+            let args = vec!["request.json".to_string()];
+            assert!(matches!(
+                strategy_args(&args, command).unwrap().1,
+                Strategy::Greedy
+            ));
+            for value in ["greedy", "chunked"] {
+                let args = vec!["request.json".into(), "--strategy".into(), value.into()];
+                assert!(strategy_args(&args, command).is_ok());
+            }
+            for suffix in [
+                vec!["--strategy"],
+                vec!["--strategy", "unknown"],
+                vec!["--other", "chunked"],
+            ] {
+                let args: Vec<_> = std::iter::once("request.json")
+                    .chain(suffix)
+                    .map(String::from)
+                    .collect();
+                assert!(strategy_args(&args, command).is_err());
+            }
+            assert!(strategy_args(&[], command).is_err());
+        }
+    }
+}
