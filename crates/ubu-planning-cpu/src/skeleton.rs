@@ -7,13 +7,23 @@ use ubu_planning_core::request::{
 use ubu_planning_core::response::{Plan, PlanStatus, PlanStep};
 
 #[derive(Debug, Clone)]
-struct OccupiedInterval {
-    task_id: String,
-    start: u64,
-    end: u64,
+pub(crate) struct OccupiedInterval {
+    pub(crate) task_id: String,
+    pub(crate) start: u64,
+    pub(crate) end: u64,
 }
 
-pub fn build_skeleton(request: &PlanningRequest) -> Result<Plan, SkeletonFailureDiagnostic> {
+pub(crate) struct FixedPlacements<'a> {
+    pub(crate) plan_window: &'a TimeWindow,
+    pub(crate) ordered_tasks: Vec<String>,
+    pub(crate) preserved: HashMap<String, PlanStep>,
+    pub(crate) affixed: HashMap<String, PlanStep>,
+    pub(crate) occupied: Vec<OccupiedInterval>,
+}
+
+pub(crate) fn affix_fixed(
+    request: &PlanningRequest,
+) -> Result<FixedPlacements<'_>, SkeletonFailureDiagnostic> {
     let plan_window = request
         .time_window
         .as_ref()
@@ -36,7 +46,6 @@ pub fn build_skeleton(request: &PlanningRequest) -> Result<Plan, SkeletonFailure
         .collect();
     let preserved = preserved_steps(request, plan_window, &task_by_id);
     let mut occupied = Vec::new();
-    let mut scheduled_by_id = HashMap::new();
 
     for step in preserved.values() {
         push_occupied(&mut occupied, step)?;
@@ -56,6 +65,30 @@ pub fn build_skeleton(request: &PlanningRequest) -> Result<Plan, SkeletonFailure
             affixed.insert(task_id.clone(), step);
         }
     }
+
+    Ok(FixedPlacements {
+        plan_window,
+        ordered_tasks,
+        preserved,
+        affixed,
+        occupied,
+    })
+}
+
+pub fn build_skeleton(request: &PlanningRequest) -> Result<Plan, SkeletonFailureDiagnostic> {
+    let FixedPlacements {
+        plan_window,
+        ordered_tasks,
+        preserved,
+        mut affixed,
+        mut occupied,
+    } = affix_fixed(request)?;
+    let task_by_id: HashMap<_, _> = request
+        .tasks()
+        .iter()
+        .map(|task| (task.id.clone(), task))
+        .collect();
+    let mut scheduled_by_id = HashMap::new();
 
     for task_id in &ordered_tasks {
         if let Some(step) = preserved.get(task_id) {
@@ -109,7 +142,7 @@ pub fn build_skeleton(request: &PlanningRequest) -> Result<Plan, SkeletonFailure
     })
 }
 
-fn plan_id(request: &PlanningRequest) -> String {
+pub(crate) fn plan_id(request: &PlanningRequest) -> String {
     match request.mode {
         PlanningMode::FreshGeneration => {
             format!("plan-{}-{:016x}", request.request_id, request.rng_seed)

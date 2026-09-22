@@ -88,7 +88,7 @@ fn placement_key(plan: &Plan) -> Vec<(String, u64, u64)> {
         .collect()
 }
 
-fn proposal_key(seed: u64, pivot: usize, shift: u64) -> u64 {
+pub(crate) fn proposal_key(seed: u64, pivot: usize, shift: u64) -> u64 {
     // SplitMix64 gives a deterministic seed-dependent ordering without adding a
     // stochastic search or a platform-dependent RNG implementation.
     let mut value = seed ^ (pivot as u64).rotate_left(21) ^ shift.rotate_left(43);
