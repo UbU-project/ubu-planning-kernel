@@ -70,19 +70,26 @@ fn most_constrained_rescues_narrow_slot() {
         .generate_candidates(&request)
         .unplaced
         .is_empty());
-    let plans = sweep_plans(&request, &ChunkedSweepStrategy::default()).unwrap();
+    let plans = sweep_plans(&request, &ChunkedSweepStrategy::default())
+        .unwrap()
+        .plans;
     assert_eq!(
         placements(&plans[0]),
         vec![("b-narrow", 0, 10), ("a-wide", 10, 20)]
     );
-    assert!(sweep_plans(
-        &request,
-        &ChunkedSweepStrategy {
-            alternatives_per_chunk: 1,
-            beam_width: 16
-        }
-    )
-    .is_err());
+    assert!(
+        sweep_plans(
+            &request,
+            &ChunkedSweepStrategy {
+                alternatives_per_chunk: 1,
+                beam_width: 16
+            }
+        )
+        .unwrap()
+        .unplaced
+        .len()
+            == 1
+    );
 }
 
 #[test]
@@ -99,7 +106,9 @@ fn look_ahead_across_static() {
         .generate_candidates(&request)
         .unplaced
         .is_empty());
-    let plans = sweep_plans(&request, &ChunkedSweepStrategy::default()).unwrap();
+    let plans = sweep_plans(&request, &ChunkedSweepStrategy::default())
+        .unwrap()
+        .plans;
     assert_eq!(
         placements(&plans[0]),
         vec![("b-tight", 0, 30), ("s", 40, 60), ("a-flex", 60, 90)]
@@ -109,7 +118,9 @@ fn look_ahead_across_static() {
 #[test]
 fn value_first_within_chunk() {
     let request = request(vec![task("a-low", 10, 0.1), task("b-high", 10, 1.0)], 100);
-    let plans = sweep_plans(&request, &ChunkedSweepStrategy::default()).unwrap();
+    let plans = sweep_plans(&request, &ChunkedSweepStrategy::default())
+        .unwrap()
+        .plans;
     assert_eq!(
         placements(&plans[0]),
         vec![("b-high", 0, 10), ("a-low", 10, 20)]
@@ -161,7 +172,8 @@ fn capacity_look_ahead_prunes_higher_scoring_dead_end() {
             ..Default::default()
         },
     )
-    .unwrap();
+    .unwrap()
+    .plans;
     assert_eq!(
         placements(&plans[0]),
         vec![
@@ -177,7 +189,9 @@ fn capacity_look_ahead_prunes_higher_scoring_dead_end() {
 #[test]
 fn state_merging_keeps_higher_utility_order() {
     let request = request(vec![task("q", 30, 1.0), task("p", 10, 0.9)], 100);
-    let plans = sweep_plans(&request, &ChunkedSweepStrategy::default()).unwrap();
+    let plans = sweep_plans(&request, &ChunkedSweepStrategy::default())
+        .unwrap()
+        .plans;
     assert_eq!(plans.len(), 1);
     assert_eq!(placements(&plans[0]), vec![("p", 0, 10), ("q", 10, 40)]);
 }
@@ -266,7 +280,7 @@ fn candidate_set_retains_distinct_greedy_and_reproducible_delays() {
     for p in plans {
         assert_valid(&distinct, &p, &[]);
     }
-    // Restricting K deliberately makes the sweep fail; the benchmark still survives.
+    // Restricting K makes the sweep omit work; the complete greedy baseline replaces it.
     let narrow = request(vec![task("narrow", 10, 0.1), task("wide", 10, 1.0)], 20);
     let mut narrow = narrow;
     narrow.task_graph.tasks[0].window = Some(ubu_planning_core::TimeWindow { start: 0, end: 10 });
@@ -274,7 +288,7 @@ fn candidate_set_retains_distinct_greedy_and_reproducible_delays() {
         alternatives_per_chunk: 1,
         ..Default::default()
     };
-    assert!(sweep_plans(&narrow, &strategy).is_err());
+    assert!(!sweep_plans(&narrow, &strategy).unwrap().unplaced.is_empty());
     assert!(strategy.generate_candidates(&narrow).plans[0]
         .plan_id
         .ends_with("-greedy"));
@@ -296,7 +310,10 @@ fn greedy_fallback_delays_use_time_order_for_window_limits() {
         alternatives_per_chunk: 1,
         ..Default::default()
     };
-    assert!(sweep_plans(&request, &strategy).is_err());
+    assert!(!sweep_plans(&request, &strategy)
+        .unwrap()
+        .unplaced
+        .is_empty());
     let plans = strategy.generate_candidates(&request).plans;
     assert!(plans.len() > 1 && plans[0].plan_id.ends_with("-greedy"));
     for plan in plans {
@@ -408,6 +425,7 @@ fn randomized_candidates_are_hard_valid_and_never_lose_to_greedy() {
                 .map(|p| utility(&request, p))
                 .max_by(f64::total_cmp)
                 .unwrap_or(f64::NEG_INFINITY);
+            assert!(!set.plans.is_empty(), "greedy survived case {case}");
             if set.unplaced.iter().map(|u| &u.task_ref).collect::<Vec<_>>()
                 == greedy
                     .unplaced

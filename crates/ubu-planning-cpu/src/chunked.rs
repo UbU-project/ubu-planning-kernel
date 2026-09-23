@@ -3,12 +3,13 @@ use std::cmp::Ordering;
 use std::collections::{BTreeMap, BTreeSet};
 
 use ubu_planning_core::{
-    Plan, PlanStatus, PlanStep, PlanningRequest, SkeletonFailureDiagnostic, TaskSpec, TimeWindow,
+    compare_omissions, ChunkRef, Plan, PlanStatus, PlanStep, PlanningRequest, SelectionRank,
+    SkeletonFailureDiagnostic, TaskSpec, TimeWindow, UnplacedReason, UnplacedTask,
 };
 
 use crate::skeleton::{affix_fixed, plan_id};
 
-pub const DEFAULT_ALTERNATIVES_PER_CHUNK: usize = 3;
+pub const DEFAULT_ALTERNATIVES_PER_CHUNK: usize = 4;
 pub const DEFAULT_BEAM_WIDTH: usize = 16;
 pub const MAX_SWEEP_CANDIDATES: usize = 16;
 
@@ -32,11 +33,13 @@ pub enum FillRule {
     ValueFirst,
     MostConstrainedFirst,
     ValueDensity,
+    ProtectedFirst,
 }
-pub const FILL_RULES: [FillRule; 3] = [
+pub const FILL_RULES: [FillRule; 4] = [
     FillRule::ValueFirst,
     FillRule::MostConstrainedFirst,
     FillRule::ValueDensity,
+    FillRule::ProtectedFirst,
 ];
 
 #[derive(Debug, Clone, PartialEq, Eq)]
@@ -73,20 +76,132 @@ pub fn partition(plan_window: &TimeWindow, fixed: &[(u64, u64)]) -> Vec<Chunk> {
     chunks
 }
 
+#[derive(Clone)]
 struct Unit<'a> {
     task: &'a TaskSpec,
     duration: u64,
     weight: f64,
     release: u64,
     deadline: u64,
+    base_deadline: u64,
+    protected: bool,
+    rank: SelectionRank,
     eligible: Vec<usize>,
 }
 
 #[derive(Clone)]
 struct Branch {
     remaining: BTreeSet<String>,
+    omitted: BTreeMap<String, UnplacedReason>,
+    excluded: BTreeSet<String>,
+    eligible_at_omission: BTreeMap<String, Vec<ChunkRef>>,
     placed: BTreeMap<String, PlanStep>,
     utility: f64,
+}
+
+struct Sweep<'a> {
+    units: BTreeMap<String, Unit<'a>>,
+    fixed: BTreeMap<String, PlanStep>,
+    chunks: Vec<Chunk>,
+    dependents: BTreeMap<String, BTreeSet<String>>,
+    window: &'a TimeWindow,
+    order: Vec<String>,
+}
+#[derive(Debug)]
+pub struct SweepOutcome {
+    pub plans: Vec<Plan>,
+    pub unplaced: Vec<UnplacedTask>,
+}
+impl<'a> Sweep<'a> {
+    fn recompute_eligibility(&self, branch: &Branch) -> BTreeMap<String, Unit<'a>> {
+        let mut units = self.units.clone();
+        for unit in units.values_mut() {
+            unit.deadline = unit.base_deadline;
+        }
+        for id in self.order.iter().rev() {
+            if branch.excluded.contains(id) {
+                continue;
+            }
+            let (start, deps) = if let Some(step) = self.fixed.get(id) {
+                (step.start, step.depends_on.clone())
+            } else {
+                let unit = &units[id];
+                (
+                    unit.deadline.saturating_sub(unit.duration),
+                    unit.task.depends_on.clone(),
+                )
+            };
+            for dep in deps {
+                if let Some(unit) = units.get_mut(&dep) {
+                    unit.deadline = unit.deadline.min(start);
+                }
+            }
+        }
+        for unit in units.values_mut() {
+            unit.eligible = self
+                .chunks
+                .iter()
+                .enumerate()
+                .filter_map(|(i, c)| {
+                    c.start
+                        .max(unit.release)
+                        .checked_add(unit.duration)
+                        .is_some_and(|end| end <= c.end.min(unit.deadline))
+                        .then_some(i)
+                })
+                .collect();
+        }
+        units
+    }
+    fn exclude(&self, branch: &mut Branch, id: &str, reason: UnplacedReason) {
+        let units = self.recompute_eligibility(branch);
+        let roots = BTreeSet::from([id.to_owned()]);
+        let excluded = crate::protection::dependents_of(&self.dependents, &roots)
+            .union(&roots)
+            .cloned()
+            .collect::<BTreeSet<_>>();
+        for task in &excluded {
+            if branch.excluded.contains(task) {
+                continue;
+            }
+            if let Some(unit) = units.get(task) {
+                branch.eligible_at_omission.insert(
+                    task.clone(),
+                    unit.eligible
+                        .iter()
+                        .map(|&index| ChunkRef {
+                            index,
+                            start: self.chunks[index].start,
+                            end: self.chunks[index].end,
+                        })
+                        .collect(),
+                );
+            }
+            branch.remaining.remove(task);
+        }
+        branch.omitted.insert(id.into(), reason);
+        branch.excluded.extend(excluded);
+    }
+    fn strand_reason(&self, branch: &Branch, unit: &Unit<'_>) -> UnplacedReason {
+        if branch.placed.values().any(|step| {
+            !self.units[&step.task_id].protected
+                && unit
+                    .eligible
+                    .iter()
+                    .any(|&i| step.start < self.chunks[i].end && step.end > self.chunks[i].start)
+        }) {
+            UnplacedReason::OmittedLowerValue
+        } else {
+            UnplacedReason::InsufficientTotalCapacity
+        }
+    }
+    fn omission_ranks(&self, branch: &Branch) -> Vec<SelectionRank> {
+        branch
+            .excluded
+            .iter()
+            .map(|id| self.units[id].rank.clone())
+            .collect()
+    }
 }
 
 type PlacementKey = Vec<(u64, u64, String)>;
@@ -109,7 +224,18 @@ fn compare_units(left: &Unit<'_>, right: &Unit<'_>, index: usize, rule: FillRule
     let count = |unit: &Unit<'_>| unit.eligible.iter().filter(|&&i| i >= index).count();
     forced(right)
         .cmp(&forced(left))
+        .then_with(|| {
+            if forced(left) && forced(right) {
+                right.protected.cmp(&left.protected)
+            } else {
+                Ordering::Equal
+            }
+        })
         .then_with(|| match rule {
+            FillRule::ProtectedFirst => right
+                .protected
+                .cmp(&left.protected)
+                .then_with(|| left.rank.compare_protection(&right.rank)),
             FillRule::ValueFirst => right
                 .weight
                 .total_cmp(&left.weight)
@@ -127,13 +253,14 @@ fn compare_units(left: &Unit<'_>, right: &Unit<'_>, index: usize, rule: FillRule
 
 fn fill(
     branch: &Branch,
-    units: &BTreeMap<String, Unit<'_>>,
-    fixed: &BTreeMap<String, PlanStep>,
-    chunk: &Chunk,
+    sweep: &Sweep<'_>,
     index: usize,
     rule: FillRule,
-    window: &TimeWindow,
 ) -> Result<Branch, String> {
+    let mut units = sweep.recompute_eligibility(branch);
+    let fixed = &sweep.fixed;
+    let chunk = &sweep.chunks[index];
+    let window = sweep.window;
     let mut child = branch.clone();
     let mut failed = BTreeSet::new();
     loop {
@@ -204,41 +331,77 @@ fn fill(
             failed.insert(id);
         }
     }
-    if let Some(id) = child
-        .remaining
-        .iter()
-        .find(|id| units[*id].eligible.last() == Some(&index))
-    {
-        Err(id.clone())
-    } else {
-        Ok(child)
-    }
-}
-
-fn look_ahead(
-    branch: &Branch,
-    units: &BTreeMap<String, Unit<'_>>,
-    chunks: &[Chunk],
-    index: usize,
-) -> bool {
-    if branch
-        .remaining
-        .iter()
-        .any(|id| !units[id].eligible.iter().any(|&i| i > index))
-    {
-        return false;
-    }
-    let mut capacity = 0_u128;
-    for (j, chunk) in chunks.iter().enumerate().skip(index + 1) {
-        capacity += u128::from(chunk.end - chunk.start);
-        let required: u128 = branch
+    loop {
+        let id = child
             .remaining
             .iter()
-            .filter(|id| units[*id].eligible.last().is_some_and(|&last| last <= j))
-            .map(|id| u128::from(units[id].duration))
-            .sum();
-        if required > capacity {
+            .filter(|id| units[*id].eligible.last().is_none_or(|&last| last <= index))
+            .min_by_key(|id| {
+                (
+                    !units[*id]
+                        .task
+                        .depends_on
+                        .iter()
+                        .all(|dep| fixed.contains_key(dep) || child.placed.contains_key(dep)),
+                    *id,
+                )
+            })
+            .cloned();
+        let Some(id) = id else {
+            break;
+        };
+        if units[&id].protected {
+            return Err(id);
+        }
+        let reason = sweep.strand_reason(&child, &units[&id]);
+        sweep.exclude(&mut child, &id, reason);
+        units = sweep.recompute_eligibility(&child);
+    }
+    Ok(child)
+}
+
+fn project_omissions(branch: &mut Branch, sweep: &Sweep<'_>, index: usize) -> bool {
+    let mut units = sweep.recompute_eligibility(branch);
+    loop {
+        let stranded = branch
+            .remaining
+            .iter()
+            .find(|id| !units[*id].eligible.iter().any(|&i| i > index))
+            .cloned();
+        let Some(id) = stranded else {
+            break;
+        };
+        if units[&id].protected {
             return false;
+        }
+        let reason = sweep.strand_reason(branch, &units[&id]);
+        sweep.exclude(branch, &id, reason);
+        units = sweep.recompute_eligibility(branch);
+    }
+    let mut capacity = 0_u128;
+    for (j, chunk) in sweep.chunks.iter().enumerate().skip(index + 1) {
+        capacity += u128::from(chunk.end - chunk.start);
+        loop {
+            let due: Vec<_> = branch
+                .remaining
+                .iter()
+                .filter(|id| units[*id].eligible.last().is_some_and(|&last| last <= j))
+                .cloned()
+                .collect();
+            let required: u128 = due.iter().map(|id| u128::from(units[id].duration)).sum();
+            if required <= capacity {
+                break;
+            }
+            let Some(id) = due
+                .iter()
+                .filter(|id| !units[*id].protected)
+                .max_by(|a, b| units[*a].rank.compare_protection(&units[*b].rank))
+            else {
+                return false;
+            };
+            let reason = sweep.strand_reason(branch, &units[id]);
+            sweep.exclude(branch, id, reason);
+            units = sweep.recompute_eligibility(branch);
         }
     }
     true
@@ -258,11 +421,9 @@ fn optimistic_score(
             .iter()
             .map(|id| {
                 let unit = &units[id];
-                let next = *unit
-                    .eligible
-                    .iter()
-                    .find(|&&i| i > index)
-                    .expect("look-ahead retained a later chunk");
+                let Some(&next) = unit.eligible.iter().find(|&&i| i > index) else {
+                    return 0.0;
+                };
                 utility(
                     unit,
                     chunks[next]
@@ -278,7 +439,7 @@ fn optimistic_score(
 pub fn sweep_plans(
     request: &PlanningRequest,
     strategy: &ChunkedSweepStrategy,
-) -> Result<Vec<Plan>, SkeletonFailureDiagnostic> {
+) -> Result<SweepOutcome, SkeletonFailureDiagnostic> {
     let placements = affix_fixed(request)?;
     let window = placements.plan_window;
     let fixed: BTreeMap<_, _> = placements
@@ -326,6 +487,7 @@ pub fn sweep_plans(
             }
         }
     }
+    let protected = crate::protection::protected_tasks(request, fixed.keys().cloned());
     let mut units: BTreeMap<String, Unit<'_>> = BTreeMap::new();
     for id in &placements.ordered_tasks {
         if fixed.contains_key(id) {
@@ -354,69 +516,88 @@ pub fn sweep_plans(
                 deadline: window
                     .end
                     .min(task.window.as_ref().map_or(window.end, |w| w.end)),
+                base_deadline: window
+                    .end
+                    .min(task.window.as_ref().map_or(window.end, |w| w.end)),
+                protected: protected.contains(id),
+                rank: crate::protection::selection_rank(task),
                 eligible: Vec::new(),
             },
         );
     }
-    // Propagate deadlines back through both fixed and movable dependents.
-    for id in placements.ordered_tasks.iter().rev() {
-        let (latest_start, dependencies) = if let Some(step) = fixed.get(id) {
-            (
-                step.start,
-                if placements.preserved.contains_key(id) {
-                    &step.depends_on
-                } else {
-                    &tasks[id].depends_on
-                },
-            )
-        } else {
-            let unit = &units[id];
-            (
-                unit.deadline.saturating_sub(unit.duration),
-                &unit.task.depends_on,
-            )
-        };
-        for dep in dependencies {
-            if let Some(unit) = units.get_mut(dep) {
-                unit.deadline = unit.deadline.min(latest_start);
-            }
-        }
-    }
-    for (id, unit) in &mut units {
-        unit.eligible = chunks
-            .iter()
-            .enumerate()
-            .filter_map(|(index, chunk)| {
-                chunk
-                    .start
-                    .max(unit.release)
-                    .checked_add(unit.duration)
-                    .is_some_and(|end| end <= chunk.end.min(unit.deadline))
-                    .then_some(index)
-            })
-            .collect();
-        if unit.eligible.is_empty() {
-            return Err(SkeletonFailureDiagnostic {
-                task_id: Some(id.clone()),
-                reason: "no chunk can hold the task inside its window".to_string(),
-            });
-        }
-    }
-    let mut beam = vec![Branch {
-        remaining: units.keys().cloned().collect(),
+    let sweep = Sweep {
+        units,
+        fixed,
+        chunks,
+        dependents: crate::protection::dependent_index(request),
+        window,
+        order: placements.ordered_tasks,
+    };
+    let mut root = Branch {
+        remaining: sweep.units.keys().cloned().collect(),
         placed: BTreeMap::new(),
         utility: 0.0,
-    }];
-    for (index, chunk) in chunks.iter().enumerate() {
-        let mut merged: BTreeMap<BTreeSet<String>, Branch> = BTreeMap::new();
+        omitted: BTreeMap::new(),
+        excluded: BTreeSet::new(),
+        eligible_at_omission: BTreeMap::new(),
+    };
+    for id in &sweep.order {
+        if !root.remaining.contains(id) {
+            continue;
+        }
+        let unit = &sweep.units[id];
+        if unit
+            .release
+            .checked_add(unit.duration)
+            .is_none_or(|end| end > unit.base_deadline)
+        {
+            if unit.protected {
+                return Err(SkeletonFailureDiagnostic {
+                    task_id: Some(id.clone()),
+                    reason: "task has insufficient available window".into(),
+                });
+            }
+            sweep.exclude(&mut root, id, UnplacedReason::OutsideAllowedWindow);
+        }
+    }
+    loop {
+        let units = sweep.recompute_eligibility(&root);
+        let id = root
+            .remaining
+            .iter()
+            .filter(|id| units[*id].eligible.is_empty())
+            .min_by_key(|id| {
+                (
+                    sweep
+                        .dependents
+                        .get(*id)
+                        .is_some_and(|deps| deps.iter().any(|d| root.remaining.contains(d))),
+                    *id,
+                )
+            })
+            .cloned();
+        let Some(id) = id else {
+            break;
+        };
+        if units[&id].protected {
+            return Err(SkeletonFailureDiagnostic {
+                task_id: Some(id),
+                reason: "no chunk can hold the task inside its window".into(),
+            });
+        }
+        sweep.exclude(&mut root, &id, UnplacedReason::NoEligibleChunkLargeEnough);
+    }
+    let mut beam = vec![root];
+    for index in 0..sweep.chunks.len() {
+        let mut merged: BTreeMap<(BTreeSet<String>, BTreeSet<String>), Branch> = BTreeMap::new();
         let mut stranded = BTreeSet::new();
         for branch in &beam {
             let mut seen = BTreeSet::new();
             for &rule in FILL_RULES
                 .iter()
-                .take(strategy.alternatives_per_chunk.clamp(1, 3))
+                .take(strategy.alternatives_per_chunk.clamp(1, FILL_RULES.len()))
             {
-                let child = match fill(branch, &units, &fixed, chunk, index, rule, window) {
+                let mut child = match fill(branch, &sweep, index, rule) {
                     Ok(child) => child,
                     Err(id) => {
                         stranded.insert(id);
@@ -424,10 +605,12 @@ pub fn sweep_plans(
                     }
                 };
                 let key = placement_key(child.placed.values());
-                if !seen.insert(key.clone()) || !look_ahead(&child, &units, &chunks, index) {
+                if !project_omissions(&mut child, &sweep, index)
+                    || !seen.insert((child.excluded.clone(), key.clone()))
+                {
                     continue;
                 }
-                match merged.entry(child.remaining.clone()) {
+                match merged.entry((child.excluded.clone(), child.remaining.clone())) {
                     std::collections::btree_map::Entry::Vacant(entry) => {
                         entry.insert(child);
                     }
@@ -447,8 +630,23 @@ pub fn sweep_plans(
         }
         beam = merged.into_values().collect();
         beam.sort_by(|left, right| {
-            optimistic_score(right, &units, &chunks, index, window)
-                .total_cmp(&optimistic_score(left, &units, &chunks, index, window))
+            compare_omissions(&sweep.omission_ranks(left), &sweep.omission_ranks(right))
+                .then_with(|| {
+                    optimistic_score(
+                        right,
+                        &sweep.recompute_eligibility(right),
+                        &sweep.chunks,
+                        index,
+                        window,
+                    )
+                    .total_cmp(&optimistic_score(
+                        left,
+                        &sweep.recompute_eligibility(left),
+                        &sweep.chunks,
+                        index,
+                        window,
+                    ))
+                })
                 .then_with(|| {
                     placement_key(left.placed.values()).cmp(&placement_key(right.placed.values()))
                 })
@@ -461,13 +659,30 @@ pub fn sweep_plans(
             });
         }
     }
+    let best = &beam[0];
+    if best.placed.is_empty() && sweep.fixed.is_empty() {
+        return Err(SkeletonFailureDiagnostic {
+            task_id: None,
+            reason: "partial placement left no Task in the Plan".into(),
+        });
+    }
+    let excluded = best.excluded.clone();
+    let unplaced = crate::skeleton::unplaced_report(
+        request,
+        &best.omitted,
+        &best.excluded,
+        &sweep.dependents,
+        &best.eligible_at_omission,
+    );
     let base = plan_id(request);
-    Ok(beam
+    let plans = beam
         .into_iter()
+        .filter(|branch| branch.excluded == excluded)
         .take(MAX_SWEEP_CANDIDATES)
         .enumerate()
         .map(|(index, branch)| {
-            let mut steps: Vec<_> = fixed
+            let mut steps: Vec<_> = sweep
+                .fixed
                 .values()
                 .cloned()
                 .chain(branch.placed.into_values())
@@ -489,45 +704,53 @@ pub fn sweep_plans(
                 steps,
             }
         })
-        .collect())
+        .collect();
+    Ok(SweepOutcome { plans, unplaced })
 }
 
 impl ubu_planning_core::PlannerStrategy for ChunkedSweepStrategy {
     fn generate_candidates(&self, request: &PlanningRequest) -> ubu_planning_core::CandidateSet {
         let sweep = sweep_plans(request, self);
         let greedy = crate::skeleton::build_skeleton(request);
-        let mut plans = match sweep {
-            Ok(plans) => plans,
+        let (mut plans, mut unplaced) = match sweep {
+            Ok(outcome) => (outcome.plans, outcome.unplaced),
             Err(diagnostic) => {
                 if greedy.is_err() {
                     return ubu_planning_core::CandidateSet {
-                        unplaced: Vec::new(),
                         plans: Vec::new(),
+                        unplaced: Vec::new(),
                         diagnostics: vec![diagnostic.into()],
                     };
                 }
-                Vec::new()
+                (Vec::new(), Vec::new())
             }
         };
-        let mut unplaced = Vec::new();
-        if let Some(outcome) = greedy
-            .ok()
-            .filter(|outcome| plans.is_empty() || outcome.unplaced.is_empty())
-        {
-            if plans.is_empty() {
+        if let Ok(outcome) = greedy {
+            let ranks = |report: &[UnplacedTask]| {
+                report
+                    .iter()
+                    .map(|u| u.selection_rank.clone())
+                    .collect::<Vec<_>>()
+            };
+            let order = if plans.is_empty() {
+                Ordering::Less
+            } else {
+                compare_omissions(&ranks(&outcome.unplaced), &ranks(&unplaced))
+            };
+            if order.is_lt() {
+                plans.clear();
                 unplaced = outcome.unplaced;
             }
-            let mut baseline = outcome.plan;
-            let key = placement_key(baseline.steps.iter());
-            if !plans
-                .iter()
-                .any(|plan| placement_key(plan.steps.iter()) == key)
-            {
-                baseline.plan_id.push_str("-greedy");
-                if plans.len() == MAX_SWEEP_CANDIDATES {
-                    plans.pop();
+            if !order.is_gt() {
+                let mut baseline = outcome.plan;
+                let key = placement_key(baseline.steps.iter());
+                if !plans.iter().any(|p| placement_key(p.steps.iter()) == key) {
+                    baseline.plan_id.push_str("-greedy");
+                    if plans.len() == MAX_SWEEP_CANDIDATES {
+                        plans.pop();
+                    }
+                    plans.push(baseline);
                 }
-                plans.push(baseline);
             }
         }
         add_tail_delays(request, &mut plans);
@@ -674,7 +897,7 @@ mod tests {
         let strategy = ChunkedSweepStrategy::default();
         assert_eq!(
             (strategy.alternatives_per_chunk, strategy.beam_width),
-            (3, 16)
+            (4, 16)
         );
         assert_eq!(MAX_SWEEP_CANDIDATES, 16);
         assert_eq!(
@@ -682,7 +905,8 @@ mod tests {
             [
                 FillRule::ValueFirst,
                 FillRule::MostConstrainedFirst,
-                FillRule::ValueDensity
+                FillRule::ValueDensity,
+                FillRule::ProtectedFirst
             ]
         );
     }
