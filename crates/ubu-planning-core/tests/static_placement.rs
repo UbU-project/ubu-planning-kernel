@@ -23,7 +23,8 @@ fn earlier_dynamic_task_plans_around_later_static_anchor() {
     fixed["static_anchor"] = json!({"start": 0});
     let plan = build_skeleton(&request(vec![task("dynamic", 10), fixed])).unwrap();
     assert_eq!(
-        plan.steps
+        plan.plan
+            .steps
             .iter()
             .map(|s| (s.task_id.as_str(), s.start, s.end))
             .collect::<Vec<_>>(),

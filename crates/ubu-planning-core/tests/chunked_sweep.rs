@@ -37,7 +37,11 @@ fn placements(plan: &Plan) -> Vec<(&str, u64, u64)> {
         .map(|s| (s.task_id.as_str(), s.start, s.end))
         .collect()
 }
-fn assert_valid(request: &PlanningRequest, plan: &Plan) {
+fn assert_valid(
+    request: &PlanningRequest,
+    plan: &Plan,
+    unplaced: &[ubu_planning_core::UnplacedTask],
+) {
     assert!(ubu_planning_core::validate_plan(plan).is_valid, "{plan:?}");
     let full = full_legitimize(plan, None, None);
     assert_ne!(
@@ -46,6 +50,7 @@ fn assert_valid(request: &PlanningRequest, plan: &Plan) {
         "{request:?}\n{plan:?}"
     );
     let mut ids: Vec<_> = plan.steps.iter().map(|s| &s.task_id).collect();
+    ids.extend(unplaced.iter().map(|u| &u.task_ref));
     ids.sort();
     let mut expected: Vec<_> = request.tasks().iter().map(|t| &t.id).collect();
     expected.sort();
@@ -61,7 +66,10 @@ fn most_constrained_rescues_narrow_slot() {
         ],
         100,
     );
-    assert!(CpuStrategy.generate_candidates(&request).plans.is_empty());
+    assert!(!CpuStrategy
+        .generate_candidates(&request)
+        .unplaced
+        .is_empty());
     let plans = sweep_plans(&request, &ChunkedSweepStrategy::default()).unwrap();
     assert_eq!(
         placements(&plans[0]),
@@ -87,7 +95,10 @@ fn look_ahead_across_static() {
         ],
         100,
     );
-    assert!(CpuStrategy.generate_candidates(&request).plans.is_empty());
+    assert!(!CpuStrategy
+        .generate_candidates(&request)
+        .unplaced
+        .is_empty());
     let plans = sweep_plans(&request, &ChunkedSweepStrategy::default()).unwrap();
     assert_eq!(
         placements(&plans[0]),
@@ -120,7 +131,7 @@ fn dependencies_propagate_to_fixed_and_movable_dependents() {
         .plans;
     assert!(!plans.is_empty());
     for plan in plans {
-        assert_valid(&request, &plan);
+        assert_valid(&request, &plan, &[]);
         let a = plan.steps.iter().find(|s| s.task_id == "a").unwrap();
         let b = plan.steps.iter().find(|s| s.task_id == "b").unwrap();
         assert!(a.end <= 15 && a.end <= b.start);
@@ -139,7 +150,10 @@ fn capacity_look_ahead_prunes_higher_scoring_dead_end() {
         ],
         100,
     );
-    assert!(CpuStrategy.generate_candidates(&request).plans.is_empty());
+    assert!(!CpuStrategy
+        .generate_candidates(&request)
+        .unplaced
+        .is_empty());
     let plans = sweep_plans(
         &request,
         &ChunkedSweepStrategy {
@@ -169,7 +183,7 @@ fn state_merging_keeps_higher_utility_order() {
 }
 
 #[test]
-fn infeasible_returns_one_skeleton_diagnostic() {
+fn contested_slot_omits_optional_task() {
     let request = request(
         vec![
             ranged(task("a", 30, 1.0), 0, 40),
@@ -178,11 +192,12 @@ fn infeasible_returns_one_skeleton_diagnostic() {
         100,
     );
     let result = ChunkedSweepStrategy::default().generate_candidates(&request);
-    assert!(result.plans.is_empty());
-    assert_eq!(result.diagnostics.len(), 1);
-    assert!(result.diagnostics[0]
-        .message
-        .starts_with("Could not build deterministic skeleton"));
+    assert!(!result.plans.is_empty());
+    assert_eq!(result.unplaced.len(), 1);
+    assert_eq!(result.unplaced[0].task_ref, "b");
+    for plan in &result.plans {
+        assert_valid(&request, plan, &result.unplaced);
+    }
 }
 
 #[test]
@@ -215,7 +230,7 @@ fn repair_preserves_history_and_in_progress_steps() {
     let result = ChunkedSweepStrategy::default().generate_candidates(&request);
     assert!(!result.plans.is_empty());
     for plan in result.plans {
-        assert_valid(&request, &plan);
+        assert_valid(&request, &plan, &[]);
         assert_eq!(plan.supersedes_plan_id.as_deref(), Some("plan-prior"));
         assert_eq!(
             &plan.steps[..2],
@@ -249,7 +264,7 @@ fn candidate_set_retains_distinct_greedy_and_reproducible_delays() {
     );
     assert!(plans.len() <= 16);
     for p in plans {
-        assert_valid(&distinct, &p);
+        assert_valid(&distinct, &p, &[]);
     }
     // Restricting K deliberately makes the sweep fail; the benchmark still survives.
     let narrow = request(vec![task("narrow", 10, 0.1), task("wide", 10, 1.0)], 20);
@@ -285,7 +300,7 @@ fn greedy_fallback_delays_use_time_order_for_window_limits() {
     let plans = strategy.generate_candidates(&request).plans;
     assert!(plans.len() > 1 && plans[0].plan_id.ends_with("-greedy"));
     for plan in plans {
-        assert_valid(&request, &plan);
+        assert_valid(&request, &plan, &[]);
     }
 }
 
@@ -381,7 +396,7 @@ fn randomized_candidates_are_hard_valid_and_never_lose_to_greedy() {
         let set = ChunkedSweepStrategy::default().generate_candidates(&request);
         assert!(set.plans.len() <= 16);
         for plan in &set.plans {
-            assert_valid(&request, plan);
+            assert_valid(&request, plan, &set.unplaced);
         }
         if let Some(greedy) = greedy {
             if set.plans.is_empty() {
@@ -393,7 +408,18 @@ fn randomized_candidates_are_hard_valid_and_never_lose_to_greedy() {
                 .map(|p| utility(&request, p))
                 .max_by(f64::total_cmp)
                 .unwrap_or(f64::NEG_INFINITY);
-            assert!(best + 1e-12 >= utility(&request, &greedy), "case {case}");
+            if set.unplaced.iter().map(|u| &u.task_ref).collect::<Vec<_>>()
+                == greedy
+                    .unplaced
+                    .iter()
+                    .map(|u| &u.task_ref)
+                    .collect::<Vec<_>>()
+            {
+                assert!(
+                    best + 1e-12 >= utility(&request, &greedy.plan),
+                    "case {case}"
+                );
+            }
         } else if !set.plans.is_empty() {
             sweep_only += 1;
         }

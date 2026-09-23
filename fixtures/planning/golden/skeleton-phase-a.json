@@ -417,6 +417,7 @@
           },
           {
             "id": "task-b",
+            "mandatory": true,
             "duration": {"type": "fixed", "seconds": 3},
             "depends_on": ["task-a"]
           }

@@ -509,7 +509,15 @@ impl ubu_planning_core::PlannerStrategy for ChunkedSweepStrategy {
                 Vec::new()
             }
         };
-        if let Ok(mut baseline) = greedy {
+        let mut unplaced = Vec::new();
+        if let Some(outcome) = greedy
+            .ok()
+            .filter(|outcome| plans.is_empty() || outcome.unplaced.is_empty())
+        {
+            if plans.is_empty() {
+                unplaced = outcome.unplaced;
+            }
+            let mut baseline = outcome.plan;
             let key = placement_key(baseline.steps.iter());
             if !plans
                 .iter()
@@ -524,7 +532,7 @@ impl ubu_planning_core::PlannerStrategy for ChunkedSweepStrategy {
         }
         add_tail_delays(request, &mut plans);
         ubu_planning_core::CandidateSet {
-            unplaced: Vec::new(),
+            unplaced,
             plans,
             diagnostics: Vec::new(),
         }

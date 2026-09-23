@@ -1,11 +1,11 @@
 use ubu_planning_core::{
-    DiagnosticCode, DurationModel, PlanningMode, PlanningRequest, TaskGraph, TaskSpec, TimeWindow,
-    PLANNING_SCHEMA_VERSION,
+    DurationModel, PlanningMode, PlanningRequest, ResponseStatus, TaskGraph, TaskSpec, TimeWindow,
+    UnplacedReason, PLANNING_SCHEMA_VERSION,
 };
 use ubu_planning_cpu::CpuStrategy;
 
 #[test]
-fn impossible_after_dependency_window_returns_skeleton_failure() {
+fn impossible_after_dependency_window_returns_partial() {
     let request = PlanningRequest {
         schema_version: Some(PLANNING_SCHEMA_VERSION.to_string()),
         request_id: "skeleton-failure".to_string(),
@@ -51,9 +51,12 @@ fn impossible_after_dependency_window_returns_skeleton_failure() {
 
     let response = ubu_planning_core::plan(request, &CpuStrategy);
 
-    assert!(response.plan_candidates.is_empty());
-    assert!(response
-        .diagnostics
-        .iter()
-        .any(|diagnostic| diagnostic.code == DiagnosticCode::SkeletonFailure));
+    assert_eq!(response.status, ResponseStatus::Partial);
+    assert_eq!(response.default_plan().unwrap().steps.len(), 1);
+    assert_eq!(response.unplaced_tasks[0].task_ref, "task-b");
+    assert_eq!(
+        response.unplaced_tasks[0].reason,
+        UnplacedReason::OutsideAllowedWindow
+    );
+    assert!(response.diagnostics.is_empty());
 }

@@ -75,7 +75,15 @@ pub(crate) fn affix_fixed(
     })
 }
 
-pub fn build_skeleton(request: &PlanningRequest) -> Result<Plan, SkeletonFailureDiagnostic> {
+#[derive(Debug, Clone)]
+pub struct SkeletonOutcome {
+    pub plan: Plan,
+    pub unplaced: Vec<ubu_planning_core::UnplacedTask>,
+}
+
+pub fn build_skeleton(
+    request: &PlanningRequest,
+) -> Result<SkeletonOutcome, SkeletonFailureDiagnostic> {
     let FixedPlacements {
         plan_window,
         ordered_tasks,
@@ -88,9 +96,19 @@ pub fn build_skeleton(request: &PlanningRequest) -> Result<Plan, SkeletonFailure
         .iter()
         .map(|task| (task.id.clone(), task))
         .collect();
+    let protected = crate::protection::protected_tasks(
+        request,
+        preserved.keys().chain(affixed.keys()).cloned(),
+    );
+    let dependents = crate::protection::dependent_index(request);
+    let mut omitted = BTreeMap::new();
+    let mut excluded = BTreeSet::new();
     let mut scheduled_by_id = HashMap::new();
 
     for task_id in &ordered_tasks {
+        if excluded.contains(task_id) {
+            continue;
+        }
         if let Some(step) = preserved.get(task_id) {
             validate_preserved_step(step, &scheduled_by_id)?;
             scheduled_by_id.insert(task_id.clone(), step.clone());
@@ -115,13 +133,29 @@ pub fn build_skeleton(request: &PlanningRequest) -> Result<Plan, SkeletonFailure
             scheduled_by_id.insert(task_id.clone(), step);
             continue;
         }
-        let step = place_task(task, plan_window, earliest_start, &occupied)?;
+        let step = match place_task(task, plan_window, earliest_start, &occupied) {
+            Ok(step) => step,
+            Err(error) if protected.contains(task_id) => return Err(error),
+            Err(_) => {
+                omitted.insert(
+                    task_id.clone(),
+                    greedy_reason(task, plan_window, earliest_start, &protected, &occupied),
+                );
+                let roots = BTreeSet::from([task_id.clone()]);
+                excluded.extend(crate::protection::dependents_of(&dependents, &roots));
+                excluded.extend(roots);
+                continue;
+            }
+        };
         push_occupied(&mut occupied, &step)?;
         scheduled_by_id.insert(task_id.clone(), step);
     }
 
     let mut steps = Vec::with_capacity(ordered_tasks.len());
     for task_id in ordered_tasks {
+        if excluded.contains(&task_id) {
+            continue;
+        }
         let step = scheduled_by_id
             .remove(&task_id)
             .ok_or_else(|| SkeletonFailureDiagnostic {
@@ -131,14 +165,24 @@ pub fn build_skeleton(request: &PlanningRequest) -> Result<Plan, SkeletonFailure
         steps.push(step);
     }
 
-    Ok(Plan {
-        plan_id: plan_id(request),
-        status: PlanStatus::Candidate,
-        supersedes_plan_id: request
-            .repair_context
-            .as_ref()
-            .map(|context| context.prior_plan_id.clone()),
-        steps,
+    if steps.is_empty() {
+        return Err(SkeletonFailureDiagnostic {
+            task_id: None,
+            reason: "partial placement left no Task in the Plan".into(),
+        });
+    }
+    let unplaced = unplaced_report(request, &omitted, &excluded, &dependents, &BTreeMap::new());
+    Ok(SkeletonOutcome {
+        unplaced,
+        plan: Plan {
+            plan_id: plan_id(request),
+            status: PlanStatus::Candidate,
+            supersedes_plan_id: request
+                .repair_context
+                .as_ref()
+                .map(|context| context.prior_plan_id.clone()),
+            steps,
+        },
     })
 }
 
@@ -519,4 +563,84 @@ fn topological_order(tasks: &[TaskSpec]) -> Result<Vec<String>, SkeletonFailureD
         });
     }
     Ok(order)
+}
+
+fn greedy_reason(
+    task: &TaskSpec,
+    plan_window: &TimeWindow,
+    earliest_start: u64,
+    protected: &BTreeSet<String>,
+    occupied: &[OccupiedInterval],
+) -> ubu_planning_core::UnplacedReason {
+    use ubu_planning_core::UnplacedReason::*;
+    let start = task
+        .window
+        .as_ref()
+        .map_or(plan_window.start, |w| w.start)
+        .max(plan_window.start)
+        .max(earliest_start);
+    let end = task
+        .window
+        .as_ref()
+        .map_or(plan_window.end, |w| w.end)
+        .min(plan_window.end);
+    if start
+        .checked_add(task.duration.placement_seconds())
+        .is_none_or(|finish| finish > end)
+    {
+        OutsideAllowedWindow
+    } else if occupied
+        .iter()
+        .any(|i| !protected.contains(&i.task_id) && i.start < end && i.end > start)
+    {
+        OmittedLowerValue
+    } else {
+        InsufficientTotalCapacity
+    }
+}
+
+pub(crate) fn unplaced_report(
+    request: &PlanningRequest,
+    omitted: &BTreeMap<String, ubu_planning_core::UnplacedReason>,
+    excluded: &BTreeSet<String>,
+    dependents: &BTreeMap<String, BTreeSet<String>>,
+    chunks: &BTreeMap<String, Vec<ubu_planning_core::ChunkRef>>,
+) -> Vec<ubu_planning_core::UnplacedTask> {
+    use ubu_planning_core::{sort_report, UnplacedReason, UnplacedTask};
+    let mut report: Vec<_> = request
+        .tasks()
+        .iter()
+        .filter(|t| excluded.contains(&t.id))
+        .map(|task| {
+            let reason = omitted
+                .get(&task.id)
+                .copied()
+                .unwrap_or(UnplacedReason::DeferredDependency);
+            let deferred = if reason == UnplacedReason::DeferredDependency {
+                task.depends_on
+                    .iter()
+                    .filter(|id| excluded.contains(*id))
+                    .cloned()
+                    .collect::<BTreeSet<_>>()
+                    .into_iter()
+                    .collect()
+            } else {
+                Vec::new()
+            };
+            let mut entry = UnplacedTask::new(
+                crate::protection::selection_rank(task),
+                reason,
+                chunks.get(&task.id).cloned().unwrap_or_default(),
+                deferred,
+            );
+            entry.affected_dependent_task_refs =
+                crate::protection::dependents_of(dependents, &BTreeSet::from([task.id.clone()]))
+                    .intersection(excluded)
+                    .cloned()
+                    .collect();
+            entry
+        })
+        .collect();
+    sort_report(&mut report);
+    report
 }
