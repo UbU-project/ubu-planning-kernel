@@ -1,3 +1,5 @@
+pub mod coverage;
+pub use coverage::*;
 pub mod diagnostics;
 pub mod explanations;
 pub mod graph;
