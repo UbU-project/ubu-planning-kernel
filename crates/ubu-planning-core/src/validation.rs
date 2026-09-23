@@ -24,6 +24,10 @@ pub fn validate_planning_request(request: &PlanningRequest) -> ValidationResult 
         diagnostics.push(diagnostic);
     }
 
+    if let Err(message) = request.horizon_policy.validate() {
+        diagnostics.push(Diagnostic::new(DiagnosticCode::RolloutValidation, message));
+    }
+
     if request.tasks().is_empty() {
         diagnostics.push(Diagnostic::new(
             DiagnosticCode::EmptyRequest,

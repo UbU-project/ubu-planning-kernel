@@ -54,6 +54,7 @@ fn provided_topological_order_must_respect_dependencies() {
 #[test]
 fn static_anchor_collision_returns_skeleton_failure() {
     let request = PlanningRequest {
+        horizon_policy: Default::default(),
         schema_version: Some(PLANNING_SCHEMA_VERSION.to_string()),
         request_id: "static-collision".to_string(),
         mode: PlanningMode::FreshGeneration,
@@ -98,6 +99,7 @@ fn repair_supersedes_prior_plan_and_preserves_past_and_in_progress_steps() {
         ],
     };
     let request = PlanningRequest {
+        horizon_policy: Default::default(),
         schema_version: Some(PLANNING_SCHEMA_VERSION.to_string()),
         request_id: "repair-skeleton".to_string(),
         mode: PlanningMode::Repair,

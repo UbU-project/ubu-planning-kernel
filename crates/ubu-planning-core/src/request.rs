@@ -11,6 +11,45 @@ pub const MAX_N_ROLLOUTS: usize = 5_000;
 pub const DEFAULT_ROLLOUT_TOP_K: usize = 3;
 pub const MAX_ROLLOUT_TOP_K: usize = 8;
 
+pub const DEFAULT_REACTIVE_HORIZON_SECONDS: u64 = 3_600;
+pub const DEFAULT_BRANCH_COVERAGE_TARGET: f64 = 0.99;
+fn default_reactive_horizon_seconds() -> u64 {
+    DEFAULT_REACTIVE_HORIZON_SECONDS
+}
+fn default_branch_coverage_target() -> f64 {
+    DEFAULT_BRANCH_COVERAGE_TARGET
+}
+
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
+pub struct HorizonPolicy {
+    #[serde(default = "default_reactive_horizon_seconds")]
+    pub reactive_horizon_seconds: u64,
+    #[serde(default = "default_branch_coverage_target")]
+    pub branch_coverage_target: f64,
+}
+impl Default for HorizonPolicy {
+    fn default() -> Self {
+        Self {
+            reactive_horizon_seconds: DEFAULT_REACTIVE_HORIZON_SECONDS,
+            branch_coverage_target: DEFAULT_BRANCH_COVERAGE_TARGET,
+        }
+    }
+}
+impl HorizonPolicy {
+    pub fn validate(&self) -> Result<(), String> {
+        if self.reactive_horizon_seconds == 0 {
+            return Err("horizon_policy.reactive_horizon_seconds must be positive".into());
+        }
+        if !self.branch_coverage_target.is_finite()
+            || self.branch_coverage_target <= 0.0
+            || self.branch_coverage_target > 1.0
+        {
+            return Err("horizon_policy.branch_coverage_target must be in (0, 1]".into());
+        }
+        Ok(())
+    }
+}
+
 fn default_n_rollouts() -> usize {
     DEFAULT_N_ROLLOUTS
 }
@@ -317,6 +356,8 @@ pub struct RepairContext {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct PlanningRequest {
+    #[serde(default)]
+    pub horizon_policy: HorizonPolicy,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub schema_version: Option<String>,
     pub request_id: String,
@@ -402,6 +443,8 @@ impl PlanningRequest {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct RepairRequest {
+    #[serde(default)]
+    pub horizon_policy: HorizonPolicy,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub schema_version: Option<String>,
     pub request_id: String,

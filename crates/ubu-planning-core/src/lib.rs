@@ -16,9 +16,10 @@ pub use explanations::{explain_plan, ExplanationBundle, ExplanationFragment};
 pub use graph::{DependencyEdge, TaskId};
 pub use request::{
     AffectDirection, AffectLegitimizationMode, AffectObservation, AffectObservationValue,
-    AffectProfile, AffectTolerance, CorrelationGroup, DurationModel, PlanningMode, PlanningRequest,
-    RepairContext, RepairRequest, RepairScope, ScoringPolicy, StaticAnchor, TaskGraph, TaskSpec,
-    TimeWindow, DEFAULT_N_ROLLOUTS, DEFAULT_ROLLOUT_TOP_K, MAX_N_ROLLOUTS, MAX_ROLLOUT_TOP_K,
+    AffectProfile, AffectTolerance, CorrelationGroup, DurationModel, HorizonPolicy, PlanningMode,
+    PlanningRequest, RepairContext, RepairRequest, RepairScope, ScoringPolicy, StaticAnchor,
+    TaskGraph, TaskSpec, TimeWindow, DEFAULT_BRANCH_COVERAGE_TARGET, DEFAULT_N_ROLLOUTS,
+    DEFAULT_REACTIVE_HORIZON_SECONDS, DEFAULT_ROLLOUT_TOP_K, MAX_N_ROLLOUTS, MAX_ROLLOUT_TOP_K,
     PLANNING_SCHEMA_VERSION,
 };
 pub use response::{
@@ -124,6 +125,13 @@ pub fn repair(request: RepairRequest, strategy: &impl PlannerStrategy) -> Repair
         );
     }
 
+    if let Err(message) = request.horizon_policy.validate() {
+        return RepairResponse::failure(
+            response_schema_version,
+            request.request_id,
+            vec![Diagnostic::new(DiagnosticCode::RolloutValidation, message)],
+        );
+    }
     let validation = validate_plan(&request.candidate);
     if validation.is_valid {
         return RepairResponse::unchanged(
@@ -140,6 +148,7 @@ pub fn repair(request: RepairRequest, strategy: &impl PlannerStrategy) -> Repair
         repair_scope: RepairScope::RemainingWindow,
     });
     let planning_request = PlanningRequest {
+        horizon_policy: request.horizon_policy,
         schema_version: request.schema_version,
         request_id: request.request_id.clone(),
         mode: PlanningMode::Repair,

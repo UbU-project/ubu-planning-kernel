@@ -7,6 +7,7 @@ use ubu_planning_cpu::CpuStrategy;
 #[test]
 fn impossible_after_dependency_window_returns_partial() {
     let request = PlanningRequest {
+        horizon_policy: Default::default(),
         schema_version: Some(PLANNING_SCHEMA_VERSION.to_string()),
         request_id: "skeleton-failure".to_string(),
         mode: PlanningMode::FreshGeneration,

@@ -22,6 +22,7 @@ fn semi_legitimization_runs_implemented_cheap_checks() {
 
 fn request_for_plan() -> PlanningRequest {
     PlanningRequest {
+        horizon_policy: Default::default(),
         schema_version: Some(PLANNING_SCHEMA_VERSION.to_string()),
         request_id: "semi".to_string(),
         mode: PlanningMode::FreshGeneration,
