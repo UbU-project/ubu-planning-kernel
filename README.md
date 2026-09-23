@@ -57,18 +57,37 @@ Unknown strategy values are errors. The default preserves fixture-oriented CLI o
 The greedy `CpuStrategy` builds a first-fit skeleton in topological order and
 adds bounded suffix delays. `ChunkedSweepStrategy` partitions free time around
 Static and preserved placements, then sweeps the chunks with a bounded beam.
-Its strategy parameters are `alternatives_per_chunk` (K, default 3, clamped to
-1–3) and `beam_width` (B, default 16, minimum 1). K selects value-first,
-most-constrained-first, and value-density fills in that order. Dependency bounds,
-forced placements, capacity look-ahead, and merging by remaining Task set keep
+Its strategy parameters are `alternatives_per_chunk` (K, default 4, clamped to
+1–4) and `beam_width` (B, default 16, minimum 1). K selects value-first,
+most-constrained-first, value-density, and protected-first fills in that order. Dependency bounds,
+forced placements, capacity look-ahead, and merging by omitted and remaining Task sets keep
 the search bounded and deterministic.
 
 The candidate set contains sweep plans, the greedy baseline when distinct, and
-chunk-tail delay variants, capped at 16. The greedy baseline remains available
-even when the sweep fails. Chunk-tail delays preserve Task windows and fixed
+chunk-tail delay variants, capped at 16. The greedy baseline replaces the sweep when it gives up less protected work,
+joins only when it omits the same Tasks, and is discarded when it gives up more.
+It remains available when the sweep fails. Chunk-tail delays preserve Task windows and fixed
 boundaries while providing alternatives within chunks.
 
 Rollouts are unchanged: all candidates use the existing shared latent duration
 draws, and overrunning a Static boundary makes a rollout infeasible. Per-chunk
-rollout structure, streaming, splittable Tasks, partial placement, and mandatory
-routine constraints remain later work. No request or response fields change.
+rollout structure, streaming, and splittable Tasks remain later work.
+
+## Partial placement
+
+`TaskSpec.mandatory` defaults to false. Routine occurrences mark it true, so
+value zero does not make them expendable. Mandatory Tasks, Static Tasks, fixed
+placements, and their transitive prerequisites are protected from omission.
+An impossible protected Task still rejects the Plan.
+
+Optional Dynamic Tasks that do not fit are reported in `unplaced_tasks` while
+the remaining Plan proceeds with response status `partial`. Dependents of an
+omitted Task are deferred too. Empty Plans are rejected. The omission order is
+lowest value first, then latest own deadline (missing deadlines first), then
+largest id. Protection compares the reverse order in one shared implementation.
+The beam compares omission sets before utility, and every candidate in a
+response omits the same set. Greedy uses the same report, with no chunk refs.
+
+Horizon extension is never attempted. The orchestrator owns the horizon and no
+extension policy bound exists in the kernel. Capacity/window reports record
+`skipped_by_policy`; alternatives describe changes the user can request.
