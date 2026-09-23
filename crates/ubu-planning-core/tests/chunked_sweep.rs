@@ -468,3 +468,109 @@ fn pipeline_ranks_fourteen_task_request() {
         );
     }
 }
+
+#[test]
+fn impossible_mandatory_task_rejects() {
+    let mut required = task("required", 30, 0.0);
+    required["mandatory"] = json!(true);
+    let response = ubu_planning_core::plan(
+        request(vec![required], 20),
+        &ChunkedSweepStrategy::default(),
+    );
+    assert_eq!(response.status, ubu_planning_core::ResponseStatus::Rejected);
+    assert!(response.plan_candidates.is_empty() && response.unplaced_tasks.is_empty());
+    assert_eq!(
+        response.diagnostics[0].code,
+        ubu_planning_core::DiagnosticCode::SkeletonFailure
+    );
+}
+#[test]
+fn mandatory_keeps_slot_against_more_valuable_work() {
+    let mut required = task("z-required", 10, 0.0);
+    required["mandatory"] = json!(true);
+    let request = request(vec![task("a-valuable", 10, 1.0), required], 10);
+    let set = ChunkedSweepStrategy::default().generate_candidates(&request);
+    assert_eq!(set.unplaced[0].task_ref, "a-valuable");
+    for plan in &set.plans {
+        assert_valid(&request, plan, &set.unplaced);
+        assert_eq!(plan.steps[0].task_id, "z-required");
+    }
+}
+#[test]
+fn omitted_prerequisite_defers_dependents() {
+    let request = request_with_deferred_chain();
+    let set = ChunkedSweepStrategy::default().generate_candidates(&request);
+    let child = set
+        .unplaced
+        .iter()
+        .find(|u| u.task_ref == "c-child")
+        .unwrap();
+    assert_eq!(
+        child.reason,
+        ubu_planning_core::UnplacedReason::DeferredDependency
+    );
+    assert_eq!(child.deferred_by_task_refs, ["b-loser"]);
+    assert_eq!(
+        set.unplaced
+            .iter()
+            .find(|u| u.task_ref == "b-loser")
+            .unwrap()
+            .affected_dependent_task_refs,
+        ["c-child"]
+    );
+    for plan in &set.plans {
+        assert_valid(&request, plan, &set.unplaced);
+    }
+}
+fn request_with_deferred_chain() -> PlanningRequest {
+    request(
+        vec![
+            task("a-winner", 9, 1.0),
+            task("b-loser", 5, 0.1),
+            dependent(task("c-child", 5, 0.1), "b-loser"),
+        ],
+        10,
+    )
+}
+#[test]
+fn mandatory_prerequisite_is_protected() {
+    let mut required = dependent(task("z-required", 5, 0.0), "b-prerequisite");
+    required["mandatory"] = json!(true);
+    let request = request(
+        vec![
+            task("a-valuable", 10, 10.0),
+            task("b-prerequisite", 5, 0.0),
+            required,
+        ],
+        10,
+    );
+    let set = ChunkedSweepStrategy::default().generate_candidates(&request);
+    assert!(!set.plans.is_empty());
+    assert_eq!(set.unplaced[0].task_ref, "a-valuable");
+    for plan in &set.plans {
+        assert_valid(&request, plan, &set.unplaced);
+        assert_eq!(plan.steps.len(), 2);
+    }
+}
+#[test]
+fn fixed_protection_and_forward_closure_are_transitive() {
+    use std::collections::BTreeSet;
+    use ubu_planning_cpu::protection::*;
+    let request = request(
+        vec![
+            task("a", 1, 0.0),
+            dependent(task("b", 1, 0.0), "a"),
+            dependent(task("c", 1, 0.0), "b"),
+            task("d", 1, 0.0),
+        ],
+        10,
+    );
+    assert_eq!(
+        protected_tasks(&request, ["c".into()]),
+        BTreeSet::from(["a".into(), "b".into(), "c".into()])
+    );
+    assert_eq!(
+        dependents_of(&dependent_index(&request), &BTreeSet::from(["a".into()])),
+        BTreeSet::from(["b".into(), "c".into()])
+    );
+}

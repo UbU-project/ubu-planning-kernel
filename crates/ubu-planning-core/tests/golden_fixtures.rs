@@ -29,7 +29,16 @@ struct GoldenCase {
 }
 
 #[derive(Debug, Deserialize)]
+struct ExpectedUnplaced {
+    task_ref: String,
+    reason: ubu_planning_core::UnplacedReason,
+}
+
+#[derive(Debug, Deserialize)]
 struct PhaseAExpectedResponse {
+    status: ubu_planning_core::ResponseStatus,
+    #[serde(default)]
+    unplaced_tasks: Vec<ExpectedUnplaced>,
     #[serde(default)]
     plan: Option<Plan>,
     #[serde(default)]
@@ -56,6 +65,25 @@ fn phase_a_goldens_match_byte_exact_responses() {
         request.n_rollouts = 0;
 
         let actual = ubu_planning_core::plan(request, &CpuStrategy);
+        assert_eq!(
+            actual.status, case.expected_response.status,
+            "{}",
+            case.name
+        );
+        assert_eq!(
+            actual
+                .unplaced_tasks
+                .iter()
+                .map(|u| (&u.task_ref, u.reason))
+                .collect::<Vec<_>>(),
+            case.expected_response
+                .unplaced_tasks
+                .iter()
+                .map(|u| (&u.task_ref, u.reason))
+                .collect::<Vec<_>>(),
+            "{}",
+            case.name
+        );
         if let Some(expected_plan) = case.expected_response.plan {
             let baseline = actual
                 .plan_candidates
@@ -98,6 +126,8 @@ fn assert_required_coverage(cases: &[GoldenCase]) {
         .flat_map(|case| case.covers.iter().map(String::as_str))
         .collect();
     let required = [
+        "partial_placement",
+        "optional_omission",
         "linear_chain",
         "diamond",
         "wide_fan_out",

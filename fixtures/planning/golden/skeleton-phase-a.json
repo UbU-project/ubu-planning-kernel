@@ -35,6 +35,7 @@
       "expected_response": {
         "schema_version": "planning-kernel-contract/0.1",
         "request_id": "golden-linear-chain",
+        "status": "ok",
         "plan": {
           "plan_id": "plan-golden-linear-chain-000000000000000b",
           "status": "candidate",
@@ -109,6 +110,7 @@
       "expected_response": {
         "schema_version": "planning-kernel-contract/0.1",
         "request_id": "golden-diamond",
+        "status": "ok",
         "plan": {
           "plan_id": "plan-golden-diamond-000000000000000c",
           "status": "candidate",
@@ -200,6 +202,7 @@
       "expected_response": {
         "schema_version": "planning-kernel-contract/0.1",
         "request_id": "golden-wide-fan",
+        "status": "ok",
         "plan": {
           "plan_id": "plan-golden-wide-fan-000000000000000d",
           "status": "candidate",
@@ -285,6 +288,7 @@
       "expected_response": {
         "schema_version": "planning-kernel-contract/0.1",
         "request_id": "golden-disconnected",
+        "status": "ok",
         "plan": {
           "plan_id": "plan-golden-disconnected-000000000000000e",
           "status": "candidate",
@@ -361,6 +365,7 @@
       "expected_response": {
         "schema_version": "planning-kernel-contract/0.1",
         "request_id": "golden-static-anchor",
+        "status": "ok",
         "plan": {
           "plan_id": "plan-golden-static-anchor-000000000000000f",
           "status": "candidate",
@@ -426,12 +431,59 @@
       "expected_response": {
         "schema_version": "planning-kernel-contract/0.1",
         "request_id": "golden-window-overflow",
+        "status": "rejected",
         "diagnostics": [
           {
             "code": "skeleton_failure",
             "message": "Could not build deterministic skeleton for task task-b: insufficient available window for deterministic skeleton placement"
           }
         ]
+      }
+    },
+    {
+      "name": "time-window-overflow-partial",
+      "covers": ["partial_placement", "optional_omission", "time_window_overflow"],
+      "request": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-window-overflow-partial",
+        "mode": "fresh_generation",
+        "rng_seed": 16,
+        "time_window": {
+          "start": 0,
+          "end": 5
+        },
+        "topological_order": ["task-a", "task-b"],
+        "tasks": [
+          {
+            "id": "task-a",
+            "duration": {"type": "fixed", "seconds": 3}
+          },
+          {
+            "id": "task-b",
+            "duration": {"type": "fixed", "seconds": 3},
+            "depends_on": ["task-a"]
+          }
+        ]
+      },
+      "expected_response": {
+        "schema_version": "planning-kernel-contract/0.1",
+        "request_id": "golden-window-overflow-partial",
+        "status": "partial",
+        "plan": {
+          "plan_id": "plan-golden-window-overflow-partial-0000000000000010",
+          "status": "candidate",
+          "steps": [
+            {
+              "task_id": "task-a",
+              "start": 0,
+              "end": 3
+            }
+          ]
+        },
+        "unplaced_tasks": [
+          {"task_ref": "task-b", "reason": "outside_allowed_window"}
+        ],
+        "diagnostics": []
       }
     },
     {
@@ -453,6 +505,7 @@
       "expected_response": {
         "schema_version": "planning-kernel-contract/0.1",
         "request_id": "golden-missing-starting-state",
+        "status": "rejected",
         "diagnostics": [
           {
             "code": "skeleton_failure",
@@ -489,6 +542,7 @@
       "expected_response": {
         "schema_version": "planning-kernel-contract/0.1",
         "request_id": "golden-impossible-dependency",
+        "status": "rejected",
         "diagnostics": [
           {
             "code": "skeleton_failure",
@@ -526,6 +580,7 @@
       "expected_response": {
         "schema_version": "planning-kernel-contract/0.1",
         "request_id": "golden-cyclic-dependency",
+        "status": "rejected",
         "diagnostics": [
           {
             "code": "cyclic_dependency",
@@ -567,6 +622,7 @@
       "expected_response": {
         "schema_version": "planning-kernel-contract/0.1",
         "request_id": "golden-static-collision",
+        "status": "rejected",
         "diagnostics": [
           {
             "code": "skeleton_failure",
@@ -663,6 +719,7 @@
       "expected_response": {
         "schema_version": "planning-kernel-contract/0.1",
         "request_id": "golden-repair-local",
+        "status": "ok",
         "plan": {
           "plan_id": "plan-golden-repair-local-0000000000000015-repair",
           "status": "candidate",
@@ -801,6 +858,7 @@
       "expected_response": {
         "schema_version": "planning-kernel-contract/0.1",
         "request_id": "golden-repair-remaining",
+        "status": "ok",
         "plan": {
           "plan_id": "plan-golden-repair-remaining-0000000000000016-repair",
           "status": "candidate",
@@ -939,6 +997,7 @@
       "expected_response": {
         "schema_version": "planning-kernel-contract/0.1",
         "request_id": "golden-repair-full",
+        "status": "ok",
         "plan": {
           "plan_id": "plan-golden-repair-full-0000000000000017-repair",
           "status": "candidate",
