@@ -91,3 +91,17 @@ response omits the same set. Greedy uses the same report, with no chunk refs.
 Horizon extension is never attempted. The orchestrator owns the horizon and no
 extension policy bound exists in the kernel. Capacity/window reports record
 `skipped_by_policy`; alternatives describe changes the user can request.
+
+## Coverage
+
+`horizon_policy` defaults to `reactive_horizon_seconds: 3600` and
+`branch_coverage_target: 0.99`; supplied requests may override them. Rollout
+finalists carry `coverage`, with an estimate, uncovered mass, 95% Wilson interval
+and boundary continuation summary. Boundaries are the candidate's own Static
+placements inside the reactive horizon; the recorded merge rule rounds lateness
+up to whole minutes.
+
+`display_probability` still measures running the Plan exactly as written.
+Coverage additionally credits continuing after optional work is dropped, so it
+can be higher. Protected work is never dropped. This slice uses existing draws
+and reports `budget_limited: false`; it does not search alternative continuations.

@@ -2,6 +2,9 @@
 
 ## Unreleased
 
+- Add validated horizon policy, deterministic boundary outcome digests, continuation
+  coverage and Wilson confidence without changing feasibility or rollout draws.
+
 - Return partial Plans with deterministic unplaced reports and safe alternatives.
 - Protect mandatory routine occurrences, fixed work, and their prerequisites.
 - Compare omissions before utility; add the fourth protected-first fill rule.

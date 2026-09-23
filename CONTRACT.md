@@ -67,3 +67,36 @@ both halves together. These fields are additive and consumers pin revisions.
 The existing `serde_json` dependency enables `float_roundtrip` without changing
 versions or Cargo.lock. Serialized scores, probabilities and selection ranks
 parse back to the same floating-point values, supporting exact CPU/GPU parity.
+
+## Coverage
+
+A boundary outcome records the candidate's Static placement index, start and
+Task ref, the set of work completed by that boundary, and remaining lateness
+rounded up to whole 60-second buckets. Zero lateness remains distinct. The
+response records `lateness_seconds_ceil_60` as its quantization rule. Digests use
+FNV-1a over fixed-order little-endian u64 fields and length-prefixed UTF-8 strings,
+with completed ids in sorted order; no machine memory layout is hashed.
+
+Phase 1b certifies two continuations using the same duration draws: the Plan as
+written, and the Plan with optional work that no longer fits omitted. A separate
+continuation clock does not advance when it drops work. A missing prerequisite
+also prevents its dependent from continuing; a mandatory or Static Task can
+never be dropped. Failing protected work makes the continuation fail.
+
+`coverage_estimate >= display_probability` always holds for generated, validated
+candidates. The original feasibility clock, outcome and scores are unchanged.
+Coverage estimates successful continuation rollouts; uncovered mass is its
+complement and confidence is 95% Wilson over those same samples. A merged
+boundary state counts as covered only when none of its visits failed; its
+uncovered mass counts failing visits divided by all rollouts. The summary is
+conservative about state certification even when some visits to a mixed state
+continue. A boundary's heaviest failing state is chosen by failure count then
+smaller digest.
+
+`horizon_policy` defaults to 3,600 reactive seconds and target 0.99. Only Static
+boundaries up to window start plus that duration (clamped to window end) are
+listed. This first slice assesses the full candidate continuation against those
+states; it does not truncate the feasibility or continuation walks. No sampled
+boundaries means an empty summary, not an invented boundary. Coverage is absent
+when rollout does not run, and `budget_limited` is false. Alternative continuation
+search, compute-budget allocation and mobile continuation refs remain later work.
