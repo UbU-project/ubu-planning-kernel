@@ -55,6 +55,7 @@ pub fn score_and_rank(request: &PlanningRequest, inputs: Vec<ScoringInput>) -> V
             let explanation_fragments = explain_plan(&input.schedule).fragments;
 
             PlanCandidate {
+                coverage: None,
                 candidate_id: input.schedule.plan_id.clone(),
                 rank: 0,
                 candidate_role: CandidateRole::Other,

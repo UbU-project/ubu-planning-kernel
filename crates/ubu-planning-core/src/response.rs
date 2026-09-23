@@ -247,6 +247,8 @@ pub struct RolloutDiagnostics {
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct PlanCandidate {
+    #[serde(default, skip_serializing_if = "Option::is_none")]
+    pub coverage: Option<crate::coverage::CoverageSummary>,
     pub candidate_id: String,
     pub rank: usize,
     pub candidate_role: CandidateRole,

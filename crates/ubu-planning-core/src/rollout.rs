@@ -1,5 +1,6 @@
 use std::collections::{BTreeMap, BTreeSet};
 
+use crate::coverage::{lateness_bucket, CoverageCounter, CoverageScope, OutcomeState};
 use crate::diagnostics::{Diagnostic, DiagnosticCode};
 use crate::request::{DurationModel, PlanningRequest, TaskSpec, MAX_N_ROLLOUTS, MAX_ROLLOUT_TOP_K};
 use crate::response::{PlanCandidate, ProbabilityQuality, RolloutDiagnostics};
@@ -108,6 +109,13 @@ fn rollout_candidate(
     let mut rng = SplitMix64::new(substream_seed);
     let mut feasible_count = 0usize;
     let mut outcomes = Vec::with_capacity(n_rollouts);
+    let mut coverage = CoverageCounter::default();
+    let boundary_limit = request.time_window.as_ref().map_or(u64::MAX, |window| {
+        window
+            .start
+            .saturating_add(request.horizon_policy.reactive_horizon_seconds)
+            .min(window.end)
+    });
 
     for _ in 0..n_rollouts {
         let independent: Vec<_> = (0..request.tasks().len())
@@ -120,7 +128,9 @@ fn rollout_candidate(
             .zip(normals)
             .map(|(task, normal)| sample_duration(&task.duration, normal))
             .collect();
-        let (feasible, outcome) = simulate(request, candidate, &durations);
+        let (feasible, outcome, states, continuation) =
+            simulate(request, candidate, &durations, boundary_limit);
+        coverage.observe(states, continuation != Continuation::Failed);
         feasible_count += usize::from(feasible);
         outcomes.push(outcome);
     }
@@ -131,6 +141,11 @@ fn rollout_candidate(
     let probability = feasible_count as f64 / n_rollouts as f64;
     let (low, high) = wilson_interval(feasible_count, n_rollouts);
 
+    candidate.coverage = Some(coverage.summarize(
+        CoverageScope::ReactiveHorizon,
+        request.horizon_policy.branch_coverage_target,
+        false,
+    ));
     candidate.score_summary.robustness_score = robustness;
     // Probability and lower-tail outcome jointly ground the former C-1 robustness proxy.
     let rollout_grounded_robustness = (robustness + probability) / 2.0;
@@ -168,11 +183,19 @@ fn recompute_total(candidate: &PlanCandidate, request: &PlanningRequest, robustn
         / weight_sum
 }
 
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub(crate) enum Continuation {
+    AsPlanned,
+    RequiredOmission,
+    Failed,
+}
+
 fn simulate(
     request: &PlanningRequest,
     candidate: &PlanCandidate,
     sampled_durations: &[f64],
-) -> (bool, f64) {
+    boundary_limit: u64,
+) -> (bool, f64, Vec<OutcomeState>, Continuation) {
     let task_indices: BTreeMap<_, _> = request
         .tasks()
         .iter()
@@ -182,13 +205,34 @@ fn simulate(
     let mut actual_ends = BTreeMap::new();
     let mut previous_end = 0.0f64;
     let mut feasible = true;
+    let mut continued_end = 0.0f64;
+    let mut continued_ends = BTreeMap::new();
+    let mut continuation = Continuation::AsPlanned;
+    let mut states = Vec::new();
+    let mut boundary_index = 0;
 
     // Simulation follows time, while the emitted (topological) order stays frozen.
     let mut steps: Vec<_> = candidate.schedule.steps.iter().collect();
     steps.sort_by_key(|step| (step.start, step.end, &step.task_id));
     for step in steps {
+        if step.static_anchor {
+            if step.start <= boundary_limit {
+                states.push(OutcomeState {
+                    boundary_index,
+                    boundary_start: step.start,
+                    boundary_task_ref: step.task_id.clone(),
+                    completed: actual_ends
+                        .iter()
+                        .filter(|(_, end)| **end <= step.start as f64)
+                        .map(|(id, _)| String::from(*id))
+                        .collect(),
+                    lateness_bucket: lateness_bucket(previous_end - step.start as f64),
+                });
+            }
+            boundary_index += 1;
+        }
         let Some(&task_index) = task_indices.get(step.task_id.as_str()) else {
-            return (false, 0.0);
+            return (false, 0.0, states, Continuation::Failed);
         };
         let task = &request.tasks()[task_index];
         let dependency_end = task
@@ -202,11 +246,42 @@ fn simulate(
             feasible &= actual_start == anchor.start as f64;
         }
         let actual_end = actual_start + sampled_durations[task_index];
-        if let Some(window) = &task.window {
-            feasible &= actual_start >= window.start as f64 && actual_end <= window.end as f64;
-        }
-        if let Some(window) = &request.time_window {
-            feasible &= actual_start >= window.start as f64 && actual_end <= window.end as f64;
+        let fits = |start: f64, end: f64| {
+            task.window
+                .as_ref()
+                .is_none_or(|window| start >= window.start as f64 && end <= window.end as f64)
+                && request
+                    .time_window
+                    .as_ref()
+                    .is_none_or(|window| start >= window.start as f64 && end <= window.end as f64)
+        };
+        feasible &= fits(actual_start, actual_end);
+        if continuation != Continuation::Failed {
+            let dependency_end = task
+                .depends_on
+                .iter()
+                .filter_map(|id| continued_ends.get(id.as_str()))
+                .copied()
+                .fold(0.0f64, f64::max);
+            let start = (step.start as f64).max(continued_end).max(dependency_end);
+            let end = start + sampled_durations[task_index];
+            let dependencies_hold = task
+                .depends_on
+                .iter()
+                .all(|id| continued_ends.contains_key(id.as_str()));
+            let anchor_holds = task
+                .static_anchor
+                .as_ref()
+                .is_none_or(|anchor| start == anchor.start as f64);
+            if dependencies_hold && anchor_holds && fits(start, end) {
+                continued_ends.insert(task.id.as_str(), end);
+                continued_end = end;
+            } else if task.mandatory || task.static_anchor.is_some() {
+                continuation = Continuation::Failed;
+            } else {
+                // Dropping optional work leaves the continuation's clock untouched.
+                continuation = Continuation::RequiredOmission;
+            }
         }
         actual_ends.insert(task.id.as_str(), actual_end);
         previous_end = actual_end;
@@ -216,7 +291,12 @@ fn simulate(
         let width = window.end.saturating_sub(window.start).max(1) as f64;
         ((window.end as f64 - previous_end) / width).clamp(0.0, 1.0)
     });
-    (feasible, if feasible { outcome } else { 0.0 })
+    (
+        feasible,
+        if feasible { outcome } else { 0.0 },
+        states,
+        continuation,
+    )
 }
 
 /// Exact §3 shifted-log-normal transformation. Fixed durations are delta draws.
