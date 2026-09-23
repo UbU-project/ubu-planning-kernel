@@ -3,6 +3,7 @@ pub use chunked::ChunkedSweepStrategy;
 
 pub mod candidate_generation;
 pub mod default_selection;
+pub mod protection;
 pub mod repair;
 pub mod skeleton;
 
