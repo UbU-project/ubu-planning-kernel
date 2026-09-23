@@ -4,6 +4,7 @@ use crate::response::Plan;
 
 #[derive(Debug, Clone, Default)]
 pub struct CandidateSet {
+    pub unplaced: Vec<crate::unplaced::UnplacedTask>,
     pub plans: Vec<Plan>,
     pub diagnostics: Vec<Diagnostic>,
 }

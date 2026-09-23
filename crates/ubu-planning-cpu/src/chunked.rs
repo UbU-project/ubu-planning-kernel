@@ -501,6 +501,7 @@ impl ubu_planning_core::PlannerStrategy for ChunkedSweepStrategy {
             Err(diagnostic) => {
                 if greedy.is_err() {
                     return ubu_planning_core::CandidateSet {
+                        unplaced: Vec::new(),
                         plans: Vec::new(),
                         diagnostics: vec![diagnostic.into()],
                     };
@@ -523,6 +524,7 @@ impl ubu_planning_core::PlannerStrategy for ChunkedSweepStrategy {
         }
         add_tail_delays(request, &mut plans);
         ubu_planning_core::CandidateSet {
+            unplaced: Vec::new(),
             plans,
             diagnostics: Vec::new(),
         }

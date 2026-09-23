@@ -9,7 +9,8 @@ fn request(tasks: Vec<Value>) -> PlanningRequest {
         "n_rollouts": 64, "time_window": {"start": 0, "end": 100},
         "topological_order": tasks.iter().map(|t| t["id"].clone()).collect::<Vec<_>>(),
         "tasks": tasks
-    })).unwrap()
+    }))
+    .unwrap()
 }
 
 fn task(id: &str, duration: u64) -> Value {
@@ -21,8 +22,13 @@ fn earlier_dynamic_task_plans_around_later_static_anchor() {
     let mut fixed = task("static", 10);
     fixed["static_anchor"] = json!({"start": 0});
     let plan = build_skeleton(&request(vec![task("dynamic", 10), fixed])).unwrap();
-    assert_eq!(plan.steps.iter().map(|s| (s.task_id.as_str(), s.start, s.end)).collect::<Vec<_>>(),
-        vec![("dynamic", 10, 20), ("static", 0, 10)]);
+    assert_eq!(
+        plan.steps
+            .iter()
+            .map(|s| (s.task_id.as_str(), s.start, s.end))
+            .collect::<Vec<_>>(),
+        vec![("dynamic", 10, 20), ("static", 0, 10)]
+    );
 }
 
 #[test]
@@ -32,7 +38,10 @@ fn static_dependency_must_finish_before_anchor() {
     fixed["depends_on"] = json!(["dynamic"]);
     let failure = build_skeleton(&request(vec![task("dynamic", 10), fixed])).unwrap_err();
     assert_eq!(failure.task_id.as_deref(), Some("static"));
-    assert_eq!(failure.reason, "static anchor collides with dependencies or window start");
+    assert_eq!(
+        failure.reason,
+        "static anchor collides with dependencies or window start"
+    );
 }
 
 #[test]
@@ -56,12 +65,19 @@ fn rollouts_use_time_order_without_changing_emitted_order() {
     let request = request(vec![fixed, dynamic]);
     let response = ubu_planning_core::plan(request.clone(), &CpuStrategy);
     assert!(!response.plan_candidates.is_empty());
-    let baseline = response.plan_candidates.iter().find(|c|
-        c.schedule.steps[0].task_id == "static").expect("topological emission remains available");
+    let baseline = response
+        .plan_candidates
+        .iter()
+        .find(|c| c.schedule.steps[0].task_id == "static")
+        .expect("topological emission remains available");
     assert_eq!(baseline.schedule.steps[0].start, 50);
     assert!(baseline.schedule.steps[1].end <= 20);
-    let scored = ubu_planning_core::rollout::rollout_and_rerank(&request, vec![baseline.clone()]).unwrap();
+    let scored =
+        ubu_planning_core::rollout::rollout_and_rerank(&request, vec![baseline.clone()]).unwrap();
     for candidate in scored.candidates {
-        assert_eq!(candidate.rollout_diagnostics.unwrap().feasibility_frequency, 1.0);
+        assert_eq!(
+            candidate.rollout_diagnostics.unwrap().feasibility_frequency,
+            1.0
+        );
     }
 }

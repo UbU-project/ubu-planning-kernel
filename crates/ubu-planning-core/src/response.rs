@@ -3,6 +3,16 @@ use std::collections::BTreeMap;
 use serde::{Deserialize, Serialize};
 
 use crate::diagnostics::Diagnostic;
+use crate::unplaced::UnplacedTask;
+
+#[derive(Debug, Clone, Copy, PartialEq, Eq, Serialize, Deserialize)]
+#[serde(rename_all = "snake_case")]
+pub enum ResponseStatus {
+    Ok,
+    Partial,
+    Rejected,
+    EngineError,
+}
 use crate::explanations::ExplanationFragment;
 use crate::graph::TaskId;
 use crate::request::AffectLegitimizationMode;
@@ -74,6 +84,9 @@ impl ValidationResult {
 pub struct PlanningResponse {
     pub schema_version: String,
     pub request_id: String,
+    pub status: ResponseStatus,
+    #[serde(default)]
+    pub unplaced_tasks: Vec<UnplacedTask>,
     #[serde(default)]
     pub plan_candidates: Vec<PlanCandidate>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -85,11 +98,18 @@ impl PlanningResponse {
         schema_version: String,
         request_id: String,
         plan_candidates: Vec<PlanCandidate>,
+        unplaced_tasks: Vec<UnplacedTask>,
         diagnostics: Vec<Diagnostic>,
     ) -> Self {
         Self {
             schema_version,
             request_id,
+            status: if unplaced_tasks.is_empty() {
+                ResponseStatus::Ok
+            } else {
+                ResponseStatus::Partial
+            },
+            unplaced_tasks,
             plan_candidates,
             diagnostics,
         }
@@ -103,6 +123,8 @@ impl PlanningResponse {
         Self {
             schema_version,
             request_id,
+            status: ResponseStatus::Rejected,
+            unplaced_tasks: Vec::new(),
             plan_candidates: Vec::new(),
             diagnostics,
         }
@@ -275,11 +297,14 @@ pub struct LegitimizationReport {
     pub dimensions: BTreeMap<String, AffectDimensionLegitimization>,
 }
 
-#[derive(Debug, Clone, PartialEq, Eq, Serialize, Deserialize)]
+#[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(rename_all = "snake_case")]
 pub struct RepairResponse {
     pub schema_version: String,
     pub request_id: String,
+    pub status: ResponseStatus,
+    #[serde(default)]
+    pub unplaced_tasks: Vec<UnplacedTask>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
     pub repaired_plan: Option<Plan>,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
@@ -291,6 +316,8 @@ impl RepairResponse {
         Self {
             schema_version,
             request_id,
+            status: ResponseStatus::Ok,
+            unplaced_tasks: Vec::new(),
             repaired_plan: Some(candidate),
             diagnostics: Vec::new(),
         }
@@ -304,6 +331,8 @@ impl RepairResponse {
         Self {
             schema_version,
             request_id,
+            status: ResponseStatus::Rejected,
+            unplaced_tasks: Vec::new(),
             repaired_plan: None,
             diagnostics,
         }

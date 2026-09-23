@@ -9,10 +9,12 @@ const MAX_CANDIDATES: usize = 16;
 pub fn generate(request: &PlanningRequest) -> CandidateSet {
     match crate::skeleton::build_skeleton(request) {
         Ok(baseline) => CandidateSet {
+            unplaced: Vec::new(),
             plans: bounded_perturbations(request, baseline),
             diagnostics: Vec::new(),
         },
         Err(diagnostic) => CandidateSet {
+            unplaced: Vec::new(),
             plans: Vec::new(),
             diagnostics: vec![diagnostic.into()],
         },

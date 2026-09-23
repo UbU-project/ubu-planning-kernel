@@ -156,6 +156,7 @@ fn task_with_anchor(
         correlation_groups: Vec::new(),
         value: 1.0,
         priority: 1.0,
+        mandatory: false,
         depends_on: depends_on
             .iter()
             .map(|dependency| dependency.to_string())

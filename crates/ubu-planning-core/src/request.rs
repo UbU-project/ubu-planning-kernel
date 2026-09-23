@@ -49,6 +49,9 @@ pub struct TaskSpec {
     pub value: f64,
     #[serde(default = "default_task_priority")]
     pub priority: f64,
+    /// UBU-D0288: routine occurrence required regardless of value; never omitted.
+    #[serde(default, skip_serializing_if = "std::ops::Not::not")]
+    pub mandatory: bool,
     #[serde(default, skip_serializing_if = "Vec::is_empty")]
     pub depends_on: Vec<TaskId>,
     #[serde(default, skip_serializing_if = "Option::is_none")]
@@ -135,6 +138,8 @@ struct TaskSpecWire {
     #[serde(default = "default_task_priority")]
     priority: f64,
     #[serde(default)]
+    mandatory: bool,
+    #[serde(default)]
     depends_on: Vec<TaskId>,
     #[serde(default)]
     window: Option<TimeWindow>,
@@ -154,6 +159,7 @@ impl<'de> Deserialize<'de> for TaskSpec {
             correlation_groups: wire.correlation_groups,
             value: wire.value,
             priority: wire.priority,
+            mandatory: wire.mandatory,
             depends_on: wire.depends_on,
             window: wire.window,
             static_anchor: wire.static_anchor,
@@ -171,6 +177,7 @@ impl TaskSpec {
             correlation_groups: Vec::new(),
             value: default_task_value(),
             priority: default_task_priority(),
+            mandatory: false,
             depends_on: Vec::new(),
             window: None,
             static_anchor: None,

@@ -37,6 +37,7 @@ fn request_for_plan() -> PlanningRequest {
                 correlation_groups: Vec::new(),
                 value: 1.0,
                 priority: 1.0,
+                mandatory: false,
                 depends_on: Vec::new(),
                 window: None,
                 static_anchor: None,

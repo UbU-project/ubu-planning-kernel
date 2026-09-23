@@ -7,7 +7,9 @@ pub mod response;
 pub mod rollout;
 pub mod scoring;
 pub mod strategy;
+pub mod unplaced;
 pub mod validation;
+pub use unplaced::*;
 
 pub use diagnostics::{Diagnostic, DiagnosticCode, SkeletonFailureDiagnostic};
 pub use explanations::{explain_plan, ExplanationBundle, ExplanationFragment};
@@ -22,7 +24,7 @@ pub use request::{
 pub use response::{
     AffectDimensionLegitimization, CandidateRole, FeasibilitySummary, LegitimizationReport,
     LegitimizationResult, Plan, PlanCandidate, PlanStatus, PlanStep, PlanningResponse,
-    ProbabilityInterval, ProbabilityQuality, ProbabilitySummary, RepairResponse,
+    ProbabilityInterval, ProbabilityQuality, ProbabilitySummary, RepairResponse, ResponseStatus,
     RolloutDiagnostics, ScheduledTask, ScoreSummary, SemiLegitimizationResult,
     SemiLegitimizationSummary, ValidationResult,
 };
@@ -105,6 +107,7 @@ pub fn plan(request: PlanningRequest, strategy: &impl PlannerStrategy) -> Planni
             response_schema_version,
             request_id,
             plan_candidates,
+            candidates.unplaced,
             diagnostics,
         )
     }
@@ -161,6 +164,8 @@ pub fn repair(request: RepairRequest, strategy: &impl PlannerStrategy) -> Repair
     RepairResponse {
         schema_version: response.schema_version,
         request_id: request.request_id,
+        status: response.status,
+        unplaced_tasks: response.unplaced_tasks,
         repaired_plan: response
             .plan_candidates
             .into_iter()
