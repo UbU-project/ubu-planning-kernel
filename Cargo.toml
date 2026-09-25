@@ -19,6 +19,6 @@ anyhow = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["float_roundtrip"] }
 thiserror = "1"
-ubu_core = { git = "https://github.com/UbU-project/ubu-core", rev = "867c7a95edcba452470604c8fbce33b2d96986c1" }
+ubu_core = { git = "https://github.com/UbU-project/ubu-core", rev = "72b3ad8d5734d30443ea62f721833212e6da5e25" }
 ubu_planning_core = { path = "crates/ubu-planning-core" }
 ubu_planning_cpu = { path = "crates/ubu-planning-cpu" }
