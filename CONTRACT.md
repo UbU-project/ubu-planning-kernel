@@ -95,8 +95,14 @@ smaller digest.
 
 `horizon_policy` defaults to 3,600 reactive seconds and target 0.99. Only Static
 boundaries up to window start plus that duration (clamped to window end) are
-listed. This first slice assesses the full candidate continuation against those
-states; it does not truncate the feasibility or continuation walks. No sampled
+listed, and from P1B-56 the continuation is judged over the same span: a step
+that starts after window start plus that duration does not enter the
+continuation verdict, so `coverage_estimate` answers the `reactive_horizon` scope
+it is labelled with. The feasibility walk is not truncated: `display_probability`
+is still a verdict on the whole candidate. The first slice assessed the full
+candidate continuation against the listed states and truncated neither walk,
+which made the estimate identical at every horizon and let it report uncovered
+mass with no boundary in scope. No sampled
 boundaries means an empty summary, not an invented boundary. Coverage is absent
 when rollout does not run, and `budget_limited` is false. Alternative continuation
 search, compute-budget allocation and mobile continuation refs remain later work.

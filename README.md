@@ -99,7 +99,8 @@ extension policy bound exists in the kernel. Capacity/window reports record
 finalists carry `coverage`, with an estimate, uncovered mass, 95% Wilson interval
 and boundary continuation summary. Boundaries are the candidate's own Static
 placements inside the reactive horizon; the recorded merge rule rounds lateness
-up to whole minutes.
+up to whole minutes. The estimate covers that same span: a step that starts
+beyond the reactive horizon cannot fail the continuation.
 
 `display_probability` still measures running the Plan exactly as written.
 Coverage additionally credits continuing after optional work is dropped, so it
