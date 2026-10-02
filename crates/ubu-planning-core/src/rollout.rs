@@ -256,7 +256,10 @@ fn simulate(
                     .is_none_or(|window| start >= window.start as f64 && end <= window.end as f64)
         };
         feasible &= fits(actual_start, actual_end);
-        if continuation != Continuation::Failed {
+        // The continuation is judged over the same span its boundaries are recorded
+        // for. A step that starts beyond the reactive horizon cannot fail it: the
+        // estimate is labelled `reactive_horizon`, and that is what it now covers.
+        if continuation != Continuation::Failed && step.start <= boundary_limit {
             let dependency_end = task
                 .depends_on
                 .iter()

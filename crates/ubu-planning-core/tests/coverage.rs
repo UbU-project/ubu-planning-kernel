@@ -220,3 +220,95 @@ fn disabled_rollout_has_no_coverage_and_policy_is_validated() {
     };
     assert!(req.horizon_policy.validate().is_err());
 }
+
+// P1B-56: the continuation verdict covers the span it is named after.
+//
+// `coverage_estimate` is labelled `reactive_horizon`, and the boundaries it is
+// attributed to were always limited to that span. The continuation walk was
+// not: a commitment anywhere in the Plan could fail it. So the figure was a
+// verdict on the whole Plan, the same at every horizon.
+fn with_horizon(tasks: Vec<Value>, end: u64, reactive_horizon_seconds: u64) -> PlanningRequest {
+    let mut request = request(tasks, end);
+    request.rng_seed = 42;
+    request.horizon_policy =
+        serde_json::from_value(json!({"reactive_horizon_seconds":reactive_horizon_seconds}))
+            .unwrap();
+    request
+}
+#[test]
+fn the_estimate_moves_with_the_horizon() {
+    // Uncertain work packed in front of three commitments, each further out.
+    let tasks = vec![
+        uncertain("a"),
+        commitment("b", 2400),
+        uncertain("c"),
+        uncertain("d"),
+        commitment("e", 9000),
+        uncertain("f"),
+        uncertain("g"),
+        uncertain("h"),
+        commitment("i", 20000),
+    ];
+    let coverage = |seconds| {
+        candidate(with_horizon(tasks.clone(), 40000, seconds))
+            .coverage
+            .unwrap()
+    };
+    // Short of the first commitment, as far as the first, and the whole window.
+    let (short, medium, long) = (coverage(1200), coverage(2400), coverage(40000));
+    assert_eq!(
+        [&short, &medium, &long].map(|c| c.outcome_continuation_summary.boundaries.len()),
+        [0, 1, 3]
+    );
+    println!(
+        "P1B56_A_ESTIMATES short={} medium={} long={}",
+        short.coverage_estimate, medium.coverage_estimate, long.coverage_estimate
+    );
+    // A wider span can only hold more that may go wrong.
+    assert!(short.coverage_estimate >= medium.coverage_estimate);
+    assert!(medium.coverage_estimate >= long.coverage_estimate);
+    // Before P1B-56 all three were equal. That equality was the defect.
+    assert!(short.coverage_estimate > medium.coverage_estimate);
+    assert!(medium.coverage_estimate > long.coverage_estimate);
+    // With no commitment in scope there is nothing that can fail.
+    assert_eq!(short.coverage_estimate, 1.0);
+    assert!(long.coverage_estimate < 1.0);
+    for coverage in [&short, &medium, &long] {
+        assert_eq!(coverage.coverage_scope, CoverageScope::ReactiveHorizon);
+    }
+}
+#[test]
+fn a_commitment_outside_the_scope_cannot_fail_the_continuation() {
+    // `near` is over before the uncertain work starts. `far` is where that work's
+    // tail lands: it is threatened, and it is outside the ten-minute scope.
+    let near = commitment("near", 0);
+    let far = commitment("far", 1800);
+    let with_far = candidate(with_horizon(
+        vec![near.clone(), uncertain("a"), far],
+        6000,
+        600,
+    ));
+    let without_far = candidate(with_horizon(vec![near, uncertain("a")], 6000, 600));
+    // The threat is real: over the whole Plan the far commitment does not always hold.
+    let whole_plan = with_far.probability_summary.display_probability.unwrap();
+    assert!(whole_plan < 1.0, "{whole_plan}");
+    let coverage = with_far.coverage.unwrap();
+    assert_eq!(coverage.coverage_estimate, 1.0);
+    assert_eq!(
+        coverage.coverage_estimate,
+        without_far.coverage.unwrap().coverage_estimate
+    );
+    assert_eq!(
+        coverage
+            .outcome_continuation_summary
+            .boundaries
+            .iter()
+            .map(|boundary| boundary.boundary_task_ref.as_str())
+            .collect::<Vec<_>>(),
+        ["near"]
+    );
+    println!(
+        "P1B56_A_OUT_OF_SCOPE whole_plan={whole_plan} coverage_estimate={}",
+        coverage.coverage_estimate
+    );
+}

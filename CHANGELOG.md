@@ -2,6 +2,13 @@
 
 ## Unreleased
 
+- Scope the continuation walk to the reactive horizon. `coverage_estimate` was
+  labelled `reactive_horizon` and attributed to boundaries inside that span, but
+  a commitment anywhere in the Plan could fail the continuation, so the figure
+  was a verdict on the whole Plan and was the same at every horizon. A step that
+  starts beyond the horizon no longer enters the continuation verdict.
+  Feasibility, rollout draws and every golden fixture are unchanged.
+
 - Add validated horizon policy, deterministic boundary outcome digests, continuation
   coverage and Wilson confidence without changing feasibility or rollout draws.
 
