@@ -5,13 +5,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ubu-gpu-advisory"
 version = "0.1.0"
-description = "Session-local planning frame echo; no GPU computation"
+description = "Session-local planning worker with optional CPU tensor computation"
 requires-python = ">=3.10"
 dependencies = []
 
 [project.optional-dependencies]
 torch = [
-    # TODO: later PyTorch stage ticket (follow-up to P1B-70; not assigned here): pin torch when device computation lands.
+    "torch==2.6.0+cpu",
 ]
 
 [tool.setuptools.packages.find]

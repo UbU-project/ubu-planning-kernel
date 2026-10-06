@@ -20,11 +20,27 @@ pub struct WorkerSession {
     output: mpsc::Receiver<io::Result<Value>>,
     reader: Option<thread::JoinHandle<()>>,
     timeout: Duration,
+    compute_guard: Option<crate::compute_lock::ComputeGuard>,
 }
 impl WorkerSession {
     /// The only executable is a caller-selected Python interpreter; its module
     /// and import root are fixed to this repository. No shell or user payload.
     pub fn spawn(python: &str, timeout: Duration) -> io::Result<Self> {
+        Self::spawn_inner(python, timeout, None)
+    }
+    /// Compute sessions, unlike the no-compute echo, share Cargo's exclusion.
+    pub fn spawn_compute(python: &str, timeout: Duration) -> io::Result<Self> {
+        Self::spawn_inner(
+            python,
+            timeout,
+            Some(crate::compute_lock::ComputeGuard::try_acquire()?),
+        )
+    }
+    fn spawn_inner(
+        python: &str,
+        timeout: Duration,
+        compute_guard: Option<crate::compute_lock::ComputeGuard>,
+    ) -> io::Result<Self> {
         if timeout.is_zero() || timeout > Duration::from_secs(30) {
             return Err(invalid("worker timeout must be in (0, 30s]"));
         }
@@ -33,6 +49,8 @@ impl WorkerSession {
             .args(["-B", "-u", "-m", "ubu_planning_worker.main"])
             .env_clear()
             .env("PYTHONPATH", module_root)
+            .env("OMP_NUM_THREADS", "1")
+            .env("MKL_NUM_THREADS", "1")
             .stdin(Stdio::piped())
             .stdout(Stdio::piped())
             .stderr(Stdio::null())
@@ -49,6 +67,7 @@ impl WorkerSession {
             output,
             reader: None,
             timeout,
+            compute_guard,
         };
         // Owner guard exists before any fallible thread creation or later panic.
         session.reader = Some(
@@ -92,19 +111,22 @@ impl WorkerSession {
         )
     }
     pub fn receive(&mut self) -> io::Result<PlanningStreamFrame> {
-        let value = match self.output.recv_timeout(self.timeout) {
-            Ok(value) => value?,
-            Err(_) => {
-                self.stop();
-                return Err(io::Error::new(
-                    io::ErrorKind::TimedOut,
-                    "worker response timeout",
-                ));
-            }
-        };
+        let value = self.receive_value()?;
         let frame: PlanningStreamFrame = serde_json::from_value(value).map_err(invalid)?;
         frame.validate().map_err(invalid)?;
         Ok(frame)
+    }
+    pub fn receive_value(&mut self) -> io::Result<Value> {
+        match self.output.recv_timeout(self.timeout) {
+            Ok(value) => value,
+            Err(_) => {
+                self.stop();
+                Err(io::Error::new(
+                    io::ErrorKind::TimedOut,
+                    "worker response timeout",
+                ))
+            }
+        }
     }
     pub fn cancel(
         &mut self,
@@ -120,6 +142,7 @@ impl WorkerSession {
         self.input.take();
         let _ = self.child.kill();
         let _ = self.child.wait();
+        self.compute_guard.take();
     }
 }
 impl PlanningTransport for WorkerSession {

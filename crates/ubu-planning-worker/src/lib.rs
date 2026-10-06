@@ -66,24 +66,46 @@ pub fn plan_via_transport(
     }
 }
 
-/// Observations, not permission to install or import a framework. A Python file
-/// can be located without running it; its suitability is deliberately unverified.
+/// Verified by a bounded owned interpreter, never imported into Rust.
 #[derive(Debug, Clone, PartialEq, Eq)]
 pub struct LocalEnvironment {
     pub python_found: bool,
     pub gpu_stage_implemented: bool,
-    pub pytorch_cuda_verified: bool,
+    pub torch_importable: bool,
+    pub torch_version: Option<String>,
 }
 impl LocalEnvironment {
     pub fn detect() -> Self {
-        let python_found = std::env::var_os("PATH").is_some_and(|paths| {
-            std::env::split_paths(&paths).any(|path| path.join("python3").is_file())
-        });
-        Self {
-            python_found,
+        Self::detect_with_python("python3")
+    }
+    pub fn detect_with_python(python: &str) -> Self {
+        let mut result = Self {
+            python_found: false,
             gpu_stage_implemented: false,
-            pytorch_cuda_verified: false,
+            torch_importable: false,
+            torch_version: None,
+        };
+        // A real import in our own child is necessary: metadata may be stale,
+        // or a native extension may fail even when its package is present.
+        if let Ok(mut session) = ubu_planning_worker_protocol::session::WorkerSession::spawn(
+            python,
+            std::time::Duration::from_secs(5),
+        ) {
+            result.python_found = true;
+            if session
+                .send(&serde_json::json!({"kind":"environment","payload":{}}))
+                .is_ok()
+            {
+                if let Ok(value) = session.receive_value() {
+                    if value["kind"] == "environment" {
+                        result.torch_importable = value["payload"]["importable"] == true;
+                        result.torch_version =
+                            value["payload"]["version"].as_str().map(str::to_owned);
+                    }
+                }
+            }
         }
+        result
     }
     pub fn missing(&self) -> Vec<&'static str> {
         let mut missing = Vec::new();
@@ -91,36 +113,49 @@ impl LocalEnvironment {
             missing.push("local Python not found");
         }
         if !self.gpu_stage_implemented {
-            missing.push("GPU compute stage not implemented");
+            missing.push("CPU tensor stage not implemented");
         }
-        if !self.pytorch_cuda_verified {
-            missing.push("PyTorch/CUDA compatibility unverified");
+        if !self.torch_importable {
+            missing.push("pinned CPU PyTorch unavailable or broken");
         }
         missing
     }
 }
-/// All three CPU-owned prerequisites must be true. In this boundary-only ticket
-/// the device stage and its compute-budget justification are unavailable.
-pub fn gpu_eligible(policy: bool, environment: &LocalEnvironment, budget_justified: bool) -> bool {
+fn gates(policy: bool, environment: &LocalEnvironment, budget: bool, lock: bool) -> bool {
     policy
         && environment.python_found
         && environment.gpu_stage_implemented
-        && environment.pytorch_cuda_verified
-        && budget_justified
+        && environment.torch_importable
+        && budget
+        && lock
+}
+/// A probe does not reserve the lock: the compute session acquires it again,
+/// and races still fall back to CPU without waiting.
+pub fn gpu_eligible(policy: bool, environment: &LocalEnvironment, budget_justified: bool) -> bool {
+    gates(
+        policy,
+        environment,
+        budget_justified,
+        policy
+            && budget_justified
+            && ubu_planning_worker_protocol::compute_lock::ComputeGuard::try_acquire().is_ok(),
+    )
 }
 #[cfg(test)]
 mod selection_tests {
     use super::*;
     #[test]
-    fn policy_environment_and_budget_are_independent_required_gates() {
+    fn policy_environment_budget_and_lock_are_independent_required_gates() {
         let ready = LocalEnvironment {
             python_found: true,
             gpu_stage_implemented: true,
-            pytorch_cuda_verified: true,
+            torch_importable: true,
+            torch_version: Some("2.6.0+cpu".into()),
         };
-        assert!(gpu_eligible(true, &ready, true));
-        assert!(!gpu_eligible(false, &ready, true));
-        assert!(!gpu_eligible(true, &ready, false));
+        assert!(gates(true, &ready, true, true));
+        assert!(!gates(false, &ready, true, true));
+        assert!(!gates(true, &ready, false, true));
+        assert!(!gates(true, &ready, true, false));
         for absent in [
             LocalEnvironment {
                 python_found: false,
@@ -131,14 +166,12 @@ mod selection_tests {
                 ..ready.clone()
             },
             LocalEnvironment {
-                pytorch_cuda_verified: false,
+                torch_importable: false,
                 ..ready.clone()
             },
         ] {
-            assert!(!gpu_eligible(true, &absent, true));
+            assert!(!gates(true, &absent, true, true));
             assert!(!absent.missing().is_empty());
         }
-        let actual = LocalEnvironment::detect();
-        assert!(!gpu_eligible(true, &actual, true));
     }
 }

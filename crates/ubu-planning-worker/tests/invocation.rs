@@ -193,3 +193,70 @@ fn absent_python_is_cleanly_unavailable_without_spawn_fallback() {
         io::ErrorKind::NotFound
     );
 }
+
+#[test]
+fn owned_probe_reports_absence_or_pinned_cpu_framework_and_version() {
+    use ubu_planning_worker::LocalEnvironment;
+    let absent = LocalEnvironment::detect_with_python("/nonexistent-synthetic-worker-python");
+    assert!(!absent.python_found && !absent.torch_importable && absent.torch_version.is_none());
+    let python = std::env::var("UBU_WORKER_TEST_PYTHON").unwrap_or_else(|_| "python3".into());
+    let environment = LocalEnvironment::detect_with_python(&python);
+    if !environment.python_found {
+        eprintln!("SKIP: suitable local Python unavailable for environment probe");
+    }
+    if environment.torch_importable {
+        assert_eq!(environment.torch_version.as_deref(), Some("2.6.0+cpu"));
+    } else {
+        eprintln!("CPU: pinned torch absent, incompatible or broken");
+    }
+}
+#[test]
+fn compute_session_try_lock_is_released_on_end_and_panic() {
+    use ubu_planning_worker_protocol::compute_lock::ComputeGuard;
+    let Ok(guard) = ComputeGuard::try_acquire() else {
+        eprintln!("SKIP: Cargo holds shared compute lock; run owned suite outside Cargo to verify release");
+        return;
+    };
+    let ready = ubu_planning_worker::LocalEnvironment {
+        python_found: true,
+        gpu_stage_implemented: true,
+        torch_importable: true,
+        torch_version: Some("2.6.0+cpu".into()),
+    };
+    assert!(!ubu_planning_worker::gpu_eligible(true, &ready, true));
+    assert_eq!(
+        WorkerSession::spawn_compute("python3", Duration::from_secs(3))
+            .err()
+            .unwrap()
+            .kind(),
+        io::ErrorKind::WouldBlock
+    );
+    let answer = ubu_planning_core::plan(request(), &CpuStrategy);
+    assert_eq!(
+        serde_json::to_value(answer.engine_provenance).unwrap()["backend_kind"],
+        "cpu_reference"
+    );
+    drop(guard);
+    let python = std::env::var("UBU_WORKER_TEST_PYTHON").unwrap_or_else(|_| "python3".into());
+    let worker = match WorkerSession::spawn_compute(&python, Duration::from_secs(3)) {
+        Ok(worker) => worker,
+        Err(error) if error.kind() == io::ErrorKind::NotFound => {
+            eprintln!("SKIP: suitable local Python unavailable");
+            return;
+        }
+        Err(error) => panic!("compute session: {error}"),
+    };
+    let pid = worker.id();
+    assert!(ComputeGuard::try_acquire().is_err());
+    assert!(
+        std::panic::catch_unwind(std::panic::AssertUnwindSafe(move || {
+            let _worker = worker;
+            panic!("synthetic compute owner panic");
+        }))
+        .is_err()
+    );
+    assert!(!Path::new(&format!("/proc/{pid}")).exists());
+    drop(ComputeGuard::try_acquire().unwrap());
+    drop(WorkerSession::spawn_compute(&python, Duration::from_secs(3)).unwrap());
+    drop(ComputeGuard::try_acquire().unwrap());
+}

@@ -29,6 +29,10 @@ def run(reader, writer):
                 raise ValueError("cancellation identity mismatch")
             protocol.write(writer, outcome(active, "cancelled"))
             active = None
+        elif kind == "environment":
+            if active is not None or payload != {}:
+                raise ValueError("invalid environment probe")
+            protocol.write(writer, {"kind": "environment", "payload": framework_environment()})
         elif kind == "test_wait":
             # Explicit test plumbing, not a semantic planning input.
             if payload != {"milliseconds": 200}:
@@ -36,6 +40,18 @@ def run(reader, writer):
             time.sleep(0.2)
         else:
             raise ValueError("unknown input kind")
+
+def framework_environment():
+    # Importability cannot be established from distribution metadata alone.
+    # The owned, bounded child isolates broken native imports from Rust.
+    try:
+        import torch
+        if torch.__version__ != "2.6.0+cpu":
+            return {"importable": False, "version": str(torch.__version__)}
+        torch.empty(0, device="cpu")
+        return {"importable": True, "version": str(torch.__version__)}
+    except Exception:
+        return {"importable": False, "version": None}
 
 def main():
     try:

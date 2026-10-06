@@ -1,4 +1,5 @@
 //! Local, bounded invocation framing. No planning authority lives here.
+pub mod compute_lock;
 use serde::{de::DeserializeOwned, Serialize};
 use serde_json::{json, Value};
 use std::io::{self, Read, Write};
