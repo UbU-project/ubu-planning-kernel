@@ -3,8 +3,9 @@ resolver = "2"
 members = [
     "crates/ubu-planning-core",
     "crates/ubu-planning-cpu",
-    "crates/ubu-planning-advisory-protocol",
+    "crates/ubu-planning-worker-protocol",
     "crates/ubu-planning-cli",
+    "crates/ubu-planning-worker",
 ]
 
 [workspace.package]
@@ -19,6 +20,9 @@ anyhow = "1"
 serde = { version = "1", features = ["derive"] }
 serde_json = { version = "1", features = ["float_roundtrip"] }
 thiserror = "1"
-ubu_core = { git = "https://github.com/UbU-project/ubu-core", rev = "46135fea0312bab3606e467c3012d7327096d400" }
+ubu_core = { git = "https://github.com/UbU-project/ubu-core", rev = "fa26bf678977f5e077229eb97a39cc1b8b960c9b" }
 ubu_planning_core = { path = "crates/ubu-planning-core" }
 ubu_planning_cpu = { path = "crates/ubu-planning-cpu" }
+
+time = { version = "0.3", features = ["formatting", "parsing"] }
+ubu_planning_worker_protocol = { path = "crates/ubu-planning-worker-protocol" }

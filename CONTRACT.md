@@ -106,3 +106,20 @@ mass with no boundary in scope. No sampled
 boundaries means an empty summary, not an invented boundary. Coverage is absent
 when rollout does not run, and `budget_limited` is false. Alternative continuation
 search, compute-budget allocation and mobile continuation refs remain later work.
+
+## Legacy 0.1 invocation profile (P1B-70)
+
+The approved invocation wrapper transports the completed CPU answer after the
+existing PlannerStrategy pipeline. It does not reinterpret that answer as a
+CandidateSet or repeat scoring. Two input frames carry one typed semantic
+object each; process controls carry no planning semantics. All time coordinates
+are adapted to RFC3339 UTC. The response adds engine_provenance, planner_version,
+rng_seed_echo, effective_time and generated_at; existing diagnostics and
+unplaced_tasks remain unchanged. Actual computation remains cpu_reference /
+in_process_cpu / certified, with numeric profile boundary-v1. Error/cancellation
+transport status is engine_error, separate from the retained CPU answer.
+
+This does not implement the design's full 0.2 envelope or diagnostic object,
+request policy vocabulary, stage tensor profile, GPU computation or streaming.
+A chunk can never be surfaced here. Existing candidate strategies and pure
+planner semantics remain authoritative and unchanged.

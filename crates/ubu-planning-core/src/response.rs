@@ -84,6 +84,11 @@ impl ValidationResult {
 pub struct PlanningResponse {
     pub schema_version: String,
     pub request_id: String,
+    pub planner_version: String,
+    pub rng_seed_echo: u64,
+    pub effective_time: String,
+    pub generated_at: String,
+    pub engine_provenance: ubu_core::worker::EngineProvenance,
     pub status: ResponseStatus,
     #[serde(default)]
     pub unplaced_tasks: Vec<UnplacedTask>,
@@ -104,6 +109,11 @@ impl PlanningResponse {
         Self {
             schema_version,
             request_id,
+            planner_version: env!("CARGO_PKG_VERSION").into(),
+            rng_seed_echo: 0,
+            effective_time: "1970-01-01T00:00:00Z".into(),
+            generated_at: "1970-01-01T00:00:00Z".into(),
+            engine_provenance: cpu_provenance(),
             status: if unplaced_tasks.is_empty() {
                 ResponseStatus::Ok
             } else {
@@ -123,6 +133,11 @@ impl PlanningResponse {
         Self {
             schema_version,
             request_id,
+            planner_version: env!("CARGO_PKG_VERSION").into(),
+            rng_seed_echo: 0,
+            effective_time: "1970-01-01T00:00:00Z".into(),
+            generated_at: "1970-01-01T00:00:00Z".into(),
+            engine_provenance: cpu_provenance(),
             status: ResponseStatus::Rejected,
             unplaced_tasks: Vec::new(),
             plan_candidates: Vec::new(),
@@ -339,4 +354,19 @@ impl RepairResponse {
             diagnostics,
         }
     }
+}
+
+/// Actual computation provenance, also used by orchestration's legacy paths.
+pub fn cpu_provenance() -> ubu_core::worker::EngineProvenance {
+    let mut result = ubu_core::worker::EngineProvenance::cpu(env!("CARGO_PKG_VERSION"));
+    result.tolerance_profile = Some("boundary-v1".into());
+    result
+}
+/// Caller-supplied logical time; the pure planner never reads the wall clock.
+pub fn utc_timestamp(seconds: u64) -> Result<String, String> {
+    let seconds = i64::try_from(seconds).map_err(|_| "timestamp out of range")?;
+    time::OffsetDateTime::from_unix_timestamp(seconds)
+        .map_err(|_| "timestamp out of range")?
+        .format(&time::format_description::well_known::Rfc3339)
+        .map_err(|_| "timestamp format failed".into())
 }

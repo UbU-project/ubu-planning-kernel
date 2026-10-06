@@ -1,5 +1,5 @@
 [package]
-name = "ubu_planning_core"
+name = "ubu_planning_worker_protocol"
 version.workspace = true
 edition.workspace = true
 license.workspace = true
@@ -9,10 +9,9 @@ publish.workspace = true
 [dependencies]
 serde.workspace = true
 serde_json.workspace = true
-thiserror.workspace = true
 ubu_core.workspace = true
+ubu_planning_core.workspace = true
 time.workspace = true
 
 [dev-dependencies]
-serde_json = { workspace = true, features = ["raw_value"] }
 ubu_planning_cpu.workspace = true

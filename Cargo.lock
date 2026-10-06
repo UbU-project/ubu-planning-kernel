@@ -386,7 +386,7 @@ dependencies = [
 [[package]]
 name = "ubu_core"
 version = "0.1.0"
-source = "git+https://github.com/UbU-project/ubu-core?rev=46135fea0312bab3606e467c3012d7327096d400#46135fea0312bab3606e467c3012d7327096d400"
+source = "git+https://github.com/UbU-project/ubu-core?rev=fa26bf678977f5e077229eb97a39cc1b8b960c9b#fa26bf678977f5e077229eb97a39cc1b8b960c9b"
 dependencies = [
  "regex",
  "serde",
@@ -394,16 +394,6 @@ dependencies = [
  "thiserror",
  "time",
  "uuid",
-]
-
-[[package]]
-name = "ubu_planning_advisory_protocol"
-version = "0.1.0"
-dependencies = [
- "anyhow",
- "serde",
- "serde_json",
- "ubu_core",
 ]
 
 [[package]]
@@ -423,8 +413,8 @@ dependencies = [
  "serde",
  "serde_json",
  "thiserror",
+ "time",
  "ubu_core",
- "ubu_planning_advisory_protocol",
  "ubu_planning_cpu",
 ]
 
@@ -434,6 +424,29 @@ version = "0.1.0"
 dependencies = [
  "ubu_core",
  "ubu_planning_core",
+]
+
+[[package]]
+name = "ubu_planning_worker"
+version = "0.1.0"
+dependencies = [
+ "serde_json",
+ "ubu_core",
+ "ubu_planning_core",
+ "ubu_planning_cpu",
+ "ubu_planning_worker_protocol",
+]
+
+[[package]]
+name = "ubu_planning_worker_protocol"
+version = "0.1.0"
+dependencies = [
+ "serde",
+ "serde_json",
+ "time",
+ "ubu_core",
+ "ubu_planning_core",
+ "ubu_planning_cpu",
 ]
 
 [[package]]

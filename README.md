@@ -8,9 +8,10 @@ This repository is an internal Cargo workspace. The Rust CPU planning core is au
 
 - `ubu_planning_core`: public planning API, authoritative validation, and semi/full-legitimization entrypoints.
 - `ubu_planning_cpu`: deterministic CPU `PlannerStrategy` implementation.
-- `ubu_planning_advisory_protocol`: JSON stdio plumbing for canonical `ubu_core` GPU advisory wire types.
+- `ubu_planning_worker_protocol`: bounded length-prefixed JSON, a pure codec, stub and owned session transport.
+- `ubu_planning_worker`: complete-response invocation wrapper around the unchanged CPU planner.
 - `ubu_planning_cli`: thin local CLI for fixture-oriented planning, validation, repair, and advisory checks.
-- `gpu-advisory`: stdlib-only Python no-op advisory process.
+- `gpu-advisory`: stdlib-only `ubu_planning_worker` session module.
 
 ## Authority Rules
 
@@ -39,7 +40,7 @@ cargo clippy --workspace --all-targets
 cargo test --workspace
 ```
 
-Python advisory tests are optional for Rust CI and require only stdlib Python plus pytest:
+Python worker tests are optional for Rust CI and require only stdlib Python plus pytest:
 
 ```sh
 cd gpu-advisory
@@ -106,3 +107,33 @@ beyond the reactive horizon cannot fail the continuation.
 Coverage additionally credits continuing after optional work is dropped, so it
 can be higher. Protected work is never dropped. This slice uses existing draws
 and reports `budget_limited: false`; it does not search alternative continuations.
+
+## Invocation boundary (P1B-70)
+
+The CPU computes one complete reference response. Two separately framed inputs
+carry one legacy 0.1 PlanningRequest and one reference PlanningResponse; Python
+returns a single final_response. The wrapper checks frame identity/order, typed
+decoding, complete equality and CPU schedule validation. It retains the CPU
+answer on error or cancellation, with a separate engine_error transport status
+and engine_error/cancelled frame. No chunk is surfaced. This is a response-level
+wrapper, not a GPU PlannerStrategy: candidate generation and all scoring stay
+unchanged. Provenance records actual CPU computation, not a GPU echo.
+
+Time coordinates on these pipes are whole-second RFC3339 UTC strings. The
+adapter names every typed time path, including affect observations and coverage
+boundary starts; durations remain integers. Response replay metadata names the
+planner version, echoes the seed and records effective/generation times. The
+pure kernel uses the request window's logical time for both; orchestration
+supplies its clock for generation time. No scoring input or wall-clock read is
+introduced into the kernel. Invalid or unrepresentable coordinates cannot be
+sent. The larger 0.2 request/diagnostics conformance gap remains deferred.
+
+WorkerSession starts only this repository's local module, with a cleared
+inherited environment and no shell or socket. Its owner kills and waits for the
+child and joins its output reader on normal drop, error, timeout and panic.
+The response timeout is positive and at most 30 seconds. Tests use a 3-second
+bound (10ms for the deliberate timeout) and skip if Python is unavailable;
+UBU_WORKER_TEST_PYTHON can select an existing interpreter or a missing sentinel.
+No installation or signal handler is part of the suite. Python is persistent
+inside its owned session and never a daemon. PyTorch/CUDA are not imported or
+required; no GPU stage, tensor layout or duration model is added.

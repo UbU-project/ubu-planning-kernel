@@ -44,6 +44,18 @@ fn response_schema_version(schema_version: Option<&str>) -> String {
 }
 
 pub fn plan(request: PlanningRequest, strategy: &impl PlannerStrategy) -> PlanningResponse {
+    let seed = request.rng_seed;
+    let logical_time = request.time_window.as_ref().map_or(0, |w| w.start);
+    let mut response = plan_inner(request, strategy);
+    response.rng_seed_echo = seed;
+    // Invalid/unrepresentable coordinates never cross the worker adapter.
+    response.effective_time =
+        response::utc_timestamp(logical_time).unwrap_or_else(|_| "1970-01-01T00:00:00Z".into());
+    response.generated_at = response.effective_time.clone();
+    response
+}
+
+fn plan_inner(request: PlanningRequest, strategy: &impl PlannerStrategy) -> PlanningResponse {
     let request_id = request.request_id.clone();
     let response_schema_version = response_schema_version(request.schema_version.as_deref());
     let request_validation = validation::validate_planning_request(&request);
