@@ -54,3 +54,23 @@ def test_split_policy_is_explicitly_rejected(use_torch,request):
     result=(stage1.compute if use_torch else stage1.reference_without_framework)(p)
     assert not any(result["validity_mask"])
     assert result["rejection_codes"] == ["unsupported_split_policy"]*16
+
+import json
+from pathlib import Path
+from ubu_planning_worker import protocol
+GOLDENS=json.loads((Path(__file__).parents[2]/"fixtures/worker/stage1-goldens.json").read_text())
+FRAMES=json.loads((Path(__file__).parents[2]/"fixtures/worker/stage1-frames.json").read_text())
+@pytest.mark.parametrize("case",GOLDENS,ids=lambda c:c["name"])
+def test_python_algorithm_matches_rust_golden_exactly(case):
+    assert stage1.reference_without_framework(case["input"]) == case["expected"]
+
+@pytest.mark.parametrize("case",GOLDENS,ids=lambda c:c["name"])
+def test_tensor_algorithm_matches_rust_golden_exactly(case,cpu_torch):
+    assert stage1.compute(case["input"]) == case["expected"]
+
+@pytest.mark.parametrize("case",FRAMES,ids=lambda c:c["name"])
+def test_shared_stage1_frame_bytes(case):
+    import io
+    writer=io.BytesIO();protocol.write(writer,case["frame"])
+    assert writer.getvalue().hex() == case["hex"]
+    assert protocol.read(io.BytesIO(writer.getvalue())) == case["frame"]

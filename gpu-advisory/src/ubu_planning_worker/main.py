@@ -29,6 +29,19 @@ def run(reader, writer):
                 raise ValueError("cancellation identity mismatch")
             protocol.write(writer, outcome(active, "cancelled"))
             active = None
+        elif kind == "stage1":
+            if active is not None or not isinstance(payload, dict):
+                raise ValueError("invalid Stage 1 invocation")
+            request_id = payload.get("request", {}).get("request_id")
+            if not isinstance(request_id, str) or not request_id:
+                raise ValueError("invalid Stage 1 identity")
+            try:
+                from .stage1 import compute
+                result = compute(payload)
+                import torch
+                protocol.write(writer, {"kind":"stage1_result", "payload":{"profile":"stage1-atomic-v1", "request_id":request_id,"framework_version":str(torch.__version__),"result":result}})
+            except Exception:
+                protocol.write(writer, outcome(request_id, "engine_error", error="Stage 1 worker failed"))
         elif kind == "environment":
             if active is not None or payload != {}:
                 raise ValueError("invalid environment probe")

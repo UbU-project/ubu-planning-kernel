@@ -102,6 +102,9 @@ impl WorkerSession {
     pub fn id(&self) -> u32 {
         self.child.id()
     }
+    pub fn owns_compute_lock(&self) -> bool {
+        self.compute_guard.is_some()
+    }
     pub fn send(&mut self, value: &Value) -> io::Result<()> {
         write_frame(
             self.input

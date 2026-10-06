@@ -1,4 +1,5 @@
-//! A response-level invocation wrapper, not a candidate-generating strategy.
+//! CPU-certified response echo and an optional atomic Stage 1 strategy.
+pub mod stage1;
 use ubu_planning_core::{PlannerStrategy, PlanningRequest, PlanningResponse, ResponseStatus};
 use ubu_planning_worker_protocol::{
     from_wire, validate_sequence, FrameType, PlanningStreamFrame, PlanningTransport,
@@ -81,7 +82,7 @@ impl LocalEnvironment {
     pub fn detect_with_python(python: &str) -> Self {
         let mut result = Self {
             python_found: false,
-            gpu_stage_implemented: false,
+            gpu_stage_implemented: true,
             torch_importable: false,
             torch_version: None,
         };

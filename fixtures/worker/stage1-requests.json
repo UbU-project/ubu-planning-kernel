@@ -1,0 +1,507 @@
+[
+  {
+    "name": "synthetic-dependency-chain",
+    "request": {
+      "schema_version": "planning-kernel-contract/0.1",
+      "request_id": "dependency-chain",
+      "mode": "fresh_generation",
+      "rng_seed": 42,
+      "time_window": {
+        "start": 0,
+        "end": 10
+      },
+      "topological_order": [
+        "task-a",
+        "task-b",
+        "task-c"
+      ],
+      "tasks": [
+        {
+          "id": "task-a",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          }
+        },
+        {
+          "id": "task-b",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-a"
+          ]
+        },
+        {
+          "id": "task-c",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-b"
+          ]
+        }
+      ],
+      "n_rollouts": 64,
+      "top_k": 3
+    }
+  },
+  {
+    "name": "synthetic-static-anchor",
+    "request": {
+      "schema_version": "planning-kernel-contract/0.1",
+      "request_id": "static-anchor",
+      "mode": "fresh_generation",
+      "rng_seed": 0,
+      "time_window": {
+        "start": 0,
+        "end": 10
+      },
+      "topological_order": [
+        "task-a"
+      ],
+      "tasks": [
+        {
+          "id": "task-a",
+          "duration": {
+            "type": "fixed",
+            "seconds": 2
+          },
+          "window": {
+            "start": 5,
+            "end": 10
+          },
+          "static_anchor": {
+            "start": 5
+          }
+        }
+      ],
+      "n_rollouts": 64,
+      "top_k": 3
+    }
+  },
+  {
+    "name": "synthetic-affect-break-required",
+    "request": {
+      "schema_version": "planning-kernel-contract/0.1",
+      "request_id": "affect-break-required",
+      "mode": "fresh_generation",
+      "rng_seed": 0,
+      "time_window": {
+        "start": 0,
+        "end": 10
+      },
+      "topological_order": [
+        "task-a"
+      ],
+      "affect_profile": {
+        "mode": "warn_only",
+        "dimensions": {
+          "energy": {
+            "direction": "higher_is_better",
+            "location": 5.0,
+            "scale": 1.0,
+            "threshold": 0.5,
+            "freshness_seconds": 60
+          }
+        }
+      },
+      "affect_observation": {
+        "dimensions": {
+          "energy": {
+            "value": 4.0,
+            "observed_at": 0,
+            "source_kind": "self_report"
+          }
+        }
+      },
+      "tasks": [
+        {
+          "id": "task-a",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          }
+        }
+      ],
+      "n_rollouts": 64,
+      "top_k": 3
+    }
+  },
+  {
+    "name": "synthetic-cyclic-dependency",
+    "request": {
+      "schema_version": "planning-kernel-contract/0.1",
+      "request_id": "cyclic-dependency",
+      "mode": "fresh_generation",
+      "rng_seed": 0,
+      "time_window": {
+        "start": 0,
+        "end": 10
+      },
+      "topological_order": [
+        "task-a",
+        "task-b"
+      ],
+      "tasks": [
+        {
+          "id": "task-a",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-b"
+          ]
+        },
+        {
+          "id": "task-b",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-a"
+          ]
+        }
+      ],
+      "n_rollouts": 64,
+      "top_k": 3
+    }
+  },
+  {
+    "name": "synthetic-implicit-order",
+    "request": {
+      "schema_version": "planning-kernel-contract/0.1",
+      "request_id": "invented-implicit-order",
+      "mode": "fresh_generation",
+      "rng_seed": 42,
+      "time_window": {
+        "start": 0,
+        "end": 10
+      },
+      "tasks": [
+        {
+          "id": "task-a",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          }
+        },
+        {
+          "id": "task-b",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-a"
+          ]
+        },
+        {
+          "id": "task-c",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-b"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "synthetic-shifted-mode",
+    "request": {
+      "schema_version": "planning-kernel-contract/0.1",
+      "request_id": "invented-shifted-mode",
+      "mode": "fresh_generation",
+      "rng_seed": 42,
+      "time_window": {
+        "start": 0,
+        "end": 10
+      },
+      "topological_order": [
+        "task-a",
+        "task-b",
+        "task-c"
+      ],
+      "tasks": [
+        {
+          "id": "task-a",
+          "duration": {
+            "type": "shifted_lognormal_p95",
+            "min_seconds": 1,
+            "mode_seconds": 2,
+            "p95_seconds": 4
+          }
+        },
+        {
+          "id": "task-b",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-a"
+          ]
+        },
+        {
+          "id": "task-c",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-b"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "synthetic-large-seed",
+    "request": {
+      "schema_version": "planning-kernel-contract/0.1",
+      "request_id": "invented-large-seed",
+      "mode": "fresh_generation",
+      "rng_seed": 18446744073709551615,
+      "time_window": {
+        "start": 0,
+        "end": 10
+      },
+      "topological_order": [
+        "task-a",
+        "task-b",
+        "task-c"
+      ],
+      "tasks": [
+        {
+          "id": "task-a",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          }
+        },
+        {
+          "id": "task-b",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-a"
+          ]
+        },
+        {
+          "id": "task-c",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-b"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "synthetic-optional-omission",
+    "request": {
+      "schema_version": "planning-kernel-contract/0.1",
+      "request_id": "invented-optional-omission",
+      "mode": "fresh_generation",
+      "rng_seed": 42,
+      "time_window": {
+        "start": 0,
+        "end": 1
+      },
+      "topological_order": [
+        "task-a",
+        "task-b",
+        "task-c"
+      ],
+      "tasks": [
+        {
+          "id": "task-a",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          }
+        },
+        {
+          "id": "task-b",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-a"
+          ]
+        },
+        {
+          "id": "task-c",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-b"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "synthetic-mandatory-failure",
+    "request": {
+      "schema_version": "planning-kernel-contract/0.1",
+      "request_id": "invented-mandatory-failure",
+      "mode": "fresh_generation",
+      "rng_seed": 42,
+      "time_window": {
+        "start": 0,
+        "end": 1
+      },
+      "topological_order": [
+        "task-a",
+        "task-b",
+        "task-c"
+      ],
+      "tasks": [
+        {
+          "id": "task-a",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          }
+        },
+        {
+          "id": "task-b",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-a"
+          ]
+        },
+        {
+          "id": "task-c",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-b"
+          ],
+          "mandatory": true
+        }
+      ]
+    }
+  },
+  {
+    "name": "synthetic-static-collision",
+    "request": {
+      "schema_version": "planning-kernel-contract/0.1",
+      "request_id": "invented-static-collision",
+      "mode": "fresh_generation",
+      "rng_seed": 42,
+      "time_window": {
+        "start": 0,
+        "end": 10
+      },
+      "topological_order": [
+        "task-a",
+        "task-b",
+        "task-c"
+      ],
+      "tasks": [
+        {
+          "id": "task-a",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "static_anchor": {
+            "start": 0
+          }
+        },
+        {
+          "id": "task-b",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-a"
+          ],
+          "static_anchor": {
+            "start": 0
+          }
+        },
+        {
+          "id": "task-c",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-b"
+          ]
+        }
+      ]
+    }
+  },
+  {
+    "name": "synthetic-invalid-order",
+    "request": {
+      "schema_version": "planning-kernel-contract/0.1",
+      "request_id": "invented-invalid-order",
+      "mode": "fresh_generation",
+      "rng_seed": 42,
+      "time_window": {
+        "start": 0,
+        "end": 10
+      },
+      "topological_order": [
+        "task-c",
+        "task-b",
+        "task-a"
+      ],
+      "tasks": [
+        {
+          "id": "task-a",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          }
+        },
+        {
+          "id": "task-b",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-a"
+          ]
+        },
+        {
+          "id": "task-c",
+          "duration": {
+            "type": "fixed",
+            "seconds": 1
+          },
+          "depends_on": [
+            "task-b"
+          ]
+        }
+      ]
+    }
+  }
+]

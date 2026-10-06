@@ -3,7 +3,8 @@
 The internal stage1-atomic-v1 envelope is an explicitly approved exception to
 D0283's complete-response envelope. Canonical PlanningStreamFrame is unchanged.
 """
-from datetime import datetime, timezone
+from datetime import datetime
+from functools import cmp_to_key
 
 MAX_PLANNING_TASKS = 256
 MAX_CANDIDATES = 16
@@ -195,11 +196,21 @@ def _solve(payload, torch=None):
             if tuple(candidate) in placements: continue
             placements.add(tuple(candidate));batches.append(candidate)
             if len(batches)==MAX_CANDIDATES: break
-        omissions=[{"task_id":t["id"],"reason":omitted.get(t["id"],"deferred_dependency")} for t in tasks if t["id"] in excluded]
+        def least_protected_first(a,b):
+            av,bv=a.get("value",1.0),b.get("value",1.0)
+            if av!=bv: return -1 if av<bv else 1
+            ad=seconds(a["window"]["end"]) if a.get("window") else None
+            bd=seconds(b["window"]["end"]) if b.get("window") else None
+            if ad!=bd:
+                if ad is None: return -1
+                if bd is None: return 1
+                return -1 if ad>bd else 1
+            return (b["id"]>a["id"])-(b["id"]<a["id"])
+        omissions=[{"task_id":t["id"],"reason":omitted.get(t["id"],"deferred_dependency")} for t in sorted((t for t in tasks if t["id"] in excluded),key=cmp_to_key(least_protected_first))]
     except _Failure:
         batches=[];omissions=[];window_start=0
     output={name:[] for name in ("task_index","slot_mask","start_time_offsets","duration_samples","piece_index","piece_count")}
-    validity=[];slack=[];codes=[]
+    validity=[];slack=[];codes=[];dependency_feasibility=[];hard_constraint_feasibility=[]
     for c in range(MAX_CANDIDATES):
         batch=batches[c] if c<len(batches) else []
         n=len(batch);padding=MAX_PLANNING_TASKS-n
@@ -212,12 +223,23 @@ def _solve(payload, torch=None):
         candidate_steps={tasks[i]["id"]:(s,e) for i,s,e in batch}
         margins=[s-candidate_steps[dep][1] for i,s,_ in batch for dep in tasks[i].get("depends_on",[])]
         slack.append(min(margins) if margins else 0)
+        dependency_feasibility.append(bool(batch) and all(m>=0 for m in margins))
+        within=all(s>=window_start and e<=window_end and (not tasks[i].get("window") or s>=seconds(tasks[i]["window"]["start"]) and e<=seconds(tasks[i]["window"]["end"])) and (not tasks[i].get("static_anchor") or s==seconds(tasks[i]["static_anchor"]["start"])) for i,s,e in batch)
+        if torch is None:
+            disjoint=all(not(s<oe and e>os) for n,(_,s,e) in enumerate(batch) for _,os,oe in batch[n+1:])
+        elif batch:
+            times=torch.tensor([[s,e] for _,s,e in batch],dtype=torch.int64,device="cpu")
+            overlaps=(times[:,0,None] < times[None,:,1]) & (times[:,1,None] > times[None,:,0])
+            disjoint=not torch.triu(overlaps,diagonal=1).any().item()
+        else:
+            disjoint=True
+        hard_constraint_feasibility.append(bool(batch) and within and disjoint and dependency_feasibility[-1])
         validity.append(c<len(batches));codes.append("ok" if c<len(batches) else failures["code"] if failures else "padding")
-    output.update(validity_mask=validity,dependency_slack=slack,rejection_codes=codes,omissions=omissions,failure=failures)
+    output.update(validity_mask=validity,dependency_slack=slack,rejection_codes=codes,omissions=omissions,failure=failures,dependency_feasibility=dependency_feasibility,hard_constraint_feasibility=hard_constraint_feasibility)
     if torch is not None:
         for name in ("task_index","start_time_offsets","duration_samples","piece_index","piece_count","dependency_slack"):
             output[name]=torch.tensor(output[name],dtype=torch.int64,device="cpu").tolist()
-        for name in ("slot_mask","validity_mask"):
+        for name in ("slot_mask","validity_mask","dependency_feasibility","hard_constraint_feasibility"):
             output[name]=torch.tensor(output[name],dtype=torch.bool,device="cpu").tolist()
     return output
 

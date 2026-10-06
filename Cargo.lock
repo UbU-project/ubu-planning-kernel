@@ -430,6 +430,7 @@ dependencies = [
 name = "ubu_planning_worker"
 version = "0.1.0"
 dependencies = [
+ "serde",
  "serde_json",
  "ubu_core",
  "ubu_planning_core",

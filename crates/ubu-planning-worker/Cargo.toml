@@ -12,5 +12,5 @@ ubu_core.workspace = true
 ubu_planning_core.workspace = true
 ubu_planning_worker_protocol.workspace = true
 
-[dev-dependencies]
 ubu_planning_cpu.workspace = true
+serde.workspace = true
