@@ -5,13 +5,13 @@ build-backend = "setuptools.build_meta"
 [project]
 name = "ubu-gpu-advisory"
 version = "0.1.0"
-description = "No-op UbU GPU advisory process scaffold"
+description = "Session-local planning frame echo; no GPU computation"
 requires-python = ">=3.10"
 dependencies = []
 
 [project.optional-dependencies]
 torch = [
-    # TODO: add a pinned torch dependency when a real GPU advisory implementation exists.
+    # TODO: later PyTorch stage ticket (follow-up to P1B-70; not assigned here): pin torch when device computation lands.
 ]
 
 [tool.setuptools.packages.find]
