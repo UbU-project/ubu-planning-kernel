@@ -1,6 +1,7 @@
 """Owned frame echo, framework probe and optional atomic CPU-tensor Stage 1."""
 import sys
 import time
+import warnings
 from . import protocol
 
 def outcome(request_id, kind, **payload):
@@ -55,16 +56,22 @@ def run(reader, writer):
             raise ValueError("unknown input kind")
 
 def framework_environment():
-    # Importability cannot be established from distribution metadata alone.
-    # The owned, bounded child isolates broken native imports from Rust.
-    try:
-        import torch
-        if torch.__version__ != "2.6.0+cpu":
-            return {"importable": False, "version": str(torch.__version__)}
-        torch.empty(0, device="cpu")
-        return {"importable": True, "version": str(torch.__version__)}
-    except Exception:
-        return {"importable": False, "version": None}
+    # Probe the actual worker import path; successful resolution is not a quiet run.
+    # Report warnings through the existing owned probe, whose stderr is discarded.
+    with warnings.catch_warnings(record=True) as observed:
+        warnings.simplefilter("always")
+        try:
+            import torch
+            if torch.__version__ != "2.6.0+cpu":
+                result = {"importable": False, "version": str(torch.__version__)}
+            else:
+                torch.empty(0, device="cpu")
+                result = {"importable": True, "version": str(torch.__version__)}
+        except Exception:
+            result = {"importable": False, "version": None}
+    # No warning text/path is serialized; the owned check must reject any warning.
+    result["import_warning_count"] = len(observed)
+    return result
 
 def main():
     try:

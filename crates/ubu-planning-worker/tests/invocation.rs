@@ -260,3 +260,42 @@ fn compute_session_try_lock_is_released_on_end_and_panic() {
     drop(WorkerSession::spawn_compute(&python, Duration::from_secs(3)).unwrap());
     drop(ComputeGuard::try_acquire().unwrap());
 }
+
+fn quiet_probe(reply: &serde_json::Value) -> Result<(), &'static str> {
+    if reply["kind"] != "environment" {
+        return Err("wrong owned probe response");
+    }
+    if reply["payload"]["import_warning_count"].as_u64() != Some(0) {
+        return Err("worker import emitted a warning; verify the documented torch/numpy installation with a quiet owned-worker run");
+    }
+    Ok(())
+}
+
+#[test]
+fn warning_probe_fails_even_when_framework_import_falls_back() {
+    for importable in [true, false] {
+        assert!(quiet_probe(&json!({"kind":"environment", "payload":{"importable":importable, "import_warning_count":1}})).is_err());
+    }
+    assert!(
+        quiet_probe(&json!({"kind":"environment", "payload":{"import_warning_count":0}})).is_ok()
+    );
+}
+
+#[test]
+fn owned_worker_framework_import_must_be_quiet() {
+    let Some(mut worker) = real(Duration::from_secs(30)) else {
+        return;
+    };
+    worker
+        .send(&json!({"kind":"environment", "payload":{}}))
+        .unwrap();
+    let reply = worker.receive_value().unwrap();
+    quiet_probe(&reply).expect("documented worker import must be quiet");
+    if reply["payload"]["importable"] != true {
+        eprintln!(
+            "SKIP: pinned CPU framework unavailable; its installation has not been verified quiet"
+        );
+    } else {
+        assert_eq!(reply["payload"]["version"], "2.6.0+cpu");
+    }
+}

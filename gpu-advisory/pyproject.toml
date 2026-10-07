@@ -12,6 +12,7 @@ dependencies = []
 [project.optional-dependencies]
 torch = [
     "torch==2.6.0+cpu",
+    "numpy==2.2.6",
 ]
 
 [tool.setuptools.packages.find]

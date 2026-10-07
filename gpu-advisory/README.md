@@ -26,6 +26,12 @@ The pure Python codec uses the same golden bytes as Rust. Pytest exercises
 split reads, malformed lengths, frame ordering, duplicate terminals,
 cancellation and persistence through in-memory streams; it spawns no process.
 The real owned-child tests are section D's Rust tests and section G's suite.
-The torch extra remains an explicitly unassigned later-stage TODO, after
-P1B-70; this ticket installs only pytest in a local test environment under the
-operator's one-time exception. No runtime dependency is added.
+The optional extra is CPU-only; no runtime dependency is added to the stdlib echo.
+A documented install is verified when a run under it is quiet, not when it
+resolves. Select the installed interpreter with UBU_WORKER_TEST_PYTHON and run
+ubu-devshell/scripts/check-planning-worker.sh. Its existing owned environment
+probe reports import_warning_count and the owned invocation check requires zero
+before accepting availability. Warnings fail even on a later import fallback;
+missing Python/torch explicitly skips installation verification. Checks install
+nothing. The actual installation commands live beside this rule in
+ubu-devshell/docs/STAGE1_WORKER.md; this repository has no docs directory.
