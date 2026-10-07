@@ -1,4 +1,4 @@
-"""Session-local CPU-answer echo. No network, torch import, or planning."""
+"""Owned frame echo, framework probe and optional atomic CPU-tensor Stage 1."""
 import sys
 import time
 from . import protocol
