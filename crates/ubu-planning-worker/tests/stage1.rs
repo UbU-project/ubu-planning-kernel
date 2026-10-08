@@ -185,3 +185,143 @@ fn owned_tensor_worker_exact_parity_reuse_and_true_cpu_device_provenance() {
         assert_eq!(provenance["framework_version"], "2.6.0+cpu");
     }
 }
+
+// These transports only exchange in-memory frames; no subprocess or device.
+struct SyntheticReply {
+    mutation: Option<&'static str>,
+}
+impl StageTransport for SyntheticReply {
+    fn owns_compute_lock(&self) -> bool {
+        true
+    }
+    fn exchange_stage1(&mut self, input: &StageInput) -> io::Result<StageReply> {
+        if self.mutation == Some("transport") {
+            return Err(io::Error::other("invented transport failure"));
+        }
+        let mut reply = StageStubTransport.exchange_stage1(input)?;
+        match self.mutation.take() {
+            Some("profile") => reply.profile = "invented-profile".into(),
+            Some("identity") => reply.request_id = "invented-request".into(),
+            Some("version") => reply.framework_version = "invented-version".into(),
+            Some("certification") => reply.result.task_index[0][255] = 0,
+            _ => {}
+        }
+        Ok(reply)
+    }
+}
+#[test]
+fn each_policy_environment_gate_names_its_reason_and_preserves_cpu_answer() {
+    use Stage1FallbackReason::*;
+    let request: PlanningRequest = serde_json::from_value(cases()[0]["request"].clone()).unwrap();
+    let expected = ubu_planning_core::plan(request.clone(), &CpuStrategy);
+    for (policy, budget, environment, reason) in [
+        (false, true, ready(), PolicyDisabled),
+        (true, false, ready(), BudgetUnjustified),
+        (
+            true,
+            true,
+            LocalEnvironment {
+                python_found: false,
+                ..ready()
+            },
+            PythonUnavailable,
+        ),
+        (
+            true,
+            true,
+            LocalEnvironment {
+                gpu_stage_implemented: false,
+                ..ready()
+            },
+            StageUnimplemented,
+        ),
+        (
+            true,
+            true,
+            LocalEnvironment {
+                torch_importable: false,
+                ..ready()
+            },
+            TorchUnavailable,
+        ),
+    ] {
+        let strategy = Stage1Strategy::new(
+            policy,
+            environment,
+            budget,
+            SyntheticReply { mutation: None },
+        );
+        assert_eq!(plan_stage1(request.clone(), &strategy), expected);
+        assert_eq!(strategy.fallback_reason(), Some(reason));
+    }
+}
+#[test]
+fn occupied_compute_lock_is_named_without_transport_or_wait() {
+    // If Cargo or another owned test already holds it, that is the same gate.
+    let _held = ubu_planning_worker_protocol::compute_lock::ComputeGuard::try_acquire().ok();
+    let request: PlanningRequest = serde_json::from_value(cases()[0]["request"].clone()).unwrap();
+    let strategy = Stage1Strategy::new(true, ready(), true, Failed);
+    assert_eq!(
+        plan_stage1(request.clone(), &strategy),
+        ubu_planning_core::plan(request, &CpuStrategy)
+    );
+    assert_eq!(
+        strategy.fallback_reason(),
+        Some(Stage1FallbackReason::ComputeLockUnavailable)
+    );
+}
+#[test]
+fn unsupported_input_transport_mismatches_and_certification_name_cpu_fallbacks() {
+    use Stage1FallbackReason::*;
+    let request: PlanningRequest = serde_json::from_value(cases()[0]["request"].clone()).unwrap();
+    for (mutation, reason) in [
+        ("transport", TransportFailed),
+        ("profile", ReplyMismatch),
+        ("identity", ReplyMismatch),
+        ("version", ReplyMismatch),
+        ("certification", CertificationFailed),
+    ] {
+        let strategy = Stage1Strategy::new(
+            true,
+            ready(),
+            true,
+            SyntheticReply {
+                mutation: Some(mutation),
+            },
+        );
+        assert_eq!(
+            plan_stage1(request.clone(), &strategy),
+            ubu_planning_core::plan(request.clone(), &CpuStrategy)
+        );
+        assert_eq!(strategy.fallback_reason(), Some(reason));
+    }
+    let mut repair = request;
+    repair.mode = ubu_planning_core::PlanningMode::Repair;
+    let strategy = Stage1Strategy::new(true, ready(), true, SyntheticReply { mutation: None });
+    same(
+        strategy.generate_candidates(&repair),
+        CpuStrategy.generate_candidates(&repair),
+    );
+    assert_eq!(strategy.fallback_reason(), Some(InputUnsupported));
+}
+#[test]
+fn reason_resets_after_success_and_stub_never_claims_tensor_provenance() {
+    let request: PlanningRequest = serde_json::from_value(cases()[0]["request"].clone()).unwrap();
+    let strategy = Stage1Strategy::new(
+        true,
+        ready(),
+        true,
+        SyntheticReply {
+            mutation: Some("certification"),
+        },
+    );
+    let expected = ubu_planning_core::plan(request.clone(), &CpuStrategy);
+    assert_eq!(plan_stage1(request.clone(), &strategy), expected);
+    assert_eq!(
+        strategy.fallback_reason(),
+        Some(Stage1FallbackReason::CertificationFailed)
+    );
+    assert_eq!(plan_stage1(request, &strategy), expected);
+    assert_eq!(strategy.fallback_reason(), None);
+    assert_eq!(strategy.framework_version(), None);
+}

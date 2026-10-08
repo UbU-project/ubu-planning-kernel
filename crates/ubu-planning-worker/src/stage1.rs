@@ -3,7 +3,7 @@ use crate::{gpu_eligible, LocalEnvironment};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{
-    cell::RefCell,
+    cell::{Cell, RefCell},
     collections::{BTreeMap, BTreeSet},
     io,
     time::Duration,
@@ -400,6 +400,36 @@ impl StageTransport for LocalStageTransport {
         result
     }
 }
+/// Closed, content-free explanation of an unchanged CPU fallback.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum Stage1FallbackReason {
+    PolicyDisabled,
+    BudgetUnjustified,
+    PythonUnavailable,
+    StageUnimplemented,
+    TorchUnavailable,
+    ComputeLockUnavailable,
+    InputUnsupported,
+    TransportFailed,
+    ReplyMismatch,
+    CertificationFailed,
+}
+impl Stage1FallbackReason {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::PolicyDisabled => "policy_disabled",
+            Self::BudgetUnjustified => "budget_unjustified",
+            Self::PythonUnavailable => "python_unavailable",
+            Self::StageUnimplemented => "stage_unimplemented",
+            Self::TorchUnavailable => "torch_unavailable",
+            Self::ComputeLockUnavailable => "compute_lock_unavailable",
+            Self::InputUnsupported => "input_unsupported",
+            Self::TransportFailed => "transport_failed",
+            Self::ReplyMismatch => "reply_mismatch",
+            Self::CertificationFailed => "certification_failed",
+        }
+    }
+}
 /// RefCell implements the existing shared-reference strategy trait; no CPU seam
 /// or planner type is refactored. This strategy is local to one planning owner.
 pub struct Stage1Strategy<T> {
@@ -408,6 +438,7 @@ pub struct Stage1Strategy<T> {
     policy: bool,
     budget: bool,
     version: RefCell<Option<String>>,
+    fallback_reason: Cell<Option<Stage1FallbackReason>>,
 }
 impl<T: StageTransport> Stage1Strategy<T> {
     pub fn new(policy: bool, environment: LocalEnvironment, budget: bool, transport: T) -> Self {
@@ -417,7 +448,12 @@ impl<T: StageTransport> Stage1Strategy<T> {
             policy,
             budget,
             version: RefCell::new(None),
+            fallback_reason: Cell::new(None),
         }
+    }
+    /// The latest generation's reason alongside its candidates, reset each call.
+    pub fn fallback_reason(&self) -> Option<Stage1FallbackReason> {
+        self.fallback_reason.get()
     }
     pub fn framework_version(&self) -> Option<String> {
         self.version.borrow().clone()
@@ -426,31 +462,46 @@ impl<T: StageTransport> Stage1Strategy<T> {
 impl<T: StageTransport> PlannerStrategy for Stage1Strategy<T> {
     fn generate_candidates(&self, request: &PlanningRequest) -> CandidateSet {
         self.version.borrow_mut().take();
-        let fallback = || CpuStrategy.generate_candidates(request);
-        if !(self.policy
-            && self.budget
-            && self.environment.python_found
-            && self.environment.gpu_stage_implemented
-            && self.environment.torch_importable
-            && (self.transport.borrow().owns_compute_lock()
-                || gpu_eligible(self.policy, &self.environment, self.budget)))
+        self.fallback_reason.set(None);
+        let fallback = |reason| {
+            self.fallback_reason.set(Some(reason));
+            CpuStrategy.generate_candidates(request)
+        };
+        use Stage1FallbackReason::*;
+        if !self.policy {
+            return fallback(PolicyDisabled);
+        }
+        if !self.budget {
+            return fallback(BudgetUnjustified);
+        }
+        if !self.environment.python_found {
+            return fallback(PythonUnavailable);
+        }
+        if !self.environment.gpu_stage_implemented {
+            return fallback(StageUnimplemented);
+        }
+        if !self.environment.torch_importable {
+            return fallback(TorchUnavailable);
+        }
+        if !(self.transport.borrow().owns_compute_lock()
+            || gpu_eligible(self.policy, &self.environment, self.budget))
         {
-            return fallback();
+            return fallback(ComputeLockUnavailable);
         }
         let Ok(input) = StageInput::from_request(request) else {
-            return fallback();
+            return fallback(InputUnsupported);
         };
         let Ok(reply) = self.transport.borrow_mut().exchange_stage1(&input) else {
-            return fallback();
+            return fallback(TransportFailed);
         };
         if reply.profile != PROFILE
             || reply.request_id != request.request_id
             || reply.framework_version != "2.6.0+cpu"
         {
-            return fallback();
+            return fallback(ReplyMismatch);
         }
         let Ok(candidates) = reply.result.assemble(request) else {
-            return fallback();
+            return fallback(CertificationFailed);
         };
         if self.transport.borrow().runs_tensor_worker() {
             *self.version.borrow_mut() = Some(reply.framework_version);
@@ -463,6 +514,7 @@ pub fn plan_stage1<T: StageTransport>(
     strategy: &Stage1Strategy<T>,
 ) -> PlanningResponse {
     strategy.version.borrow_mut().take();
+    strategy.fallback_reason.set(None);
     let mut response = ubu_planning_core::plan(request, strategy);
     if let Some(version) = strategy.framework_version() {
         response.engine_provenance.backend_kind = ubu_core::worker::BackendKind::GpuWorker;

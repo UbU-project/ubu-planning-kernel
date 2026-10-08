@@ -123,3 +123,17 @@ This does not implement the design's full 0.2 envelope or diagnostic object,
 request policy vocabulary, stage tensor profile, GPU computation or streaming.
 A chunk can never be surfaced here. Existing candidate strategies and pure
 planner semantics remain authoritative and unchanged.
+
+## Stage 1 fallback explanation (P1B-74)
+
+Stage1Strategy.fallback_reason() returns the closed reason for its latest
+generation alongside the unchanged CandidateSet. Ten reasons distinguish the
+six policy/environment/lock gates, unsupported input, transport failure, reply
+identity/profile/version mismatch, and failed exact certification. Success resets
+the reason; the plan_stage1 wrapper also resets it when core validation does not
+invoke the strategy. There is no free-text worker error in this API.
+
+CpuStrategy remains the fallback and exact Stage 1 oracle. Existing candidate
+strategies and pure planner semantics remain authoritative and unchanged.
+StageOutput::assemble, including every padded value and its exact-comparison
+comment, is unchanged. This profile does not certify ChunkedSweep output.
