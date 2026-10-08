@@ -14,6 +14,11 @@ use std::{
 };
 use ubu_planning_core::{PlanningRequest, PlanningResponse};
 
+/// The compiled repository root is shared by validation and the owned child.
+pub fn module_root() -> PathBuf {
+    PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../gpu-advisory/src")
+}
+
 pub struct WorkerSession {
     child: Child,
     input: Option<ChildStdin>,
@@ -44,7 +49,7 @@ impl WorkerSession {
         if timeout.is_zero() || timeout > Duration::from_secs(30) {
             return Err(invalid("worker timeout must be in (0, 30s]"));
         }
-        let module_root = PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../gpu-advisory/src");
+        let module_root = module_root();
         let mut child = Command::new(python)
             .args(["-B", "-u", "-m", "ubu_planning_worker.main"])
             .env_clear()
@@ -122,12 +127,18 @@ impl WorkerSession {
     pub fn receive_value(&mut self) -> io::Result<Value> {
         match self.output.recv_timeout(self.timeout) {
             Ok(value) => value,
-            Err(_) => {
+            Err(error) => {
                 self.stop();
-                Err(io::Error::new(
-                    io::ErrorKind::TimedOut,
-                    "worker response timeout",
-                ))
+                match error {
+                    mpsc::RecvTimeoutError::Timeout => Err(io::Error::new(
+                        io::ErrorKind::TimedOut,
+                        "worker response timeout",
+                    )),
+                    mpsc::RecvTimeoutError::Disconnected => Err(io::Error::new(
+                        io::ErrorKind::UnexpectedEof,
+                        "worker reader disconnected",
+                    )),
+                }
             }
         }
     }

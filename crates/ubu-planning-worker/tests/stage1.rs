@@ -17,6 +17,7 @@ fn ready() -> LocalEnvironment {
         gpu_stage_implemented: true,
         torch_importable: true,
         torch_version: Some("2.6.0+cpu".into()),
+        ..ubu_planning_worker::LocalEnvironment::default()
     }
 }
 #[test]
@@ -324,4 +325,31 @@ fn reason_resets_after_success_and_stub_never_claims_tensor_provenance() {
     assert_eq!(plan_stage1(request, &strategy), expected);
     assert_eq!(strategy.fallback_reason(), None);
     assert_eq!(strategy.framework_version(), None);
+}
+
+#[test]
+fn every_environment_probe_failure_keeps_exact_cpu_response_without_transport() {
+    use ubu_planning_worker::ProbeFailure as P;
+    use Stage1FallbackReason as R;
+    let request: PlanningRequest = serde_json::from_value(cases()[0]["request"].clone()).unwrap();
+    let expected = ubu_planning_core::plan(request.clone(), &CpuStrategy);
+    for (failure, reason) in [
+        (P::PythonUnavailable, R::PythonUnavailable),
+        (P::InterpreterStartFailed, R::InterpreterStartFailed),
+        (P::ModuleRootUnavailable, R::ModuleRootUnavailable),
+        (P::ModulePackageUnavailable, R::ModulePackageUnavailable),
+        (P::ProbeBudgetInvalid, R::ProbeBudgetInvalid),
+        (P::ProbeTimedOut, R::ProbeTimedOut),
+        (P::ProbeFailed, R::ProbeFailed),
+        (P::TorchUnavailable, R::TorchUnavailable),
+        (P::TorchVersionMismatch, R::TorchVersionMismatch),
+    ] {
+        let environment = LocalEnvironment {
+            probe_failure: Some(failure),
+            ..ready()
+        };
+        let strategy = Stage1Strategy::new(true, environment, true, Failed);
+        assert_eq!(plan_stage1(request.clone(), &strategy), expected);
+        assert_eq!(strategy.fallback_reason(), Some(reason));
+    }
 }

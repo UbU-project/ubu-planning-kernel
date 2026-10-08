@@ -1,5 +1,5 @@
 //! Approved internal Stage 1 envelopes; not new canonical stream frame kinds.
-use crate::{gpu_eligible, LocalEnvironment};
+use crate::{gpu_eligible, LocalEnvironment, ProbeFailure};
 use serde::{Deserialize, Serialize};
 use serde_json::{json, Value};
 use std::{
@@ -408,6 +408,13 @@ pub enum Stage1FallbackReason {
     PythonUnavailable,
     StageUnimplemented,
     TorchUnavailable,
+    InterpreterStartFailed,
+    ModuleRootUnavailable,
+    ModulePackageUnavailable,
+    ProbeBudgetInvalid,
+    ProbeTimedOut,
+    ProbeFailed,
+    TorchVersionMismatch,
     ComputeLockUnavailable,
     InputUnsupported,
     TransportFailed,
@@ -422,6 +429,13 @@ impl Stage1FallbackReason {
             Self::PythonUnavailable => "python_unavailable",
             Self::StageUnimplemented => "stage_unimplemented",
             Self::TorchUnavailable => "torch_unavailable",
+            Self::InterpreterStartFailed => "interpreter_start_failed",
+            Self::ModuleRootUnavailable => "module_root_unavailable",
+            Self::ModulePackageUnavailable => "module_package_unavailable",
+            Self::ProbeBudgetInvalid => "probe_budget_invalid",
+            Self::ProbeTimedOut => "probe_timed_out",
+            Self::ProbeFailed => "probe_failed",
+            Self::TorchVersionMismatch => "torch_version_mismatch",
             Self::ComputeLockUnavailable => "compute_lock_unavailable",
             Self::InputUnsupported => "input_unsupported",
             Self::TransportFailed => "transport_failed",
@@ -473,6 +487,19 @@ impl<T: StageTransport> PlannerStrategy for Stage1Strategy<T> {
         }
         if !self.budget {
             return fallback(BudgetUnjustified);
+        }
+        if let Some(failure) = self.environment.probe_failure {
+            return fallback(match failure {
+                ProbeFailure::PythonUnavailable => PythonUnavailable,
+                ProbeFailure::InterpreterStartFailed => InterpreterStartFailed,
+                ProbeFailure::ModuleRootUnavailable => ModuleRootUnavailable,
+                ProbeFailure::ModulePackageUnavailable => ModulePackageUnavailable,
+                ProbeFailure::ProbeBudgetInvalid => ProbeBudgetInvalid,
+                ProbeFailure::ProbeTimedOut => ProbeTimedOut,
+                ProbeFailure::ProbeFailed => ProbeFailed,
+                ProbeFailure::TorchUnavailable => TorchUnavailable,
+                ProbeFailure::TorchVersionMismatch => TorchVersionMismatch,
+            });
         }
         if !self.environment.python_found {
             return fallback(PythonUnavailable);
@@ -593,6 +620,7 @@ mod owned_failure_tests {
             gpu_stage_implemented: true,
             torch_importable: true,
             torch_version: Some("2.6.0+cpu".into()),
+            ..LocalEnvironment::default()
         };
         let strategy = Stage1Strategy::new(true, environment, true, transport);
         assert_eq!(plan_stage1(request, &strategy), expected);

@@ -199,8 +199,18 @@ fn owned_probe_reports_absence_or_pinned_cpu_framework_and_version() {
     use ubu_planning_worker::LocalEnvironment;
     let absent = LocalEnvironment::detect_with_python("/nonexistent-synthetic-worker-python");
     assert!(!absent.python_found && !absent.torch_importable && absent.torch_version.is_none());
+    assert_eq!(
+        absent.probe_failure,
+        Some(ubu_planning_worker::ProbeFailure::PythonUnavailable)
+    );
+    assert_eq!(absent.interpreter, "/nonexistent-synthetic-worker-python");
     let python = std::env::var("UBU_WORKER_TEST_PYTHON").unwrap_or_else(|_| "python3".into());
     let environment = LocalEnvironment::detect_with_python(&python);
+    assert_eq!(environment.interpreter, python);
+    assert_eq!(
+        environment.interpreter_source,
+        ubu_planning_worker::InterpreterSource::EnvironmentVariable
+    );
     if !environment.python_found {
         eprintln!("SKIP: suitable local Python unavailable for environment probe");
     }
@@ -222,6 +232,7 @@ fn compute_session_try_lock_is_released_on_end_and_panic() {
         gpu_stage_implemented: true,
         torch_importable: true,
         torch_version: Some("2.6.0+cpu".into()),
+        ..ubu_planning_worker::LocalEnvironment::default()
     };
     assert!(!ubu_planning_worker::gpu_eligible(true, &ready, true));
     assert_eq!(
