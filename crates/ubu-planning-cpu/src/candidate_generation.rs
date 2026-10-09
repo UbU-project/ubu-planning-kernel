@@ -52,10 +52,15 @@ fn bounded_perturbations(
                     maximum_shift = maximum_shift.min(task_window.end.saturating_sub(step.end));
                 }
             }
-            if let Some(next) = occupied.iter().find(|interval| {
-                !suffix_tasks.contains(interval.task_id.as_str()) && interval.start >= step.end
-            }) {
-                maximum_shift = maximum_shift.min(next.start - step.end);
+            if let Some(gap) = occupied
+                .iter()
+                .filter(|interval| {
+                    !suffix_tasks.contains(interval.task_id.as_str()) && interval.start >= step.end
+                })
+                .map(|interval| interval.start - step.end)
+                .min()
+            {
+                maximum_shift = maximum_shift.min(gap);
             }
         }
         if maximum_shift == 0 {
