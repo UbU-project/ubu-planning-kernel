@@ -127,6 +127,216 @@ pub struct StageOutput {
     pub omissions: Vec<Omission>,
     pub failure: Option<StageFailure>,
 }
+/// Closed public field identities, in StageOutput declaration order.
+#[derive(Debug, Clone, Copy, PartialEq, Eq)]
+pub enum CertificationField {
+    TaskIndex,
+    SlotMask,
+    StartTimeOffsets,
+    DurationSamples,
+    PieceIndex,
+    PieceCount,
+    ValidityMask,
+    DependencySlack,
+    DependencyFeasibility,
+    HardConstraintFeasibility,
+    RejectionCodes,
+    Omissions,
+    Failure,
+}
+impl CertificationField {
+    pub fn as_str(self) -> &'static str {
+        match self {
+            Self::TaskIndex => "task_index",
+            Self::SlotMask => "slot_mask",
+            Self::StartTimeOffsets => "start_time_offsets",
+            Self::DurationSamples => "duration_samples",
+            Self::PieceIndex => "piece_index",
+            Self::PieceCount => "piece_count",
+            Self::ValidityMask => "validity_mask",
+            Self::DependencySlack => "dependency_slack",
+            Self::DependencyFeasibility => "dependency_feasibility",
+            Self::HardConstraintFeasibility => "hard_constraint_feasibility",
+            Self::RejectionCodes => "rejection_codes",
+            Self::Omissions => "omissions",
+            Self::Failure => "failure",
+        }
+    }
+}
+/// Formatting is public metadata only. Differing values are explicitly private,
+/// never included by Debug, Display or the io::Error that owns this explanation.
+#[derive(Clone)]
+pub struct CertificationDifference {
+    pub field: CertificationField,
+    pub candidate_index: Option<usize>,
+    pub slot_index: Option<usize>,
+    pub diverging_fields: usize,
+    expected: Value,
+    actual: Value,
+}
+impl CertificationDifference {
+    pub fn public_metadata(&self) -> Value {
+        json!({"field":self.field.as_str(),"candidate_index":self.candidate_index,
+            "slot_index":self.slot_index,"diverging_fields":self.diverging_fields})
+    }
+    /// Only the private diagnostic screen may consume this payload.
+    pub fn private_values(&self) -> Value {
+        json!({"expected":self.expected,"actual":self.actual})
+    }
+}
+impl std::fmt::Debug for CertificationDifference {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        f.debug_struct("CertificationDifference")
+            .field("field", &self.field)
+            .field("candidate_index", &self.candidate_index)
+            .field("slot_index", &self.slot_index)
+            .field("diverging_fields", &self.diverging_fields)
+            .finish_non_exhaustive()
+    }
+}
+impl std::fmt::Display for CertificationDifference {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "Stage 1 exact CPU certification failed: {}",
+            self.public_metadata()
+        )
+    }
+}
+impl std::error::Error for CertificationDifference {}
+fn first_difference<T: PartialEq>(actual: &[T], expected: &[T]) -> usize {
+    actual
+        .iter()
+        .zip(expected)
+        .position(|(a, e)| a != e)
+        .unwrap_or(actual.len().min(expected.len()))
+}
+fn private_value<T: Serialize>(value: Option<&T>) -> Value {
+    value.map_or(Value::Null, |v| {
+        serde_json::to_value(v).expect("StageOutput values serialize")
+    })
+}
+fn matrix_difference<T: PartialEq + Serialize>(
+    actual: &[Vec<T>],
+    expected: &[Vec<T>],
+) -> (Option<usize>, Option<usize>, Value, Value) {
+    let candidate = first_difference(actual, expected);
+    match (actual.get(candidate), expected.get(candidate)) {
+        (Some(a), Some(e)) => {
+            let slot = first_difference(a, e);
+            (
+                Some(candidate),
+                Some(slot),
+                private_value(a.get(slot)),
+                private_value(e.get(slot)),
+            )
+        }
+        (a, e) => (
+            Some(candidate),
+            None,
+            a.map_or(Value::Null, |v| json!({"row_length":v.len()})),
+            e.map_or(Value::Null, |v| json!({"row_length":v.len()})),
+        ),
+    }
+}
+fn vector_difference<T: PartialEq + Serialize>(
+    actual: &[T],
+    expected: &[T],
+    candidate_field: bool,
+) -> (Option<usize>, Option<usize>, Value, Value) {
+    let index = first_difference(actual, expected);
+    (
+        candidate_field.then_some(index),
+        None,
+        private_value(actual.get(index)),
+        private_value(expected.get(index)),
+    )
+}
+impl StageOutput {
+    /// Exactly the same thirteen typed PartialEq checks as derived StageOutput
+    /// equality, including lengths, order and every padded element. Count fields,
+    /// not elements; locate the first differing candidate/slot only afterwards.
+    pub fn certification_difference(&self, reference: &Self) -> Option<CertificationDifference> {
+        let mut fields = Vec::new();
+        macro_rules! check {
+            ($name:ident,$field:ident) => {
+                if self.$name != reference.$name {
+                    fields.push(CertificationField::$field);
+                }
+            };
+        }
+        check!(task_index, TaskIndex);
+        check!(slot_mask, SlotMask);
+        check!(start_time_offsets, StartTimeOffsets);
+        check!(duration_samples, DurationSamples);
+        check!(piece_index, PieceIndex);
+        check!(piece_count, PieceCount);
+        check!(validity_mask, ValidityMask);
+        check!(dependency_slack, DependencySlack);
+        check!(dependency_feasibility, DependencyFeasibility);
+        check!(hard_constraint_feasibility, HardConstraintFeasibility);
+        check!(rejection_codes, RejectionCodes);
+        check!(omissions, Omissions);
+        check!(failure, Failure);
+        let field = *fields.first()?;
+        let (candidate_index, slot_index, actual, expected) = match field {
+            CertificationField::TaskIndex => {
+                matrix_difference(&self.task_index, &reference.task_index)
+            }
+            CertificationField::SlotMask => {
+                matrix_difference(&self.slot_mask, &reference.slot_mask)
+            }
+            CertificationField::StartTimeOffsets => {
+                matrix_difference(&self.start_time_offsets, &reference.start_time_offsets)
+            }
+            CertificationField::DurationSamples => {
+                matrix_difference(&self.duration_samples, &reference.duration_samples)
+            }
+            CertificationField::PieceIndex => {
+                matrix_difference(&self.piece_index, &reference.piece_index)
+            }
+            CertificationField::PieceCount => {
+                matrix_difference(&self.piece_count, &reference.piece_count)
+            }
+            CertificationField::ValidityMask => {
+                vector_difference(&self.validity_mask, &reference.validity_mask, true)
+            }
+            CertificationField::DependencySlack => {
+                vector_difference(&self.dependency_slack, &reference.dependency_slack, true)
+            }
+            CertificationField::DependencyFeasibility => vector_difference(
+                &self.dependency_feasibility,
+                &reference.dependency_feasibility,
+                true,
+            ),
+            CertificationField::HardConstraintFeasibility => vector_difference(
+                &self.hard_constraint_feasibility,
+                &reference.hard_constraint_feasibility,
+                true,
+            ),
+            CertificationField::RejectionCodes => {
+                vector_difference(&self.rejection_codes, &reference.rejection_codes, true)
+            }
+            CertificationField::Omissions => {
+                vector_difference(&self.omissions, &reference.omissions, false)
+            }
+            CertificationField::Failure => (
+                None,
+                None,
+                private_value(self.failure.as_ref()),
+                private_value(reference.failure.as_ref()),
+            ),
+        };
+        Some(CertificationDifference {
+            field,
+            candidate_index,
+            slot_index,
+            diverging_fields: fields.len(),
+            expected,
+            actual,
+        })
+    }
+}
 #[derive(Debug, Clone, PartialEq, Serialize, Deserialize)]
 #[serde(deny_unknown_fields)]
 pub struct StageReply {
@@ -242,8 +452,8 @@ impl StageOutput {
     pub fn assemble(&self, request: &PlanningRequest) -> io::Result<CandidateSet> {
         // Exact comparison covers every padded value, code, mask and omission,
         // not only the final schedule. Never widen a numeric tolerance here.
-        if *self != reference_output(request) {
-            return Err(invalid("Stage 1 exact CPU certification failed"));
+        if let Some(difference) = self.certification_difference(&reference_output(request)) {
+            return Err(io::Error::new(io::ErrorKind::InvalidData, difference));
         }
         let mut plans = Vec::new();
         let window_start = request.time_window.as_ref().map_or(0, |w| w.start);
@@ -453,6 +663,7 @@ pub struct Stage1Strategy<T> {
     budget: bool,
     version: RefCell<Option<String>>,
     fallback_reason: Cell<Option<Stage1FallbackReason>>,
+    certification_difference: RefCell<Option<CertificationDifference>>,
 }
 impl<T: StageTransport> Stage1Strategy<T> {
     pub fn new(policy: bool, environment: LocalEnvironment, budget: bool, transport: T) -> Self {
@@ -463,11 +674,15 @@ impl<T: StageTransport> Stage1Strategy<T> {
             budget,
             version: RefCell::new(None),
             fallback_reason: Cell::new(None),
+            certification_difference: RefCell::new(None),
         }
     }
     /// The latest generation's reason alongside its candidates, reset each call.
     pub fn fallback_reason(&self) -> Option<Stage1FallbackReason> {
         self.fallback_reason.get()
+    }
+    pub fn certification_difference(&self) -> Option<CertificationDifference> {
+        self.certification_difference.borrow().clone()
     }
     pub fn framework_version(&self) -> Option<String> {
         self.version.borrow().clone()
@@ -477,6 +692,7 @@ impl<T: StageTransport> PlannerStrategy for Stage1Strategy<T> {
     fn generate_candidates(&self, request: &PlanningRequest) -> CandidateSet {
         self.version.borrow_mut().take();
         self.fallback_reason.set(None);
+        self.certification_difference.borrow_mut().take();
         let fallback = |reason| {
             self.fallback_reason.set(Some(reason));
             CpuStrategy.generate_candidates(request)
@@ -527,8 +743,15 @@ impl<T: StageTransport> PlannerStrategy for Stage1Strategy<T> {
         {
             return fallback(ReplyMismatch);
         }
-        let Ok(candidates) = reply.result.assemble(request) else {
-            return fallback(CertificationFailed);
+        let candidates = match reply.result.assemble(request) {
+            Ok(candidates) => candidates,
+            Err(error) => {
+                *self.certification_difference.borrow_mut() = error
+                    .get_ref()
+                    .and_then(|error| error.downcast_ref::<CertificationDifference>())
+                    .cloned();
+                return fallback(CertificationFailed);
+            }
         };
         if self.transport.borrow().runs_tensor_worker() {
             *self.version.borrow_mut() = Some(reply.framework_version);
@@ -542,6 +765,7 @@ pub fn plan_stage1<T: StageTransport>(
 ) -> PlanningResponse {
     strategy.version.borrow_mut().take();
     strategy.fallback_reason.set(None);
+    strategy.certification_difference.borrow_mut().take();
     let mut response = ubu_planning_core::plan(request, strategy);
     if let Some(version) = strategy.framework_version() {
         response.engine_provenance.backend_kind = ubu_core::worker::BackendKind::GpuWorker;

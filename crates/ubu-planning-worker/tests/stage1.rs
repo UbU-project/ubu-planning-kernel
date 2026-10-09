@@ -77,7 +77,29 @@ fn every_structural_class_including_padding_is_exactly_certified() {
             }
         }
         let forged: StageOutput = serde_json::from_value(forged).unwrap();
-        assert!(forged.assemble(&request).is_err(), "{field}");
+        let previous_refused = forged != expected;
+        let difference = forged.certification_difference(&expected).unwrap();
+        assert_eq!(difference.field.as_str(), field);
+        assert_eq!(difference.diverging_fields, 1);
+        let matrix = matches!(
+            field,
+            "task_index"
+                | "slot_mask"
+                | "start_time_offsets"
+                | "duration_samples"
+                | "piece_index"
+                | "piece_count"
+        );
+        assert_eq!(
+            difference.candidate_index,
+            (!matches!(field, "omissions" | "failure")).then_some(0)
+        );
+        assert_eq!(difference.slot_index, matrix.then_some(255));
+        assert_eq!(
+            forged.assemble(&request).is_err(),
+            previous_refused,
+            "{field}"
+        );
     }
 }
 struct Failed;
@@ -163,15 +185,26 @@ fn owned_tensor_worker_exact_parity_reuse_and_true_cpu_device_provenance() {
         let reply = transport
             .exchange_stage1(&StageInput::from_request(&request).unwrap())
             .unwrap();
-        assert_eq!(
-            serde_json::to_value(reply.result).unwrap(),
-            case["expected"],
-            "{}",
-            case["name"]
+        let reference: StageOutput = serde_json::from_value(case["expected"].clone()).unwrap();
+        assert!(
+            reply.result.certification_difference(&reference).is_none(),
+            "{}: {:?}",
+            case["name"],
+            reply.result.certification_difference(&reference)
         );
     }
     let strategy = Stage1Strategy::new(true, environment, true, transport);
-    for case in cases().into_iter().take(2) {
+    for case in cases().into_iter().filter(|case| {
+        matches!(
+            case["name"].as_str(),
+            Some(
+                "synthetic-dependency-chain"
+                    | "synthetic-static-anchor"
+                    | "synthetic-week-bound"
+                    | "synthetic-week-candidate-padding"
+            )
+        )
+    }) {
         let request: PlanningRequest = serde_json::from_value(case["request"].clone()).unwrap();
         let expected = ubu_planning_core::plan(request.clone(), &CpuStrategy);
         let actual = plan_stage1(request, &strategy);
@@ -324,6 +357,7 @@ fn reason_resets_after_success_and_stub_never_claims_tensor_provenance() {
     );
     assert_eq!(plan_stage1(request, &strategy), expected);
     assert_eq!(strategy.fallback_reason(), None);
+    assert!(strategy.certification_difference().is_none());
     assert_eq!(strategy.framework_version(), None);
 }
 
@@ -352,4 +386,117 @@ fn every_environment_probe_failure_keeps_exact_cpu_response_without_transport() 
         assert_eq!(plan_stage1(request.clone(), &strategy), expected);
         assert_eq!(strategy.fallback_reason(), Some(reason));
     }
+}
+
+#[path = "../examples/support/week_scale.rs"]
+mod week_scale;
+#[test]
+fn generated_week_requests_and_cpu_goldens_are_reproducible_and_reach_bounds() {
+    let all = cases();
+    for generated in week_scale::cases() {
+        let case = all.iter().find(|c| c["name"] == generated["name"]).unwrap();
+        assert_eq!(case["request"], generated["request"]);
+        assert_eq!(case["shape"], generated["shape"]);
+        let request: PlanningRequest = serde_json::from_value(case["request"].clone()).unwrap();
+        assert_eq!(request.tasks().len(), 120);
+        assert_eq!(
+            request
+                .tasks()
+                .iter()
+                .filter(|t| t.static_anchor.is_some())
+                .count(),
+            93
+        );
+        assert_eq!(
+            request
+                .tasks()
+                .iter()
+                .filter(|t| t.id.starts_with("synthetic-routine-"))
+                .count(),
+            7
+        );
+        assert!(request
+            .tasks()
+            .iter()
+            .all(|t| t.id.starts_with("synthetic-")));
+        let output = reference_output(&request);
+        let candidates = output.validity_mask.iter().filter(|&&v| v).count();
+        match case["name"].as_str().unwrap() {
+            "synthetic-week-bound" => assert_eq!(candidates, 16),
+            "synthetic-week-candidate-padding" => assert_eq!(candidates, 1),
+            _ => {
+                assert_eq!(candidates, 0);
+                assert!(output.failure.is_some());
+            }
+        }
+        for c in 0..candidates {
+            assert_eq!(output.slot_mask[c].iter().filter(|&&v| v).count(), 120);
+            assert!(output.task_index[c][120..].iter().all(|&v| v == -1));
+        }
+    }
+}
+#[test]
+fn comparator_matches_legacy_equality_for_shape_order_padding_and_multiple_fields() {
+    let request: PlanningRequest = serde_json::from_value(cases()[0]["request"].clone()).unwrap();
+    let reference = reference_output(&request);
+    let mut variants = vec![reference.clone()];
+    for field in 0..6 {
+        let mut v = reference.clone();
+        match field {
+            0 => {
+                v.task_index.pop();
+            }
+            1 => {
+                v.task_index[0].pop();
+            }
+            2 => {
+                v.slot_mask[15].push(true);
+            }
+            3 => {
+                v.start_time_offsets[1][20] = 37;
+                v.task_index[3][100] = 77;
+                v.duration_samples[0][3] = 92;
+            }
+            4 => {
+                v.validity_mask.push(false);
+            }
+            _ => {
+                v.rejection_codes.reverse();
+            }
+        }
+        variants.push(v);
+    }
+    for v in &variants {
+        assert_eq!(
+            v.certification_difference(&reference).is_none(),
+            *v == reference
+        );
+        assert_eq!(v.assemble(&request).is_ok(), *v == reference);
+    }
+    let difference = variants[4].certification_difference(&reference).unwrap();
+    assert_eq!(difference.field, CertificationField::TaskIndex);
+    assert_eq!(difference.candidate_index, Some(3));
+    assert_eq!(difference.slot_index, Some(100));
+    assert_eq!(difference.diverging_fields, 3);
+}
+#[test]
+fn certification_error_formatting_never_logs_private_values() {
+    let request: PlanningRequest = serde_json::from_value(cases()[0]["request"].clone()).unwrap();
+    let reference = reference_output(&request);
+    let mut actual = reference.clone();
+    actual.rejection_codes[0] = "synthetic-private-difference-canary".into();
+    let difference = actual.certification_difference(&reference).unwrap();
+    let error = actual.assemble(&request).err().unwrap();
+    for text in [
+        format!("{difference}"),
+        format!("{difference:?}"),
+        format!("{error}"),
+        format!("{error:?}"),
+    ] {
+        assert!(!text.contains("synthetic-private-difference-canary"));
+    }
+    assert_eq!(
+        difference.private_values()["actual"],
+        "synthetic-private-difference-canary"
+    );
 }

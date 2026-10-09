@@ -1,5 +1,7 @@
 //! Explicit developer regeneration; no live data, process or framework.
 use serde_json::{json, Value};
+#[path = "support/week_scale.rs"]
+mod week_scale;
 use ubu_planning_worker::stage1::*;
 fn main() {
     let root = std::path::PathBuf::from(env!("CARGO_MANIFEST_DIR")).join("../../fixtures/worker");
@@ -7,6 +9,7 @@ fn main() {
         "../../../fixtures/worker/stage1-requests.json"
     ))
     .unwrap();
+    fixtures.extend(week_scale::cases());
     for fixture in &mut fixtures {
         let request = serde_json::from_value(fixture["request"].clone()).unwrap();
         fixture["input"] =
