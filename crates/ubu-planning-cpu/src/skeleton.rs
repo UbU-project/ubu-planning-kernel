@@ -79,6 +79,7 @@ pub(crate) fn affix_fixed(
 pub struct SkeletonOutcome {
     pub plan: Plan,
     pub unplaced: Vec<ubu_planning_core::UnplacedTask>,
+    pub(crate) occupied: Vec<OccupiedInterval>,
 }
 
 pub fn build_skeleton(
@@ -174,6 +175,7 @@ pub fn build_skeleton(
     let unplaced = unplaced_report(request, &omitted, &excluded, &dependents, &BTreeMap::new());
     Ok(SkeletonOutcome {
         unplaced,
+        occupied,
         plan: Plan {
             plan_id: plan_id(request),
             status: PlanStatus::Candidate,

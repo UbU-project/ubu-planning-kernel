@@ -178,8 +178,11 @@ def _solve(payload, torch=None):
             suffix=base[pivot:]
             if any(tasks[i].get("static_anchor") or end <= window_start or start < window_start for i,start,end in suffix): continue
             maximum=max(0,window_end-max(end for _,_,end in suffix))
+            suffix_tasks={tasks[i]["id"] for i,_,_ in suffix}
             for i,_,end in suffix:
                 if tasks[i].get("window"): maximum=min(maximum,max(0,seconds(tasks[i]["window"]["end"])-end))
+                ahead=[start-end for key,start,_ in occupied if key not in suffix_tasks and start >= end]
+                if ahead: maximum=min(maximum,min(ahead))
             n=min(maximum,15)
             for ordinal in range(1,n+1):
                 shift=ordinal*maximum//n

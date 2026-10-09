@@ -426,6 +426,11 @@ pub fn reference_output(request: &PlanningRequest) -> StageOutput {
         });
         output.hard_constraint_feasibility[c] = ubu_planning_core::validate_plan(plan).is_valid
             && output.dependency_feasibility[c]
+            && plan.steps.iter().enumerate().all(|(index, step)| {
+                plan.steps[index + 1..]
+                    .iter()
+                    .all(|other| !(step.start < other.end && step.end > other.start))
+            })
             && plan.steps.iter().all(|step| {
                 let task = request
                     .tasks()

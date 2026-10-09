@@ -2955,10 +2955,10 @@
         "semi_legitimization_pruned",
         "reject_obvious"
       ],
-      "expected_generated_candidate_count": 16,
+      "expected_generated_candidate_count": 9,
       "expected_plan_candidates": [
         {
-          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c06",
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c03",
           "candidate_role": "most_schedule_diverse",
           "explanation_fragments": [
             {
@@ -2976,295 +2976,7 @@
           },
           "rank": 1,
           "schedule": {
-            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c06",
-            "status": "candidate",
-            "steps": [
-              {
-                "end": 12,
-                "start": 10,
-                "static_anchor": true,
-                "task_id": "anchor"
-              },
-              {
-                "end": 20,
-                "start": 18,
-                "task_id": "movable"
-              }
-            ]
-          },
-          "score_summary": {
-            "affect_margin_score": 1.0,
-            "robustness_score": 0.76,
-            "schedule_diversity_score": 0.45,
-            "total_score": 0.6191666666666666,
-            "utility_score": 0.26666666666666666
-          },
-          "semi_legitimization_summary": {
-            "affect_budget_ok": true,
-            "result": "passes_cheap_checks",
-            "slack_preserved": true
-          }
-        },
-        {
-          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c08",
-          "candidate_role": "other",
-          "explanation_fragments": [
-            {
-              "taskId": "anchor",
-              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
-            }
-          ],
-          "feasibility_summary": {
-            "affect_feasible": true,
-            "hard_constraints_assumed_satisfied_by_engine": true,
-            "violated_affect_dimensions": []
-          },
-          "probability_summary": {
-            "provenance_refs": []
-          },
-          "rank": 2,
-          "schedule": {
-            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c08",
-            "status": "candidate",
-            "steps": [
-              {
-                "end": 12,
-                "start": 10,
-                "static_anchor": true,
-                "task_id": "anchor"
-              },
-              {
-                "end": 18,
-                "start": 16,
-                "task_id": "movable"
-              }
-            ]
-          },
-          "score_summary": {
-            "affect_margin_score": 1.0,
-            "robustness_score": 0.7749999999999999,
-            "schedule_diversity_score": 0.4,
-            "total_score": 0.61875,
-            "utility_score": 0.3
-          },
-          "semi_legitimization_summary": {
-            "affect_budget_ok": true,
-            "result": "passes_cheap_checks",
-            "slack_preserved": true
-          }
-        },
-        {
-          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c10",
-          "candidate_role": "other",
-          "explanation_fragments": [
-            {
-              "taskId": "anchor",
-              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
-            }
-          ],
-          "feasibility_summary": {
-            "affect_feasible": true,
-            "hard_constraints_assumed_satisfied_by_engine": true,
-            "violated_affect_dimensions": []
-          },
-          "probability_summary": {
-            "provenance_refs": []
-          },
-          "rank": 3,
-          "schedule": {
-            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c10",
-            "status": "candidate",
-            "steps": [
-              {
-                "end": 12,
-                "start": 10,
-                "static_anchor": true,
-                "task_id": "anchor"
-              },
-              {
-                "end": 17,
-                "start": 15,
-                "task_id": "movable"
-              }
-            ]
-          },
-          "score_summary": {
-            "affect_margin_score": 1.0,
-            "robustness_score": 0.7825,
-            "schedule_diversity_score": 0.375,
-            "total_score": 0.6185416666666667,
-            "utility_score": 0.3166666666666667
-          },
-          "semi_legitimization_summary": {
-            "affect_budget_ok": true,
-            "result": "passes_cheap_checks",
-            "slack_preserved": true
-          }
-        },
-        {
-          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c09",
-          "candidate_role": "other",
-          "explanation_fragments": [
-            {
-              "taskId": "anchor",
-              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
-            }
-          ],
-          "feasibility_summary": {
-            "affect_feasible": true,
-            "hard_constraints_assumed_satisfied_by_engine": true,
-            "violated_affect_dimensions": []
-          },
-          "probability_summary": {
-            "provenance_refs": []
-          },
-          "rank": 4,
-          "schedule": {
-            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c09",
-            "status": "candidate",
-            "steps": [
-              {
-                "end": 12,
-                "start": 10,
-                "static_anchor": true,
-                "task_id": "anchor"
-              },
-              {
-                "end": 16,
-                "start": 14,
-                "task_id": "movable"
-              }
-            ]
-          },
-          "score_summary": {
-            "affect_margin_score": 1.0,
-            "robustness_score": 0.7899999999999999,
-            "schedule_diversity_score": 0.35,
-            "total_score": 0.6183333333333333,
-            "utility_score": 0.3333333333333333
-          },
-          "semi_legitimization_summary": {
-            "affect_budget_ok": true,
-            "result": "passes_cheap_checks",
-            "slack_preserved": true
-          }
-        },
-        {
-          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c13",
-          "candidate_role": "other",
-          "explanation_fragments": [
-            {
-              "taskId": "anchor",
-              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
-            }
-          ],
-          "feasibility_summary": {
-            "affect_feasible": true,
-            "hard_constraints_assumed_satisfied_by_engine": true,
-            "violated_affect_dimensions": []
-          },
-          "probability_summary": {
-            "provenance_refs": []
-          },
-          "rank": 5,
-          "schedule": {
-            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c13",
-            "status": "candidate",
-            "steps": [
-              {
-                "end": 12,
-                "start": 10,
-                "static_anchor": true,
-                "task_id": "anchor"
-              },
-              {
-                "end": 15,
-                "start": 13,
-                "task_id": "movable"
-              }
-            ]
-          },
-          "score_summary": {
-            "affect_margin_score": 1.0,
-            "robustness_score": 0.7975,
-            "schedule_diversity_score": 0.325,
-            "total_score": 0.618125,
-            "utility_score": 0.35000000000000003
-          },
-          "semi_legitimization_summary": {
-            "affect_budget_ok": true,
-            "result": "passes_cheap_checks",
-            "slack_preserved": true
-          }
-        },
-        {
-          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c05",
-          "candidate_role": "other",
-          "explanation_fragments": [
-            {
-              "taskId": "anchor",
-              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
-            }
-          ],
-          "feasibility_summary": {
-            "affect_feasible": true,
-            "hard_constraints_assumed_satisfied_by_engine": true,
-            "violated_affect_dimensions": []
-          },
-          "probability_summary": {
-            "provenance_refs": []
-          },
-          "rank": 6,
-          "schedule": {
-            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c05",
-            "status": "candidate",
-            "steps": [
-              {
-                "end": 12,
-                "start": 10,
-                "static_anchor": true,
-                "task_id": "anchor"
-              },
-              {
-                "end": 14,
-                "start": 12,
-                "task_id": "movable"
-              }
-            ]
-          },
-          "score_summary": {
-            "affect_margin_score": 1.0,
-            "robustness_score": 0.8049999999999999,
-            "schedule_diversity_score": 0.3,
-            "total_score": 0.6179166666666667,
-            "utility_score": 0.3666666666666667
-          },
-          "semi_legitimization_summary": {
-            "affect_budget_ok": true,
-            "result": "passes_cheap_checks",
-            "slack_preserved": true
-          }
-        },
-        {
-          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c07",
-          "candidate_role": "other",
-          "explanation_fragments": [
-            {
-              "taskId": "anchor",
-              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
-            }
-          ],
-          "feasibility_summary": {
-            "affect_feasible": true,
-            "hard_constraints_assumed_satisfied_by_engine": true,
-            "violated_affect_dimensions": []
-          },
-          "probability_summary": {
-            "provenance_refs": []
-          },
-          "rank": 7,
-          "schedule": {
-            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c07",
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c03",
             "status": "candidate",
             "steps": [
               {
@@ -3294,7 +3006,7 @@
           }
         },
         {
-          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c14",
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c07",
           "candidate_role": "other",
           "explanation_fragments": [
             {
@@ -3310,9 +3022,9 @@
           "probability_summary": {
             "provenance_refs": []
           },
-          "rank": 8,
+          "rank": 2,
           "schedule": {
-            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c14",
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c07",
             "status": "candidate",
             "steps": [
               {
@@ -3342,7 +3054,7 @@
           }
         },
         {
-          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c12",
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c06",
           "candidate_role": "other",
           "explanation_fragments": [
             {
@@ -3358,9 +3070,9 @@
           "probability_summary": {
             "provenance_refs": []
           },
-          "rank": 9,
+          "rank": 3,
           "schedule": {
-            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c12",
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c06",
             "status": "candidate",
             "steps": [
               {
@@ -3390,7 +3102,7 @@
           }
         },
         {
-          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c15",
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c04",
           "candidate_role": "other",
           "explanation_fragments": [
             {
@@ -3406,9 +3118,57 @@
           "probability_summary": {
             "provenance_refs": []
           },
-          "rank": 10,
+          "rank": 4,
           "schedule": {
-            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c15",
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c04",
+            "status": "candidate",
+            "steps": [
+              {
+                "end": 12,
+                "start": 10,
+                "static_anchor": true,
+                "task_id": "anchor"
+              },
+              {
+                "end": 7,
+                "start": 5,
+                "task_id": "movable"
+              }
+            ]
+          },
+          "score_summary": {
+            "affect_margin_score": 1.0,
+            "robustness_score": 0.8574999999999999,
+            "schedule_diversity_score": 0.125,
+            "total_score": 0.6164583333333333,
+            "utility_score": 0.4833333333333334
+          },
+          "semi_legitimization_summary": {
+            "affect_budget_ok": true,
+            "result": "passes_cheap_checks",
+            "slack_preserved": true
+          }
+        },
+        {
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c08",
+          "candidate_role": "other",
+          "explanation_fragments": [
+            {
+              "taskId": "anchor",
+              "text": "Task 'anchor' is selected next because all listed dependencies precede it in the deterministic candidate order."
+            }
+          ],
+          "feasibility_summary": {
+            "affect_feasible": true,
+            "hard_constraints_assumed_satisfied_by_engine": true,
+            "violated_affect_dimensions": []
+          },
+          "probability_summary": {
+            "provenance_refs": []
+          },
+          "rank": 5,
+          "schedule": {
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c08",
             "status": "candidate",
             "steps": [
               {
@@ -3454,7 +3214,7 @@
           "probability_summary": {
             "provenance_refs": []
           },
-          "rank": 11,
+          "rank": 6,
           "schedule": {
             "plan_id": "plan-p8-semi-prune-00000000000d6db7-c02",
             "status": "candidate",
@@ -3486,7 +3246,7 @@
           }
         },
         {
-          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c11",
+          "candidate_id": "plan-p8-semi-prune-00000000000d6db7-c05",
           "candidate_role": "other",
           "explanation_fragments": [
             {
@@ -3502,9 +3262,9 @@
           "probability_summary": {
             "provenance_refs": []
           },
-          "rank": 12,
+          "rank": 7,
           "schedule": {
-            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c11",
+            "plan_id": "plan-p8-semi-prune-00000000000d6db7-c05",
             "status": "candidate",
             "steps": [
               {
@@ -3550,7 +3310,7 @@
           "probability_summary": {
             "provenance_refs": []
           },
-          "rank": 13,
+          "rank": 8,
           "schedule": {
             "plan_id": "plan-p8-semi-prune-00000000000d6db7-c01",
             "status": "candidate",
@@ -3598,7 +3358,7 @@
           "probability_summary": {
             "provenance_refs": []
           },
-          "rank": 14,
+          "rank": 9,
           "schedule": {
             "plan_id": "plan-p8-semi-prune-00000000000d6db7",
             "status": "candidate",
@@ -3630,8 +3390,8 @@
           }
         }
       ],
-      "expected_selected_candidate_id": "plan-p8-semi-prune-00000000000d6db7-c06",
-      "expected_semi_rejected_count": 2,
+      "expected_selected_candidate_id": "plan-p8-semi-prune-00000000000d6db7-c03",
+      "expected_semi_rejected_count": 0,
       "name": "static-anchor-semi-legitimization-prunes",
       "request": {
         "mode": "fresh_generation",
@@ -4485,5 +4245,6 @@
   "description": "Offline fixed-seed C-1 scoring, semi-legitimization, candidate-role, and selection regression anchors.",
   "human_reviewed_then_frozen": true,
   "kernel_revision": "2ae6552f6157c44f6490e4c99aaf4a418fc70e67",
+  "p1b_79_regeneration": "Occupancy-affected expectations regenerated by freeze_stage1 under UBU-D0171 and UBU-D0301. The kernel_revision and coverage tags identify the historical C-1 corpus baseline; the static-anchor prune case now verifies that overlapping proposals are not generated.",
   "schema_version": "planning-golden-corpus/scoring-selection-c1.v1"
 }

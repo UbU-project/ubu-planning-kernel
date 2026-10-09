@@ -202,6 +202,7 @@ fn owned_tensor_worker_exact_parity_reuse_and_true_cpu_device_provenance() {
                     | "synthetic-static-anchor"
                     | "synthetic-week-bound"
                     | "synthetic-week-candidate-padding"
+                    | "synthetic-week-occupancy-ahead"
             )
         )
     }) {
@@ -391,6 +392,78 @@ fn every_environment_probe_failure_keeps_exact_cpu_response_without_transport() 
 #[path = "../examples/support/week_scale.rs"]
 mod week_scale;
 #[test]
+fn whole_golden_set_never_fails_hard_feasibility_due_to_disjointness() {
+    for case in cases() {
+        let request: PlanningRequest = serde_json::from_value(case["request"].clone()).unwrap();
+        let output = reference_output(&request);
+        for (candidate, plan) in CpuStrategy
+            .generate_candidates(&request)
+            .plans
+            .iter()
+            .enumerate()
+        {
+            for (index, step) in plan.steps.iter().enumerate() {
+                for other in &plan.steps[index + 1..] {
+                    assert!(
+                        step.end <= other.start || other.end <= step.start,
+                        "{}",
+                        case["name"]
+                    );
+                }
+            }
+            assert!(
+                output.hard_constraint_feasibility[candidate],
+                "{}",
+                case["name"]
+            );
+        }
+    }
+}
+
+#[test]
+fn occupancy_ahead_week_has_a_feasible_shiftable_suffix_with_loose_windows() {
+    let case = week_scale::cases()
+        .into_iter()
+        .find(|c| c["name"] == "synthetic-week-occupancy-ahead")
+        .unwrap();
+    let request: PlanningRequest = serde_json::from_value(case["request"].clone()).unwrap();
+    let baseline = ubu_planning_cpu::skeleton::build_skeleton(&request)
+        .unwrap()
+        .plan;
+    let suffix = &baseline.steps[week_scale::ANCHORS..];
+    assert_eq!(suffix.len(), week_scale::DYNAMIC);
+    assert!(suffix.iter().all(|s| !s.static_anchor));
+    let loose_bound =
+        request.time_window.as_ref().unwrap().end - suffix.iter().map(|s| s.end).max().unwrap();
+    let gap = suffix
+        .iter()
+        .filter_map(|step| {
+            baseline.steps[..week_scale::ANCHORS]
+                .iter()
+                .filter(|a| a.start >= step.end)
+                .map(|a| a.start - step.end)
+                .min()
+        })
+        .min()
+        .unwrap();
+    assert!(loose_bound > gap);
+    assert!(suffix.iter().all(|step| {
+        request
+            .tasks()
+            .iter()
+            .find(|t| t.id == step.task_id)
+            .unwrap()
+            .window
+            .as_ref()
+            .unwrap()
+            .end
+            - step.end
+            > gap
+    }));
+    assert!(ubu_planning_core::validate_plan(&baseline).is_valid);
+}
+
+#[test]
 fn generated_week_requests_and_cpu_goldens_are_reproducible_and_reach_bounds() {
     let all = cases();
     for generated in week_scale::cases() {
@@ -422,7 +495,7 @@ fn generated_week_requests_and_cpu_goldens_are_reproducible_and_reach_bounds() {
         let output = reference_output(&request);
         let candidates = output.validity_mask.iter().filter(|&&v| v).count();
         match case["name"].as_str().unwrap() {
-            "synthetic-week-bound" => assert_eq!(candidates, 16),
+            "synthetic-week-bound" | "synthetic-week-occupancy-ahead" => assert_eq!(candidates, 16),
             "synthetic-week-candidate-padding" => assert_eq!(candidates, 1),
             _ => {
                 assert_eq!(candidates, 0);

@@ -77,14 +77,27 @@ pub fn cases() -> Vec<Value> {
         .max()
         .unwrap();
     padding["time_window"]["end"] = json!(last_end);
+    // Without the bridge through the last anchor, the dynamic chain occupies
+    // early gaps while its anchor-free topological suffix has occupancy ahead.
+    let mut ahead = request.clone();
+    ahead["request_id"] = json!("synthetic-week-occupancy-ahead");
+    ahead["tasks"][last_anchor]["depends_on"] = json!([]);
+    ahead["tasks"][ANCHORS + EARLY_DYNAMIC]["depends_on"] =
+        json!([format!("synthetic-dynamic-{:02}", EARLY_DYNAMIC - 1)]);
+    ahead["topological_order"] = json!(ahead["tasks"]
+        .as_array()
+        .unwrap()
+        .iter()
+        .map(|task| task["id"].as_str().unwrap())
+        .collect::<Vec<_>>());
     let mut overlaps = request.clone();
     overlaps["request_id"] = json!("synthetic-week-three-overlaps");
     for (day, index) in commitment_indices.into_iter().take(3).enumerate() {
         overlaps["tasks"][index]["static_anchor"]["start"] =
             json!(day as u64 * DAY_SECONDS + 21_660);
     }
-    [("synthetic-week-bound",request,0),("synthetic-week-candidate-padding",padding,0),
-        ("synthetic-week-three-overlaps",overlaps,3)].into_iter().map(|(name,request,overlaps)|
+    [("synthetic-week-bound",request,0,EARLY_DYNAMIC),("synthetic-week-candidate-padding",padding,0,EARLY_DYNAMIC),
+        ("synthetic-week-three-overlaps",overlaps,3,EARLY_DYNAMIC),("synthetic-week-occupancy-ahead",ahead,0,0)].into_iter().map(|(name,request,overlaps,early_dynamic)|
         json!({"name":name,"request":request,"shape":{"seed":SEED,"anchors":ANCHORS,"routine_anchors":ROUTINES,
-            "dynamic":DYNAMIC,"tasks":ANCHORS+DYNAMIC,"overlap_pairs":overlaps,"early_dynamic":EARLY_DYNAMIC}})).collect()
+            "dynamic":DYNAMIC,"tasks":ANCHORS+DYNAMIC,"overlap_pairs":overlaps,"early_dynamic":early_dynamic}})).collect()
 }

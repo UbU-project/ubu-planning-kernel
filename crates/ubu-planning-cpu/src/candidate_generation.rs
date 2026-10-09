@@ -10,7 +10,7 @@ pub fn generate(request: &PlanningRequest) -> CandidateSet {
     match crate::skeleton::build_skeleton(request) {
         Ok(baseline) => CandidateSet {
             unplaced: baseline.unplaced,
-            plans: bounded_perturbations(request, baseline.plan),
+            plans: bounded_perturbations(request, baseline.plan, &baseline.occupied),
             diagnostics: Vec::new(),
         },
         Err(diagnostic) => CandidateSet {
@@ -21,7 +21,11 @@ pub fn generate(request: &PlanningRequest) -> CandidateSet {
     }
 }
 
-fn bounded_perturbations(request: &PlanningRequest, baseline: Plan) -> Vec<Plan> {
+fn bounded_perturbations(
+    request: &PlanningRequest,
+    baseline: Plan,
+    occupied: &[crate::skeleton::OccupiedInterval],
+) -> Vec<Plan> {
     let Some(window) = &request.time_window else {
         return vec![baseline];
     };
@@ -41,11 +45,17 @@ fn bounded_perturbations(request: &PlanningRequest, baseline: Plan) -> Vec<Plan>
                 .max()
                 .unwrap_or(window.end),
         );
+        let suffix_tasks: BTreeSet<_> = suffix.iter().map(|step| step.task_id.as_str()).collect();
         for step in suffix {
             if let Some(task) = request.tasks().iter().find(|task| task.id == step.task_id) {
                 if let Some(task_window) = &task.window {
                     maximum_shift = maximum_shift.min(task_window.end.saturating_sub(step.end));
                 }
+            }
+            if let Some(next) = occupied.iter().find(|interval| {
+                !suffix_tasks.contains(interval.task_id.as_str()) && interval.start >= step.end
+            }) {
+                maximum_shift = maximum_shift.min(next.start - step.end);
             }
         }
         if maximum_shift == 0 {

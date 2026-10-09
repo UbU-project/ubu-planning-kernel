@@ -14,3 +14,7 @@ ubu_planning_worker_protocol.workspace = true
 
 ubu_planning_cpu.workspace = true
 serde.workspace = true
+
+[dev-dependencies]
+# The explicit golden freezer preserves untouched numeric literals verbatim.
+serde_json = { workspace = true, features = ["raw_value"] }
